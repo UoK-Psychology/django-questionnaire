@@ -13,6 +13,13 @@ urlpatterns = patterns('questionnaire.views',
           { 'template': 'a_template.html' }, 'index'
 
     ),
+          url(r'^qs/(?P<questionnaire_id>\d+)/(?P<order_info>\d+)/$', 
+          view = 'get_next_questiongroup',
+          name = 'get_next_questiongroup'),
+        
+          url(r'^qs/(?P<questionnaire_id>\d+)/$', 
+          view = 'get_next_questiongroup',
+          name = 'get_next_questiongroup'),
                        
                        
     

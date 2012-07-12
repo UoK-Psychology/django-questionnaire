@@ -27,7 +27,7 @@ class Question(models.Model):
     def __unicode__(self):
         return self.label
     
-class Questiongroup(models.Model):
+class QuestionGroup(models.Model):
     '''
     reponsible for question groups ,each group set can have one to  many set of questions 
     order_no store the order or sequence the question group is to be rendered .e.g  order_no = 2 will be rendered before order_no =3  
@@ -45,7 +45,10 @@ class Questionnaire(models.Model):
     This class stores the Questionnaire name
     '''
     name=models.CharField(max_length=250)
-    questiongroup=models.ManyToManyField(Questiongroup, through='QuestionGroup_order')
+    questiongroup=models.ManyToManyField(QuestionGroup, through='QuestionGroup_order')
+    
+    def get_ordered_groups(self):
+        return QuestionGroup_order.objects.filter(questionnaire=self).order_by('order_info')
     
     def __unicode__(self):
         return self.name
@@ -54,7 +57,7 @@ class QuestionGroup_order(models.Model):
     '''
     This class stores the ordering of the question rendered on the page
     '''
-    questiongroup=models.ForeignKey(Questiongroup)
+    questiongroup=models.ForeignKey(QuestionGroup)
     questionnaire=models.ForeignKey(Questionnaire)
     order_info=models.IntegerField(max_length=3)
     
@@ -66,7 +69,7 @@ class Question_order(models.Model):
     '''
     This class is responsible in storing the ordering relation ship between the question and questiongroup
     '''
-    questiongroup =models.ForeignKey(Questiongroup)
+    questiongroup =models.ForeignKey(QuestionGroup)
     question = models.ForeignKey(Question)
     order_info = models.IntegerField(max_length=3)
     

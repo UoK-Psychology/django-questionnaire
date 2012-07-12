@@ -4,7 +4,7 @@ Created on Jul 11, 2012
 @author: mzd2
 '''
 from django.contrib import admin
-from models import Question, Questiongroup, Questionnaire, QuestionGroup_order, Question_order, AnswerSet, QuestionAnswer
+from models import Question, QuestionGroup, Questionnaire, QuestionGroup_order, Question_order, AnswerSet, QuestionAnswer
  
 class QuestionAdmin(admin.ModelAdmin):
     list_display=('label','field_type')
@@ -27,7 +27,7 @@ class QuestionGroup_OrderAdmin(admin.ModelAdmin):
 
 
 class QuestionGroupInline(admin.TabularInline):
-    model = Questiongroup.questions.through
+    model = QuestionGroup.questions.through
     
 class QuestiongroupAdmin(admin.ModelAdmin):
     inlines = [
@@ -55,7 +55,7 @@ class QuestionAnswerAdmin(admin.ModelAdmin):
     
 
 admin.site.register(Question,QuestionAdmin)
-admin.site.register(Questiongroup,QuestiongroupAdmin)
+admin.site.register(QuestionGroup,QuestiongroupAdmin)
 admin.site.register(Questionnaire,QuestionnaireAdmin)
 admin.site.register(QuestionGroup_order,QuestionGroup_OrderAdmin)
 admin.site.register(Question_order,Question_OrderAdmin)
