@@ -17,7 +17,7 @@ setup(
     license = "MIT",
     keywords = "django questionnaire survry",
     url = "http://pypi.python.org/pypi/django-questionnaire/0.01",
-    packages=['django-questionnaire',],
+    packages=['questionnaire',],
     long_description=read('README.md'),
     classifiers=[
         "Development Status :: 1 - Planning",

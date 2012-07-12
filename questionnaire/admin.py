@@ -4,7 +4,7 @@ Created on Jul 11, 2012
 @author: mzd2
 '''
 from django.contrib import admin
-from models import *
+from models import Question, Questiongroup, Questionnaire, QuestionGroup_order, Question_order, AnswerSet, QuestionAnswer
  
 class QuestionAdmin(admin.ModelAdmin):
     list_display=('label','field_type')
