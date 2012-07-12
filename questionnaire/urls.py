@@ -21,6 +21,8 @@ urlpatterns = patterns('questionnaire.views',
           view = 'get_next_questiongroup',
           name = 'get_next_questiongroup'),
                        
-                       
+        url(r'^finish/$', 
+            view = 'finish',
+            name = 'questionaire_finish'),   
     
 )
