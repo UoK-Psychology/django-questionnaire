@@ -23,6 +23,6 @@ urlpatterns = patterns('questionnaire.views',
                        
         url(r'^finish/$', 
             view = 'finish',
-            name = 'questionaire_finish'),   
+            name = 'questionnaire_finish'),   
     
 )
