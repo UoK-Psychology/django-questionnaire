@@ -7,9 +7,13 @@ Created on Jun 26, 2012
 
 from django import forms
 from models import QuestionGroup
-from django.forms.fields import CharField,BooleanField
+from django.forms.fields import CharField,BooleanField, ChoiceField
 
-
+def get_choices(question):
+    choices_list=question.selectoptions
+    choices= [(x,x) for x in choices_list]
+    return choices
+ 
 def generate_charfield():
     return CharField(max_length=100)
 
@@ -19,11 +23,16 @@ def generate_textfield():
 def generate_boolean_field():
     return BooleanField(initial= False)
 
+def generate_selectfield_field():
+    return ChoiceField(choices=[])
+
 FIELD_TYPES={
-            0: generate_charfield ,
-            1: generate_textfield,
-            2: generate_boolean_field
+            'charfield': generate_charfield ,
+            'textfield': generate_textfield,
+            'booleanfield': generate_boolean_field,
+            'selectfield':generate_selectfield_field,
             }
+
 def make_question_group_form(questiongroup_id):
     '''
      mapping questions fields  type  to form fields type 
@@ -33,14 +42,17 @@ def make_question_group_form(questiongroup_id):
     fields={}
     thisgroupquestions = QuestionGroup.objects.get(id=questiongroup_id).questions.all()
     
-    
-    
-    #for question in scheme.questions.all():
     for question in thisgroupquestions:
-        
-        field = FIELD_TYPES[question.field_type]()
-        field.label = question.label
-        fields[str(question.id)]= field
+        if question.field_type == 'selectfield':
+            tempfield=FIELD_TYPES[question.field_type]()
+            tempfield.choices=get_choices(question)
+            field=tempfield
+            field.label = question.label
+            fields[str(question.id)]= field
+        else:    
+            field = FIELD_TYPES[question.field_type]()
+            field.label = question.label
+            fields[str(question.id)]= field
         
     return type('QuestionForm',(forms.BaseForm,),{'base_fields':fields})
 

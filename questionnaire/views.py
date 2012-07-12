@@ -34,7 +34,7 @@ def get_next_questiongroup(request,questionnaire_id,order_info=None):
         if order_info == orderedgroups.count():
             this = 'this is the last one!'
             print this
-            return HttpResponseRedirect(reverse('finish'))
+            return HttpResponseRedirect(reverse('questionnaire_finish'))
             
         else:
             
