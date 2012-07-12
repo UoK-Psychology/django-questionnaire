@@ -38,7 +38,7 @@ class Questiongroup(models.Model):
     questions = models.ManyToManyField(Question, through = 'Question_order')
     
     def __unicode__(self):
-        return self.questiongroupname
+        return self.name
    
 class Questionnaire(models.Model):
     '''
