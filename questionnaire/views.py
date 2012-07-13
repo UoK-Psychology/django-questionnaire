@@ -5,10 +5,13 @@ from django.template import  RequestContext
 from django.shortcuts import render_to_response
 from questionnaire.forms import make_question_group_form
 
+from django.contrib.auth.models import  User
+from django.contrib.auth.decorators import login_required
+
 def index (request):
     return HttpResponseRedirect(reverse('index'))
 
-
+@login_required
 def get_next_questiongroup(request,questionnaire_id,order_info=None):
     questionnaire_id = int(questionnaire_id)
     if order_info==None:
@@ -29,6 +32,18 @@ def get_next_questiongroup(request,questionnaire_id,order_info=None):
     
     
     if request.method =='POST':
+        request.POST
+        print request.POST
+        form = questionForm(request.POST)
+
+        
+        if form.is_valid():
+            a = form.cleaned_data
+            print a
+        
+
+        
+        
     
         
         if order_info == orderedgroups.count():
@@ -54,4 +69,12 @@ def finish(request):
     return render_to_response('finish.html')     
      
 
+def get_answers(self):
+    '''
+    return question and answer pair tuple
     
+    self.field[name].label is data for the object to be inserted to the QuestionAnswer
+    '''  
+    for question, answer in self.cleaned_data.items():
+        print self.cleaned_data.items()
+        yield (question, answer)    

@@ -128,8 +128,6 @@ class AnswerSet(models.Model):
     user=models.ForeignKey(User)
     questionnaire=models.ForeignKey(Questionnaire)
     
-    
-    
     def save(self, *args, **kwargs):                       
         super(AnswerSet, self).save(*args, **kwargs)    
         
@@ -140,4 +138,7 @@ class QuestionAnswer(models.Model):
     question = models.ForeignKey(Question)
     answer = models.CharField(max_length=255)
     answer_set = models.ForeignKey(AnswerSet)
+    
+    def save(self, *args, **kwargs):                       
+        super(QuestionAnswer, self).save(*args, **kwargs)  
     

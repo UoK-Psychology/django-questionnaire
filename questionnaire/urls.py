@@ -1,5 +1,5 @@
 from django.conf.urls import *
-from views import *
+from views import get_next_questiongroup,finish,index
 from django.views.generic.simple import direct_to_template
 
 
