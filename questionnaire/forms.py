@@ -40,14 +40,14 @@ def make_question_group_form(questiongroup_id):
     
     '''
     fields={}
-    thisgroupquestions = QuestionGroup.objects.get(id=questiongroup_id).questions.all()
+    
+    #thisgroupquestions = QuestionGroup.objects.get(id=questiongroup_id).questions.all()
     
     
     Group = QuestionGroup.objects.get(pk=questiongroup_id)
     orderedgroups = Group.get_ordered_groups()
     
-    print thisgroupquestions
-    print orderedgroups
+
     
 
         
