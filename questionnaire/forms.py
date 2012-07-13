@@ -40,20 +40,35 @@ def make_question_group_form(questiongroup_id):
     
     '''
     fields={}
-    thisgroupquestions = QuestionGroup.objects.get(id=questiongroup_id).questions.all()
     
-    for question in thisgroupquestions:
-        if question.field_type == 'selectfield':
-            tempfield=FIELD_TYPES[question.field_type]()
-            tempfield.choices=get_choices(question)
-            field=tempfield
-            field.label = question.label
-            fields[str(question.id)]= field
-        else:    
-            field = FIELD_TYPES[question.field_type]()
-            field.label = question.label
-            fields[str(question.id)]= field
+    #thisgroupquestions = QuestionGroup.objects.get(id=questiongroup_id).questions.all()
+    
+    
+    Group = QuestionGroup.objects.get(pk=questiongroup_id)
+    orderedgroups = Group.get_ordered_groups()
+    
+
+    
+
         
+    
+    
+    #below prints the questiongroup id! so it can be used to render a group!
+
+    
+    for question in orderedgroups:
+        
+        if question.question.field_type == 'selectfield':
+            tempfield=FIELD_TYPES[question.question.field_type]()
+            tempfield.choices=get_choices(question.question)
+            field=tempfield
+            field.label = question.question.label
+            fields[int(question.question.id)]= field
+        else:    
+            field = FIELD_TYPES[question.question.field_type]()
+            field.label = question.question.label
+            fields[int(question.question.id)]= field
+            
     return type('QuestionForm',(forms.BaseForm,),{'base_fields':fields})
 
 
