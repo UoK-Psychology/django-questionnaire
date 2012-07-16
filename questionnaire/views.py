@@ -39,9 +39,10 @@ def get_next_questiongroup(request,questionnaire_id,order_info=None):
         if form.is_valid():
             formdata=get_answers(form)
             for question,answer in formdata:
+
                 this_answer_set= AnswerSet(user=request.user,questionnaire=this_questionnaire)
                 this_answer_set.save()
-                this_question_answer=QuestionAnswer(question=get_question_obj(question),answer=answer,answer_set=this_answer_set)
+                this_question_answer=QuestionAnswer(question=get_question_obj(question),answer=str(answer),answer_set=this_answer_set)
                 this_question_answer.save()
             
               

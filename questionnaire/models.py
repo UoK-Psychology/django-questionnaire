@@ -135,7 +135,10 @@ class AnswerSet(models.Model):
     questionnaire=models.ForeignKey(Questionnaire)
     
     def save(self, *args, **kwargs):                       
-        super(AnswerSet, self).save(*args, **kwargs)    
+        super(AnswerSet, self).save(*args, **kwargs)
+        
+    def __unicode__(self):
+        return 'user:%s questionnaire:%s' %(str(self.user), str(self.questionnaire))  
         
 class QuestionAnswer(models.Model):    
     '''
@@ -148,3 +151,5 @@ class QuestionAnswer(models.Model):
     def save(self, *args, **kwargs):                       
         super(QuestionAnswer, self).save(*args, **kwargs)  
     
+    def __unicode__(self):
+        return 'question:%s answer:%s answer_set:%s' %(str(self.question), str(self.answer), str(self.answer_set))   
