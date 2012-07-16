@@ -25,4 +25,9 @@ urlpatterns = patterns('questionnaire.views',
             view = 'finish',
             name = 'questionnaire_finish'),   
     
+        
+        url(r'^Answer/(?P<questionnaire_id>\d+)$', 
+            view = 'display_question_answer',
+            name = 'display_question_answer'),   
+    
 )

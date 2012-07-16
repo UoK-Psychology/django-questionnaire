@@ -31,34 +31,31 @@ def get_next_questiongroup(request,questionnaire_id,order_info=None):
     questionForm = make_question_group_form(questiongroup_id,questionnaire_id)
     
     
-    
+    this_questionnaire= get_questionnnaire_obj(questionnaire_id)
     
     if request.method =='POST':
-        request.POST
-        print request.POST
-        form = questionForm(request.POST)
-
         
+        form=questionForm(request.POST)
         if form.is_valid():
-            a = form.cleaned_data
-            print a
-        
+            formdata=get_answers(form)
+            for question,answer in formdata:
+                this_answer_set= AnswerSet(user=request.user,questionnaire=this_questionnaire)
+                this_answer_set.save()
+                this_question_answer=QuestionAnswer(question=get_question_obj(question),answer=answer,answer_set=this_answer_set)
+                this_question_answer.save()
+            
+              
 
-        
-        
-    
-        
-        if order_info == orderedgroups.count():
-            this = 'this is the last one!'
-            print this
-            return HttpResponseRedirect(reverse('questionnaire_finish'))
+            if order_info >= orderedgroups.count():
+                this = 'this is the last one!'
+                print this
+                return HttpResponseRedirect(reverse('questionnaire_finish'))
             
-        else:
-            
-            this = 'Continue! pass order_info+1 !'
-            print this
-            order_info = order_info + 1
-            return HttpResponseRedirect(reverse('get_next_questiongroup', kwargs = {'questionnaire_id': questionnaire_id, 'order_info' : order_info}))
+            else: 
+                this = 'Continue! pass order_info+1 !'
+                print this
+                order_info = order_info + 1
+                return HttpResponseRedirect(reverse('get_next_questiongroup', kwargs = {'questionnaire_id': questionnaire_id, 'order_info' : order_info}))
     
     else:
         return render_to_response('questionform.html', 
@@ -91,29 +88,6 @@ def display_question_answer(request,questionnaire_id):
     return render_to_response('questionanswer.html',{'context':context,},context_instance=RequestContext(request))
 
 
-def get_next_questiongroupid(this_questionnaire):
-    '''
-     retrieve ordered groups for given questionnaire ordered by order_info put them in a list
-     generator return next questiogroup
-     for example
-     orderedgroups =[{'questionnaire_id': 1, 'id': 1, 'order_info': 1, 'questiongroup_id': 10},
-     {'questionnaire_id': 1, 'id': 2, 'order_info': 3, 'questiongroup_id': 11}]
-     orderlist = [10, 11]
-     @return: next questiongroup_id
-    '''
-    orderedgroups = QuestionGroup_order.objects.filter(questionnaire= this_questionnaire).order_by('order_info').values()
-    orderlist=([ordergroup['questiongroup_id'] for ordergroup in orderedgroups])
-    for i, group_id in enumerate(orderlist):
-        yield  group_id
-    
-    
-def get_total_group_questions(questiongroup_id):
-    '''
-    @return: total number of questions in the given questiongroup
-    '''
-    totalcount =  QuestionGroup.objects.get(pk=questiongroup_id).questions.all().count()
-    return totalcount
-
 
 def get_questionnnaire_obj(questionnaire_id):
     '''
@@ -123,14 +97,6 @@ def get_questionnnaire_obj(questionnaire_id):
     
     return thisquestionnaire
 
-def get_questionnnaire_name(questionnaire_id):
-    '''
-    @return: questionnaire name
-    '''
-    thisquestionnaire=get_object_or_404(Questionnaire,pk=questionnaire_id)
-    
-    return thisquestionnaire.name
-
 def get_question_obj(question_id):
     '''
     @return: question object instance
@@ -139,10 +105,3 @@ def get_question_obj(question_id):
     
     return thisquestion
 
-def get_question_name(question_id):
-    '''
-    @return: question this question label actual question
-    '''
-    thisquestion=get_object_or_404(Question,pk=question_id)
-    
-    return thisquestion.label

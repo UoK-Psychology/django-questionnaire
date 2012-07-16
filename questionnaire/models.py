@@ -59,13 +59,12 @@ class Question(models.Model):
     selectoptions=CustomListField()
 
     def __unicode__(self):
-        return 'Question:%s FieldType:%s Selectoptions:%s' %(self.label, self.field_type,self.selectoptions)
+        return 'Question:%s FieldType:%s Selectoptions:%s' %(self.label, self.field_type,str(self.selectoptions))
     
     def save(self,*args,**kwgs):
         if not self.id:
-            if self.field_type == 'selectfield': 
+            if self.field_type == 'select_dropdown_field'or self.field_type == 'radioselectfield' or self.field_type == 'multiplechoicefield':               
                 self.selectoptions = self.selectoptions
-            
             else: 
                 self.selectoptions = None
         super(Question,self).save(*args,**kwgs)

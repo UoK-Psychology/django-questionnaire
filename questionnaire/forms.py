@@ -95,16 +95,16 @@ def make_question_group_form(questiongroup_id,questionnaire_id):
     
     for question in orderedgroups:
         
-        if question.question.field_type == 'select_dropdown_field' or question.field_type == 'radioselectfield' or question.field_type =='multiplechoicefield':
+        if question.question.field_type == 'select_dropdown_field' or question.question.field_type == 'radioselectfield' or question.question.field_type =='multiplechoicefield':
             tempfield=FIELD_TYPES[question.question.field_type]()
             tempfield.choices=get_choices(question.question)
             field=tempfield
             field.label = question.question.label
-            fields[int(question.question.id)]= field
+            fields[str(question.question.id)]= field
         else:    
             field = FIELD_TYPES[question.question.field_type]()
             field.label = question.question.label
-            fields[int(question.question.id)]= field
+            fields[str(question.question.id)]= field
             
     return type('%sForm' % id (questionnaire_id),(forms.BaseForm,),{'base_fields':fields})
 
