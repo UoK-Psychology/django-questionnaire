@@ -10,24 +10,31 @@ from django.contrib.auth.models import User
 
 class CustomListField(models.TextField):
     '''
-    for creating  custom list field overwrite some model.fields methods
+    for creating  custom list field override some model.fields methods
     '''
     __metaclass__ = models.SubfieldBase
 
     def __init__(self, *args, **kwargs):
         self.token = kwargs.pop('token', ',')
     
-        kwargs={'default':None,'null':True,'blank':True,'help_text':'Enter option for select Field Type seperated by comma e.g No ,Yes,Not Applicable '}
+        kwargs={'default':None,'null':True,'blank':True,
+                'help_text':'Enter option for select Field Type seperated by comma e.g No ,Yes,Not Applicable ./n TO EDIT EXISTING OPTIONS CLEAR THE OPTIONS AND TYPE AFRESH '}
         
         super(CustomListField, self).__init__(*args, **kwargs)
 
     def to_python(self, value):
+        '''
+        @return: list if it exist 
+        '''
         if not value: return
         if isinstance(value, list):
             return value
         return value.split(self.token)
 
     def get_db_prep_value(self, value,connection=None,prepared=False):
+        '''
+        @return string separated by token as stored in database
+        '''
         if not value: return
         assert(isinstance(value, list) or isinstance(value, tuple))
         return self.token.join([unicode(s) for s in value])
@@ -36,8 +43,8 @@ class CustomListField(models.TextField):
         value = self._get_val_from_obj(obj)
         return self.get_db_prep_value(value) 
 
-
-FIELD_TYPE_CHOICES=(('charfield','charfield'),('textfield','textfield'),('booleanfield','boolean'),('selectfield','select'),)
+     
+FIELD_TYPE_CHOICES=(('charfield','charfield'),('textfield','textfield'),('booleanfield','boolean'),('select_dropdown_field','select_dropdown_field'),('radioselectfield','radioselectfield'),('multiplechoicefield','multiplechoicefield'))
     
 class Question(models.Model):
     '''
