@@ -1,21 +1,31 @@
 
-{% block content %}
-
-{% if forms.errors %}
-<p>Please end valid </p>{{field.name}} 
-
-{% endif %}
 <form method="post" action=".">
-	<title> questionForm</title>
-	<h2>Question Form</h2> 
+{% load questionapp_extra %}
+	<title> {{thisquestionnairename}}</title>
+	 
+	<h2>{{thisquestionnairename}}</h2> 
+	<h3>Group :{{questionnaire_id}}</h3>
+	
 {%csrf_token %}
 
-{{ form.as_p }}
-
+{% for field in form %}
+    <div class="fieldWrapper">
+     
+  
+       {% if field.field.widget|klass == 'ChoiceField' %}
+       <p>  {{ field.errors }}</p>
+       <p>  {{ field.label_tag }}: <br>{{ field }}</p>
+     
+        {% else %}
+           <p>  {{ field.errors }}</p> 
+            <p>  {{ field.label_tag }}:{{ field }}</p>
+          
+      {% endif %}
+    
+       </div>
+{% endfor %}
 
  
 <input type="submit" value="Submit!" />
 
 </form>
-
-{% endblock %}
