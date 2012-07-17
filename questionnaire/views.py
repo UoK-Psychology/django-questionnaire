@@ -82,10 +82,14 @@ def get_answers(self):
 def display_question_answer(request,questionnaire_id):
     if request.method=='GET':
         user=request.user
-        questionanswer=QuestionAnswer.objects.values()
+        questionanswer=QuestionAnswer.objects.values()   
+        questionanswer2 = QuestionAnswer.objects.all()
         
-        paginator = Paginator(questionanswer, 2)  
-        context=questionanswer
+        answerset = AnswerSet.objects.values() 
+        answerset2 = AnswerSet.objects.all()
+        
+        
+        context=questionanswer        
     return render_to_response('questionanswer.html',{'context':context,},context_instance=RequestContext(request))
 
 
