@@ -11,11 +11,7 @@ from django.forms.fields import CharField,BooleanField,ChoiceField,MultipleChoic
 from django.forms.widgets import RadioSelect ,CheckboxSelectMultiple
 from django.utils.datastructures import SortedDict
 
-class CustomError(Exception):
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
+
 
 def get_choices(question):
     '''
@@ -25,10 +21,8 @@ def get_choices(question):
         choices_list = question.selectoptions
         choices= [(x,x) for x in choices_list]
         return choices
-    except CustomError as e:
-         msg='Exception has occurred not a valid List : s%' % e.value
-         raise MyError(msg)
-
+    except (ValueError, TypeError) as e:
+        raise ValueError(e.error_messages['invalid_choice'] % {'value': choices_list})
 def generate_charfield():
     '''
      @return charfield ,you can change the default attribute
@@ -91,10 +85,8 @@ def make_question_group_form(questiongroup_id,questionnaire_id):
     for question in orderedgroups:
         
         if question.question.field_type in ['select_dropdown_field','radioselectfield','multiplechoicefield']:
-            tempfield=FIELD_TYPES[question.question.field_type]()
-            tempfield.choices=get_choices(question.question)
-            field=tempfield
-            field.label = question.question.label
+            field=FIELD_TYPES[question.question.field_type]()
+            field.choices=get_choices(question.question)
             fields[str(question.question.id)]= field
         else:    
             field = FIELD_TYPES[question.question.field_type]()

@@ -2,6 +2,7 @@
 Created on Jul 10, 2012
 
 @author: mzd2
+@author: ayoola
 '''
 from django.db import models
 
@@ -63,10 +64,9 @@ class Question(models.Model):
     
     def save(self,*args,**kwgs):
         if not self.id:
-            if self.field_type == 'select_dropdown_field'or self.field_type == 'radioselectfield' or self.field_type == 'multiplechoicefield':               
-                self.selectoptions = self.selectoptions
-            else: 
+            if not self.field_type in ['select_dropdown_field','radioselectfield', 'multiplechoicefield'] :              
                 self.selectoptions = None
+            
         super(Question,self).save(*args,**kwgs)
 
     
