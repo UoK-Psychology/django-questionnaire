@@ -22,8 +22,8 @@ def get_next_questiongroup(request,questionnaire_id,order_info=None):
     else:
         order_info = int(order_info)
         
-    quest = Questionnaire.objects.get(pk=questionnaire_id)
-    orderedgroups = quest.get_ordered_groups()
+    this_questionnaire = get_object_or_404(Questionnaire, pk=questionnaire_id)
+    orderedgroups = this_questionnaire.get_ordered_groups()
     
     #below prints the questiongroup id! so it can be used to render a group!
     questiongroup_id = orderedgroups[order_info-1].questiongroup.id    
@@ -31,7 +31,7 @@ def get_next_questiongroup(request,questionnaire_id,order_info=None):
     questionForm = make_question_group_form(questiongroup_id,questionnaire_id)
     
     
-    this_questionnaire= get_questionnnaire_obj(questionnaire_id)
+    
     
     if request.method =='POST':
         
@@ -92,14 +92,6 @@ def display_question_answer(request,questionnaire_id):
     return render_to_response('questionanswer.html',{'context':context,},context_instance=RequestContext(request))
 
 
-
-def get_questionnnaire_obj(questionnaire_id):
-    '''
-    @return: questionnaire instance
-    '''
-    thisquestionnaire=get_object_or_404(Questionnaire,pk=questionnaire_id)
-    
-    return thisquestionnaire
 
 def get_question_obj(question_id):
     '''

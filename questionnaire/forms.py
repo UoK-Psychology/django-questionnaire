@@ -81,8 +81,8 @@ def make_question_group_form(questiongroup_id,questionnaire_id):
     #thisgroupquestions = QuestionGroup.objects.get(id=questiongroup_id).questions.all()
     
     
-    Group = QuestionGroup.objects.get(pk=questiongroup_id)
-    orderedgroups = Group.get_ordered_groups()
+    group = QuestionGroup.objects.get(pk=questiongroup_id)
+    orderedgroups = group.get_ordered_groups()
 
     #below prints the questiongroup id! so it can be used to render a group!
 
