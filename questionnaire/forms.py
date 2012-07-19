@@ -83,9 +83,7 @@ def make_question_group_form(questiongroup_id,questionnaire_id):
     
     group = QuestionGroup.objects.get(pk=questiongroup_id)
     orderedgroups = group.get_ordered_groups()
-
-    #below prints the questiongroup id! so it can be used to render a group!
-
+    
     
     for question in orderedgroups:
         

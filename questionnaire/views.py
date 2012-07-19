@@ -47,8 +47,12 @@ def get_next_questiongroup(request,questionnaire_id,order_info=None):
             
             formdata=get_answers(form)     
             for question,answer in formdata:
-                this_question_answer=QuestionAnswer(question=get_question_obj(question),answer=str(answer),answer_set=this_answer_set)
-                this_question_answer.save()
+                
+                this_question_answer, create = QuestionAnswer.objects.get_or_create(question=get_question_obj(question),answer=str(answer),answer_set=this_answer_set)
+                
+                
+                #this_question_answer=QuestionAnswer(question=get_question_obj(question),answer=str(answer),answer_set=this_answer_set)
+                #this_question_answer.save()
             
             if order_info >= orderedgroups.count():
                 return HttpResponseRedirect(reverse('questionnaire_finish'))
@@ -90,6 +94,8 @@ def display_question_answer(request,questionnaire_id):
         
         context=questionanswer        
     return render_to_response('questionanswer.html',{'context':context,},context_instance=RequestContext(request))
+
+
 
 
 
