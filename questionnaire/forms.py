@@ -12,10 +12,10 @@ from django.forms.widgets import RadioSelect ,CheckboxSelectMultiple
 from django.utils.datastructures import SortedDict
 
 class CustomError(Exception):
-       def __init__(self, value):
-         self.value = value
-       def __str__(self):
-         return repr(self.value)
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
 
 def get_choices(question):
     '''
@@ -49,10 +49,10 @@ def generate_select_dropdown_field():
     return ChoiceField(choices=[])
 
 def generate_radioselect_field():
-   '''
+    '''
     @return radioselect field no default set
-   ''' 
-   return ChoiceField(widget=RadioSelect,choices=[])
+    ''' 
+    return ChoiceField(widget=RadioSelect,choices=[])
 def generate_multiplechoice_field():
     '''
     @return MultipleChoiceField
