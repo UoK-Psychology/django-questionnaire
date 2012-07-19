@@ -36,9 +36,15 @@ def generate_charfield():
     return CharField(max_length=100,widget=forms.TextInput(attrs={'size':'40'}))
 
 def generate_textfield():
+    '''
+     @return textfield ,you can define the default attribute 
+    '''    
     return CharField(widget = forms.Textarea(attrs={'rows':'4','cols':'40',}))
 
 def generate_boolean_field():
+    '''
+     @return Boolean field , with default value of False or True 
+    '''    
     return BooleanField(initial= False)
 
 def generate_select_dropdown_field():
@@ -77,17 +83,14 @@ def make_question_group_form(questiongroup_id,questionnaire_id):
     
     '''
     fields = SortedDict([])
-    
-    #thisgroupquestions = QuestionGroup.objects.get(id=questiongroup_id).questions.all()
-    
-    
+       
     group = QuestionGroup.objects.get(pk=questiongroup_id)
     orderedgroups = group.get_ordered_groups()
     
     
     for question in orderedgroups:
         
-        if question.question.field_type == 'select_dropdown_field' or question.question.field_type == 'radioselectfield' or question.question.field_type =='multiplechoicefield':
+        if question.question.field_type in ['select_dropdown_field','radioselectfield','multiplechoicefield']:
             tempfield=FIELD_TYPES[question.question.field_type]()
             tempfield.choices=get_choices(question.question)
             field=tempfield

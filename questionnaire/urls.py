@@ -1,5 +1,5 @@
 from django.conf.urls import *
-from views import get_next_questiongroup,finish,index
+from views import handle_next_questiongroup_form,finish,index
 from django.views.generic.simple import direct_to_template
 
 
@@ -14,12 +14,12 @@ urlpatterns = patterns('questionnaire.views',
 
     ),
           url(r'^qs/(?P<questionnaire_id>\d+)/(?P<order_info>\d+)/$', 
-          view = 'get_next_questiongroup',
-          name = 'get_next_questiongroup'),
+          view = 'handle_next_questiongroup_form',
+          name = 'handle_next_questiongroup_form'),
         
           url(r'^qs/(?P<questionnaire_id>\d+)/$', 
-          view = 'get_next_questiongroup',
-          name = 'get_next_questiongroup'),
+          view = 'handle_next_questiongroup_form',
+          name = 'handle_first_questiongroup_form'),
                        
         url(r'^finish/$', 
             view = 'finish',
