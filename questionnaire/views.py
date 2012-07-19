@@ -37,24 +37,23 @@ def get_next_questiongroup(request,questionnaire_id,order_info=None):
         
         form=questionForm(request.POST)
         if form.is_valid():
-            formdata=get_answers(form)
+            
+            this_answer_set, created = AnswerSet.objects.get_or_create(user=request.user,questionnaire=this_questionnaire)
+            
+            #this_answer_set= AnswerSet(user=request.user,questionnaire=this_questionnaire)
+            #this_answer_set.save()
+            
+            
+            
+            formdata=get_answers(form)     
             for question,answer in formdata:
-
-                this_answer_set= AnswerSet(user=request.user,questionnaire=this_questionnaire)
-                this_answer_set.save()
                 this_question_answer=QuestionAnswer(question=get_question_obj(question),answer=str(answer),answer_set=this_answer_set)
                 this_question_answer.save()
             
-              
-
             if order_info >= orderedgroups.count():
-                this = 'this is the last one!'
-                print this
                 return HttpResponseRedirect(reverse('questionnaire_finish'))
             
             else: 
-                this = 'Continue! pass order_info+1 !'
-                print this
                 order_info = order_info + 1
                 return HttpResponseRedirect(reverse('get_next_questiongroup', kwargs = {'questionnaire_id': questionnaire_id, 'order_info' : order_info}))
     
@@ -76,7 +75,7 @@ def get_answers(self):
     self.field[name].label is data for the object to be inserted to the QuestionAnswer
     '''  
     for question, answer in self.cleaned_data.items():
-        print self.cleaned_data.items()
+        
         yield (question, answer)    
 
 def display_question_answer(request,questionnaire_id):
