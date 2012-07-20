@@ -1,0 +1,31 @@
+
+<form method="post" action=".">
+{% load questionapp_extra %}
+	<title> {{thisquestionnairename}}</title>
+	 
+	<h2>{{thisquestionnairename}}</h2> 
+	<h3>Group :{{questionnaire_id}}</h3>
+	
+{%csrf_token %}
+
+{% for field in form %}
+    <div class="fieldWrapper">
+     
+  
+       {% if field.field.widget|klass == 'ChoiceField' %}
+       <p>  {{ field.errors }}</p>
+       <p>  {{ field.label_tag }}: <br>{{ field }}</p>
+     
+        {% else %}
+           <p>  {{ field.errors }}</p> 
+            <p>  {{ field.label_tag }}:{{ field }}</p>
+          
+      {% endif %}
+    
+       </div>
+{% endfor %}
+
+ 
+<input type="submit" value="Submit!" />
+
+</form>
