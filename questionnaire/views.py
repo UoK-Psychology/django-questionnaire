@@ -25,7 +25,6 @@ def handle_next_questiongroup_form(request,questionnaire_id,order_info=None):
     this_questionnaire = get_object_or_404(Questionnaire, pk=questionnaire_id)
     orderedgroups = this_questionnaire.get_ordered_groups()
     
-    #below prints the questiongroup id! so it can be used to render a group!
     questiongroup = orderedgroups[order_info-1].questiongroup    
     
     questionForm = make_question_group_form(questiongroup,questionnaire_id)

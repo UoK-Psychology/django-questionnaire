@@ -78,7 +78,7 @@ def make_question_group_form(questiongroup,questionnaire_id):
     '''
     fields = SortedDict([])
        
-    #group = QuestionGroup.objects.get(pk=questiongroup_id)
+    
     orderedgroups = questiongroup.get_ordered_groups()
     
     
