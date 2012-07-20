@@ -70,7 +70,7 @@ FIELD_TYPES={
             'multiplechoicefield':generate_multiplechoice_field,
             }
 
-def make_question_group_form(questiongroup_id,questionnaire_id):
+def make_question_group_form(questiongroup,questionnaire_id):
     '''
      mapping questions fields  type  to form fields type 
      @return: type form for specific questiongroup 
@@ -78,8 +78,8 @@ def make_question_group_form(questiongroup_id,questionnaire_id):
     '''
     fields = SortedDict([])
        
-    group = QuestionGroup.objects.get(pk=questiongroup_id)
-    orderedgroups = group.get_ordered_groups()
+    #group = QuestionGroup.objects.get(pk=questiongroup_id)
+    orderedgroups = questiongroup.get_ordered_groups()
     
     
     for question in orderedgroups:
