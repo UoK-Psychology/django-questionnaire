@@ -87,6 +87,7 @@ def make_question_group_form(questiongroup,questionnaire_id):
         if question.field_type in ['select_dropdown_field','radioselectfield','multiplechoicefield']:
             field=FIELD_TYPES[question.field_type]()
             field.choices=get_choices(question)
+            field.label = question.label
             fields[str(question.id)]= field
         else:    
             field = FIELD_TYPES[question.field_type]()
