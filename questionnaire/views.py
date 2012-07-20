@@ -13,7 +13,7 @@ from django.contrib.auth.decorators import login_required
 def index (request):
     return HttpResponseRedirect(reverse('index'))
 
-
+@login_required
 def handle_next_questiongroup_form(request,questionnaire_id,order_info=None):
     questionnaire_id = int(questionnaire_id)
     if order_info==None:
