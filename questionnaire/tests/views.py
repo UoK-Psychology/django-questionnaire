@@ -6,9 +6,17 @@ from django.test import Client
 from django.core.urlresolvers import reverse
 
 
-
+class OtherTests(TestCase):
+    fixtures = ['test_questionnaire_fixtures.json',]
+    
+    def test(self):
+        
+        test_question = Question.objects.get(pk=3)
+        self.assert_(test_question.label == 'question_test_booleanfield')
+        
+        
 class QuestionnaireViewTests(TestCase):
-    fixtures = ['test_questionnaire_fixtures.json']
+    fixtures = ['test_questionnaire_fixtures.json',]
     '''
         This class will house unit test for the questionnaire package
         
