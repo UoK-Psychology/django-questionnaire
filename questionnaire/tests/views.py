@@ -93,23 +93,23 @@ class QuestionnaireViewTests(TestCase):
         
         self.questiongroup_test_group_1 = QuestionGroup.objects.create(
                                                      name = 'question group test 1',
-                                                     questions = (self.question_test_textfield)                                  
+                                                     questions = (self.question_test_textfield, 1)                                  
                                                                        )
         self.questiongroup_test_group_1 = QuestionGroup.objects.create(
                                                      name = 'question group test 1',
-                                                     questions = (self.question_test_booleanfield)                                  
+                                                     questions = (self.question_test_booleanfield, 2)                                  
                                                                        )
         self.questiongroup_test_group_2 = QuestionGroup.objects.create(
                                                      name = 'question group test 2',
-                                                     questions = (self.question_test_radioselectfield)                                  
+                                                     questions = (self.question_test_radioselectfield, 1)                                  
                                                                        )
         self.questiongroup_test_group_2 = QuestionGroup.objects.create(
                                                      name = 'question group test 2',
-                                                     questions = (self.question_test_dropdown_field)                                  
+                                                     questions = (self.question_test_dropdown_field, 2)                                  
                                                                        )
         self.questiongroup_test_group_2 = QuestionGroup.objects.create(
                                                      name = 'question group test 2',
-                                                     questions = (self.question_test_multiplechoicefield)                                  
+                                                     questions = (self.question_test_multiplechoicefield, 3)                                  
                                                                        )
         
         """
