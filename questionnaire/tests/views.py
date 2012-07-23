@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse
 
 
 class QuestionnaireViewTests(TestCase):
-    
+    fixtures = ['test_questionnaire_fixtures.json']
     '''
         This class will house unit test for the questionnaire package
         
@@ -30,99 +30,12 @@ class QuestionnaireViewTests(TestCase):
             2. A Questionnaire defined, which has 2 QuestionGroup defined, each with 1 question of each question type
         """
         self.user_test = User.objects.create_user('user_test', 'email@email.com', 'password')
+        
+        super(QuestionnaireViewTests,self).setUp()
         self.client = Client()
         
         
-        
-        """
-        create the first six question of different type
-        """
-        self.question_test_charfield = Question.objects.create(
-                                                     label = 'question 1 -  charfield',
-                                                     field_type = 'charfield',
-                                                     selectoptions= None
-                                                     )
-        
-        self.question_test_textfield = Question.objects.create(
-                                                     label = 'question 2 -  textfield',
-                                                     field_type = 'textfield',
-                                                     selectoptions= None
-                                                     )
-        
-        self.question_test_booleanfield = Question.objects.create(
-                                                     label = 'question 3 -  booleanfield',
-                                                     field_type = 'booleanfield',
-                                                     selectoptions= None
-                                                     )
-
-        self.question_test_radioselectfield = Question.objects.create(
-                                                     label = 'question 4 -  radioselectfield',
-                                                     field_type = 'radioselectfield',
-                                                     selectoptions= 'Radio 1, Radio 2, Radio 3'
-                                                     ) 
-                                                   
-        self.question_test_select_dropdown_field = Question.objects.create(
-                                                     label = 'question 5 -  select_dropdown_field',
-                                                     field_type = 'select_dropdown_field',
-                                                     selectoptions= 'Drop 1, Drop 2, Drop 3'
-                                                     )
-                
-        self.question_test_multiplechoicefield = Question.objects.create(
-                                                     label = 'question 6 -  multiplechoicefield',
-                                                     field_type = 'multiplechoicefield',
-                                                     selectoptions= 'Multiple Choice 1, Multiple Choice 2, Multiple Choice 3'
-                                                     )       
-        
-
-        """
-        create a questiongroup and its set its many to many relation through question_order
-        """
-        self.questiongroup_test_group_1 = QuestionGroup.objects.create(
-                                                     name = 'question group test 1',
-                                                     questions = (self.question_test_charfield)                                  
-                                                                       )
-        self.questionorder_test_1 = Question_order.objects.create(
-                                                                  questiongroup = self.questiongroup_test_group_1,
-                                                                  question = self.question_test_charfield,
-                                                                  order_info = 1,
-                                                                  )
-        
-        
-        
-        
-        
-        self.questiongroup_test_group_1 = QuestionGroup.objects.create(
-                                                     name = 'question group test 1',
-                                                     questions = (self.question_test_textfield, 1)                                  
-                                                                       )
-        self.questiongroup_test_group_1 = QuestionGroup.objects.create(
-                                                     name = 'question group test 1',
-                                                     questions = (self.question_test_booleanfield, 2)                                  
-                                                                       )
-        self.questiongroup_test_group_2 = QuestionGroup.objects.create(
-                                                     name = 'question group test 2',
-                                                     questions = (self.question_test_radioselectfield, 1)                                  
-                                                                       )
-        self.questiongroup_test_group_2 = QuestionGroup.objects.create(
-                                                     name = 'question group test 2',
-                                                     questions = (self.question_test_dropdown_field, 2)                                  
-                                                                       )
-        self.questiongroup_test_group_2 = QuestionGroup.objects.create(
-                                                     name = 'question group test 2',
-                                                     questions = (self.question_test_multiplechoicefield, 3)                                  
-                                                                       )
-        
-        """
-        Create one Questionnaire object and set its many to many relation with questiongroup through questiongroup_order
-        """        
-        self.questionnaire_test = Questionnaire.objects.create(
-                                                               name = 'Questionnaire_Test',
-                                                               questiongroup = (self.questiongroup_test_group_1, 1)
-                                                               )
-        self.questionnaire_test = Questionnaire.objects.create(
-                                                               name = 'Questionnaire_Test',
-                                                               questiongroup = (self.questiongroup_test_group_2, 2)
-                                                               )        
+                                                                      
 
         
     
@@ -131,10 +44,9 @@ class QuestionnaireViewTests(TestCase):
         """
             A get request to this view without a logged in user should redirect to the default login url
         """
-        response = self.client.get('/questionnaire/qs/1')
-        self.assertFalse(response.status_code, 200)    
-            
-        self.assert_(False, 'Not yet implemented')
+        self.client = Client()
+        response = self.client.get('/questionnaire/qs/1/')
+        self.assertRedirects(response, '/accounts/login/?next=/questionnaire/qs/1/')
         
     def test_handle_next_questiongroup_form_get_valid_questionnaire_firsttime(self):
         """
@@ -145,9 +57,9 @@ class QuestionnaireViewTests(TestCase):
             3. have a form in the context containing fields representing the first group in the questionnaire
             but unbound to any data (ie. not have any value associated with them)
         """
-        
-         
-        self.assert_(False, 'Not yet implemented')
+        resp = self.client.get('/questionnaire/qs/1')
+        self.assertEqual(resp.status_code, 200, 'first page should be shown')
+        self.assertTemplateUsed('questionform.html') 
         
     def test_handle_next_questiongroup_form_get_valid_questionnaire_retry(self):
         """
@@ -158,8 +70,8 @@ class QuestionnaireViewTests(TestCase):
             3. have a form in the context containing fields representing the first group in the questionnaire
             but that is bound to the answers that were previously given by the user.
         """
-         
-        self.assert_(False, 'Not yet implemented')
+        self.assertTemplateUsed('questionform.html') 
+
         
     def test_handle_next_questiongroup_form_get_invalid_questionnaire(self):
         """
@@ -220,8 +132,10 @@ class QuestionnaireViewTests(TestCase):
             1. return a 200 HTTPResponse
             2. Render the finish.html template
         """
+        resp = self.client.get('/questionnaire/finish/')
+        self.assertEqual(resp.status_code, 200, 'finish page should be shown')
+        self.assertTemplateUsed('finish.html') 
         
-        self.assert_(False, 'Not yet implemented')
         
         
     def test_display_question_answer_invalid_questionnaire(self):
