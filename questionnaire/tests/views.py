@@ -32,7 +32,7 @@ class QuestionnaireViewTests(TestCase):
         self.user_test = User.objects.create_user('user_test', 'email@email.com', 'password')
         
         super(QuestionnaireViewTests,self).setUp()
-        self.client = Client()
+        
         
         
                                                                       
@@ -78,7 +78,9 @@ class QuestionnaireViewTests(TestCase):
             A GET request to the ''handle_next_questiongroup_form'' view specifying a invalid questionnaire id
             should yield a http 404 response as this questionnaire does not exist
         """
-        self.assert_(False, 'Not yet implemented')
+        resp = self.client.get('/questionnaire/qs/0')
+        self.assertEqual(resp.status_code, 301)
+        
         
     def test_handle_next_questiongroup_form_post_success_firsttime(self):
         """
