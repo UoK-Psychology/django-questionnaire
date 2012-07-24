@@ -16,7 +16,7 @@ class OtherTests(TestCase):
         
         
 class QuestionnaireViewTests(TestCase):
-    fixtures = ['test_questionnaire_fixtures.json',]
+    fixtures = ['test_questionnaire_fixtures.json']
     '''
         This class will house unit test for the questionnaire package
         
@@ -37,10 +37,12 @@ class QuestionnaireViewTests(TestCase):
             1. A User we can login with
             2. A Questionnaire defined, which has 2 QuestionGroup defined, each with 1 question of each question type
         """
-        self.user_test = User.objects.create_user('user_test', 'email@email.com', 'password')
+        fixtures = ['test_questionnaire_fixtures.json']
+        self.client = Client()
+        self.user_test = User.objects.create_user('user', 'email@email.com', 'password')
         
         super(QuestionnaireViewTests,self).setUp()
-        
+        self.client.login(username='user', password='password') 
         
         
                                                                       
@@ -52,9 +54,9 @@ class QuestionnaireViewTests(TestCase):
         """
             A get request to this view without a logged in user should redirect to the default login url
         """
-        self.client = Client()
+        
         response = self.client.get('/questionnaire/qs/1/')
-        self.assertRedirects(response, '/accounts/login/?next=/questionnaire/qs/1/')
+        self.assertEquals (302, response.status_code )
         
     def test_handle_next_questiongroup_form_get_valid_questionnaire_firsttime(self):
         """
@@ -64,9 +66,10 @@ class QuestionnaireViewTests(TestCase):
             2. use the questionform.html template
             3. have a form in the context containing fields representing the first group in the questionnaire
             but unbound to any data (ie. not have any value associated with them)
-        """
-        resp = self.client.get('/questionnaire/qs/1')
-        self.assertEqual(resp.status_code, 200, 'first page should be shown')
+        """        
+        self.client.login(username='user', password='password')    
+        resp = self.client.get('/questionnaire/qs/1/')
+        self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
         self.assertTemplateUsed('questionform.html') 
         
     def test_handle_next_questiongroup_form_get_valid_questionnaire_retry(self):
@@ -78,6 +81,7 @@ class QuestionnaireViewTests(TestCase):
             3. have a form in the context containing fields representing the first group in the questionnaire
             but that is bound to the answers that were previously given by the user.
         """
+        
         resp = self.client.get('/questionnaire/qs/1')
         self.assertEqual(resp.status_code, 200, 'first page should be shown')        
         self.assertTemplateUsed('questionform.html') 
@@ -88,8 +92,9 @@ class QuestionnaireViewTests(TestCase):
             A GET request to the ''handle_next_questiongroup_form'' view specifying a invalid questionnaire id
             should yield a http 404 response as this questionnaire does not exist
         """
-        resp = self.client.get('/questionnaire/qs/0')
-        self.assertEqual(resp.status_code, 301, 'There are no questionnaire with id 0!')
+        self.client.login(username='user', password='password') 
+        resp = self.client.get('/questionnaire/qs/0/')
+        self.assertEqual(resp.status_code, 404, 'There are no questionnaire with id 0!')
         
         
     def test_handle_next_questiongroup_form_post_success_firsttime(self):
@@ -162,7 +167,9 @@ class QuestionnaireViewTests(TestCase):
             GET request to ''display_question_answer'' without being logged in should:
             1. redirect to the default login url
         """
-        self.assert_(False, 'Not yet implemented')
+        response = self.client.get('/questionnaire/Answer/1/')
+        self.assertEquals (302, response.status_code)
+        
         
     def test_display_question_answer_valid_questionnaire_not_answered(self):
         """

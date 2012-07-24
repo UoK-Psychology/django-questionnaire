@@ -108,6 +108,48 @@
       },
     "model" : "questionnaire.question_order",
     "pk" : 6
-  }
+  },
+    { "fields" : { "answer" : "charfield",
+        "answer_set" : 1,
+        "question" : 1
+      },
+    "model" : "questionnaire.questionanswer",
+    "pk" : 1
+  },
+  { "fields" : { "answer" : "True",
+        "answer_set" : 1,
+        "question" : 3
+      },
+    "model" : "questionnaire.questionanswer",
+    "pk" : 2
+  },
+  { "fields" : { "answer" : "textfield",
+        "answer_set" : 1,
+        "question" : 2
+      },
+    "model" : "questionnaire.questionanswer",
+    "pk" : 3
+  },
+  { "fields" : { "answer" : "radio 1",
+        "answer_set" : 1,
+        "question" : 5
+      },
+    "model" : "questionnaire.questionanswer",
+    "pk" : 4
+  },
+  { "fields" : { "answer" : "drop 1",
+        "answer_set" : 1,
+        "question" : 4
+      },
+    "model" : "questionnaire.questionanswer",
+    "pk" : 5
+  },
+  { "fields" : { "answer" : "[u'mchoice 1']",
+        "answer_set" : 1,
+        "question" : 6
+      },
+    "model" : "questionnaire.questionanswer",
+    "pk" : 6
+  },
  ]
   
