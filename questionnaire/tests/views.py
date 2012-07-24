@@ -78,6 +78,8 @@ class QuestionnaireViewTests(TestCase):
             3. have a form in the context containing fields representing the first group in the questionnaire
             but that is bound to the answers that were previously given by the user.
         """
+        resp = self.client.get('/questionnaire/qs/1')
+        self.assertEqual(resp.status_code, 200, 'first page should be shown')        
         self.assertTemplateUsed('questionform.html') 
 
         
@@ -87,7 +89,7 @@ class QuestionnaireViewTests(TestCase):
             should yield a http 404 response as this questionnaire does not exist
         """
         resp = self.client.get('/questionnaire/qs/0')
-        self.assertEqual(resp.status_code, 301)
+        self.assertEqual(resp.status_code, 301, 'There are no questionnaire with id 0!')
         
         
     def test_handle_next_questiongroup_form_post_success_firsttime(self):
