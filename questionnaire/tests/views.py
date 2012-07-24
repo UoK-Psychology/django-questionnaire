@@ -12,7 +12,7 @@ class OtherTests(TestCase):
     def test(self):
         
         test_question = Question.objects.get(pk=3)
-        self.assert_(test_question.label == 'question_test_booleanfield')
+        self.assert_(test_question.label == 'test_question_booleanfield')
         
         
 class QuestionnaireViewTests(TestCase):
@@ -37,7 +37,7 @@ class QuestionnaireViewTests(TestCase):
             1. A User we can login with
             2. A Questionnaire defined, which has 2 QuestionGroup defined, each with 1 question of each question type
         """
-        fixtures = ['test_questionnaire_fixtures.json']
+        
         self.client = Client()
         self.user_test = User.objects.create_user('user', 'email@email.com', 'password')
         
