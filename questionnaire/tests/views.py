@@ -42,7 +42,7 @@ class QuestionnaireViewTests(TestCase):
         self.user_test = User.objects.create_user('user', 'email@email.com', 'password')
         
         super(QuestionnaireViewTests,self).setUp()
-        self.client.login(username='user', password='password') 
+        
         
         
                                                                       

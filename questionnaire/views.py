@@ -62,7 +62,7 @@ def handle_next_questiongroup_form(request,questionnaire_id,order_info=None):
 def finish(request):
     return render_to_response('finish.html')     
       
-
+@login_required
 def display_question_answer(request,questionnaire_id):
     if request.method=='GET':
         user=request.user
