@@ -78,7 +78,7 @@ class QuestionnaireViewTests(TestCase):
         
         self.client.login(username='user', password='password')
         resp = self.client.get('/questionnaire/qs/1')
-        self.assertEqual(resp.status_code, 200, 'first page should be shown')        
+        self.assertEqual(resp.status_code, 302)        
         self.assertTemplateUsed('questionform.html') 
 
         
@@ -106,7 +106,7 @@ class QuestionnaireViewTests(TestCase):
         self.client.login(username='user', password='password')
         post_data =  {u'1': [u'c'], u'2': [u'b'], u'3': [u'a']}
         resp = self.client.post('/questionnaire/qs/1/',post_data)
-        self.assertEqual(200, resp.status_code)      
+        self.assertEqual(302, resp.status_code)      
         
     def test_handle_next_questiongroup_form_post_success_lastgroup(self):
         """
@@ -129,7 +129,15 @@ class QuestionnaireViewTests(TestCase):
             id of the next question group for the questionniare (in this case there is one as that is how we setup the fixture)
         """
         
-        self.assert_(False, 'Not yet implemented')
+        self.client.login(username='user', password='password')
+        post_data =  {u'1': [u'c'], u'2': [u'b'], u'3': [u'a']}
+        resp = self.client.post('/questionnaire/qs/1/',post_data)
+        resp_status_code = resp.status_code
+        post_data2 =  {u'1': [u'c'], u'2': [u'b'], u'3': [u'b']}
+        resp2 = self.client.post('/questionnaire/qs/1/',post_data2)
+        resp2_status_code = resp2.status_code
+        self.assertEqual(302, resp_status_code)
+        self.assertEqual(302, resp2_status_code)
         
     def test_handle_next_questiongroup_form_post_failure(self):
         
@@ -141,19 +149,22 @@ class QuestionnaireViewTests(TestCase):
         
         """
         
-        self.assert_(False, 'Not yet implemented')
+        self.client.login(username='user', password='password')
+        post_data =  {u'1': [u'c'], u'2': [u'b'], u'3': [u'xxx']}
+        resp = self.client.post('/questionnaire/qs/1/',post_data)
+        self.assertNotEqual(200, resp.status_code)
         
     def test_finish_view(self):
+        
         """
             A GET request to the ''finish'' view should :
             1. return a 200 HTTPResponse
             2. Render the finish.html template
         """
+        
         resp = self.client.get('/questionnaire/finish/')
         self.assertEqual(resp.status_code, 200, 'finish page should be shown')
         self.assertTemplateUsed('finish.html') 
-        
-        
         
     def test_display_question_answer_invalid_questionnaire(self):
         """
