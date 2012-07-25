@@ -184,10 +184,12 @@ class QuestionnaireViewTests(TestCase):
             3. context should not contain any answers (which will cause the template to show that you have no answers)
         """
         self.client.login(username='user', password='password')    
-        resp = self.client.get('/questionnaire/Answer/1/')
+        resp = self.client.get('/questionnaire/Answer/1')
+        
         self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
         self.assertTemplateUsed('questionanswer.html') 
-        self.assert_(False, 'Not yet implemented')
+        self.assertEqual(len(resp.context['context']), 0)
+
         
         
     def test_display_question_answer_valid_questionnaire_partialy_answered(self):

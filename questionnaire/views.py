@@ -56,7 +56,7 @@ def handle_next_questiongroup_form(request,questionnaire_id,order_info=None):
         return render_to_response('questionform.html', 
         {'form': questionForm,},context_instance=RequestContext(request))
     
-
+        
 
 
 def finish(request):
@@ -73,7 +73,7 @@ def display_question_answer(request,questionnaire_id):
         answerset2 = AnswerSet.objects.all()
         
         
-        context=questionanswer        
+        context=questionanswer      
     return render_to_response('questionanswer.html',{'context':context,},context_instance=RequestContext(request))
 
 
