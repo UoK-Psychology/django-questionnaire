@@ -179,11 +179,16 @@ class QuestionnaireViewTests(TestCase):
         """
             GET request to ''display_question_answer'' with a logged in user and a valid question id but one that has not been answered
             should :
-            1. return htt 200 response
+            1. return http 200 response
             2. template used should be questionAnswer.html
             3. context should not contain any answers (which will cause the template to show that you have no answers)
         """
+        self.client.login(username='user', password='password')    
+        resp = self.client.get('/questionnaire/Answer/1/')
+        self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
+        self.assertTemplateUsed('questionanswer.html') 
         self.assert_(False, 'Not yet implemented')
+        
         
     def test_display_question_answer_valid_questionnaire_partialy_answered(self):
         """
@@ -194,6 +199,10 @@ class QuestionnaireViewTests(TestCase):
             3. context should contain the answers in such a way that can be rendered by their group
             4. Any unanswered questions should show that they haven't yet been answered
         """
+        self.client.login(username='user', password='password')    
+        resp = self.client.get('/questionnaire/Answer/1/')
+        self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
+        self.assertTemplateUsed('questionanswer.html') 
         self.assert_(False, 'Not yet implemented')
         
     def test_display_question_answer_valid_questionnaire_fully_answered(self):
@@ -204,6 +213,10 @@ class QuestionnaireViewTests(TestCase):
             2. template used should be questionAnswer.html
             3. context should contain the answers in such a way that can be rendered by their group
         """
+        self.client.login(username='user', password='password')    
+        resp = self.client.get('/questionnaire/Answer/1/')
+        self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
+        self.assertTemplateUsed('questionanswer.html') 
         self.assert_(False, 'Not yet implemented')
     
     def test_display_question_answer_valid_questionnaire_edited_answers(self):
@@ -216,6 +229,10 @@ class QuestionnaireViewTests(TestCase):
             4. Where the answers have been edited (i.e. there are more than one QuestionAnswer for this questionnaire) only the
             most recent answer should be shown.
         """
+        self.client.login(username='user', password='password')    
+        resp = self.client.get('/questionnaire/Answer/1/')
+        self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
+        self.assertTemplateUsed('questionanswer.html') 
         self.assert_(False, 'Not yet implemented')
         
         
