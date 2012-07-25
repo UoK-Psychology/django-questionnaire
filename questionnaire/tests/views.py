@@ -1,5 +1,5 @@
 from questionnaire.views import *
-from questionnaire.models import Question,Questionnaire,QuestionGroup,Question_order, QuestionGroup_order
+from questionnaire.models import Question,Questionnaire,QuestionGroup,Question_order, QuestionGroup_order, AnswerSet
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.test import Client
@@ -40,7 +40,8 @@ class QuestionnaireViewTests(TestCase):
         
         self.client = Client()
         self.user_test = User.objects.create_user('user', 'email@email.com', 'password')
-        
+        testquestionnaire = Questionnaire.objects.get(pk=1)        
+        self.answerset = AnswerSet.objects.create(user=self.user_test,questionnaire=testquestionnaire)
         super(QuestionnaireViewTests,self).setUp()
         
         
@@ -106,6 +107,8 @@ class QuestionnaireViewTests(TestCase):
             3. It should redirect to the handle_next_questiongroup_form url specifying the questionnaire id and the 
             id of the next question group for the questionniare (in this case there is one as that is how we setup the fixture)
         """
+        
+        
         self.assert_(False, 'Not yet implemented')
         
     def test_handle_next_questiongroup_form_post_success_lastgroup(self):
