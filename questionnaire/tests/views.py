@@ -106,8 +106,8 @@ class QuestionnaireViewTests(TestCase):
         
         self.client.login(username='user', password='password')
         post_data =  {u'1': [u'c'], u'2': [u'b'], u'3': [u'a']}
-        resp = self.client.post('/questionnaire/qs/1/', post_data)
-        self.assert_(200, resp.status_code)
+        resp = self.client.post('/questionnaire/qs/1/',post_data)
+        self.assertEqual(200, resp.status_code)      
         
     def test_handle_next_questiongroup_form_post_success_lastgroup(self):
         """
