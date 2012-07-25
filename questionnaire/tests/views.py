@@ -43,21 +43,14 @@ class QuestionnaireViewTests(TestCase):
         testquestionnaire = Questionnaire.objects.get(pk=1)        
         self.answerset = AnswerSet.objects.create(user=self.user_test,questionnaire=testquestionnaire)
         super(QuestionnaireViewTests,self).setUp()
-        
-        
-        
-                                                                      
-
-        
-    
+            
     def test_handle_next_questiongroup_form_no_user(self):
-        
         """
             A get request to this view without a logged in user should redirect to the default login url
         """
-        
         response = self.client.get('/questionnaire/qs/1/')
         self.assertEquals (302, response.status_code )
+        self.assertEquals (response['Location'], 'http://testserver/accounts/login/?next=/questionnaire/qs/1/' )
         
     def test_handle_next_questiongroup_form_get_valid_questionnaire_firsttime(self):
         """
@@ -68,6 +61,7 @@ class QuestionnaireViewTests(TestCase):
             3. have a form in the context containing fields representing the first group in the questionnaire
             but unbound to any data (ie. not have any value associated with them)
         """        
+        
         self.client.login(username='user', password='password')    
         resp = self.client.get('/questionnaire/qs/1/')
         self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
@@ -83,6 +77,7 @@ class QuestionnaireViewTests(TestCase):
             but that is bound to the answers that were previously given by the user.
         """
         
+        self.client.login(username='user', password='password')
         resp = self.client.get('/questionnaire/qs/1')
         self.assertEqual(resp.status_code, 200, 'first page should be shown')        
         self.assertTemplateUsed('questionform.html') 
@@ -93,6 +88,7 @@ class QuestionnaireViewTests(TestCase):
             A GET request to the ''handle_next_questiongroup_form'' view specifying a invalid questionnaire id
             should yield a http 404 response as this questionnaire does not exist
         """
+        
         self.client.login(username='user', password='password') 
         resp = self.client.get('/questionnaire/qs/0/')
         self.assertEqual(resp.status_code, 404, 'There are no questionnaire with id 0!')
@@ -108,8 +104,10 @@ class QuestionnaireViewTests(TestCase):
             id of the next question group for the questionniare (in this case there is one as that is how we setup the fixture)
         """
         
-        
-        self.assert_(False, 'Not yet implemented')
+        self.client.login(username='user', password='password')
+        post_data =  {u'1': [u'c'], u'2': [u'b'], u'3': [u'a']}
+        resp = self.client.post('/questionnaire/qs/1/', post_data)
+        self.assert_(200, resp.status_code)
         
     def test_handle_next_questiongroup_form_post_success_lastgroup(self):
         """
