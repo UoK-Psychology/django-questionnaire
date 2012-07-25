@@ -104,9 +104,11 @@ class QuestionnaireViewTests(TestCase):
         """
         
         self.client.login(username='user', password='password')
-        post_data =  {u'1': [u'c'], u'2': [u'b'], u'3': [u'a']}
+        post_data =  {u'1': [u'a'], u'2': [u'a'], u'3': [u'True']}
         resp = self.client.post('/questionnaire/qs/1/',post_data)
+        print resp
         self.assertEqual(302, resp.status_code)      
+        self.assertEqual(resp['Location'], 'http://testserver/questionnaire/qs/1/2/')
         
     def test_handle_next_questiongroup_form_post_success_lastgroup(self):
         """
@@ -116,7 +118,16 @@ class QuestionnaireViewTests(TestCase):
             2. It should create a QuestionAnswer object for each question, related to the AnswerSet by a fk relationship
             3. It should redirect to the finish url.
         """
-        self.assert_(False, 'Not yet implemented')
+        self.client.login(username='user', password='password')
+        #post_data =  {u'4': [u'Radio 1'], u'5': [u'Drop 1'], u'6': [u'Multiple Choice 1']}
+
+        
+        
+        post_data =  {u'4': [u'Radio 1'], u'5': [u'Drop 1'], u'6': [u'Multiple Choice 1']}
+        resp = self.client.post('/questionnaire/qs/1/2',post_data)
+        print resp
+        self.assertEqual(resp.status_code, 301)     
+        self.assertEqual(resp['Location'], 'http://testserver/questionnaire/finish/')
         
     def test_handle_next_questiongroup_form_post_success_retry(self):
         """
