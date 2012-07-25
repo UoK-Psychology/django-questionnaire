@@ -37,10 +37,9 @@ class QuestionnaireViewTests(TestCase):
             1. A User we can login with
             2. A Questionnaire defined, which has 2 QuestionGroup defined, each with 1 question of each question type
         """
-        
+        testquestionnaire = Questionnaire.objects.get(pk=1)      
         self.client = Client()
-        self.user_test = User.objects.create_user('user', 'email@email.com', 'password')
-        testquestionnaire = Questionnaire.objects.get(pk=1)        
+        self.user_test = User.objects.create_user('user', 'email@email.com', 'password')          
         self.answerset = AnswerSet.objects.create(user=self.user_test,questionnaire=testquestionnaire)
         super(QuestionnaireViewTests,self).setUp()
             
@@ -171,7 +170,7 @@ class QuestionnaireViewTests(TestCase):
             GET request to ''display_question_answer'' without being logged in should:
             1. redirect to the default login url
         """
-        response = self.client.get('/questionnaire/Answer/1/')
+        response = self.client.get('/questionnaire/Answer/1')
         self.assertEquals (302, response.status_code)
         
         
@@ -185,10 +184,10 @@ class QuestionnaireViewTests(TestCase):
         """
         self.client.login(username='user', password='password')    
         resp = self.client.get('/questionnaire/Answer/1')
-        
         self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
-        self.assertTemplateUsed('questionanswer.html') 
+        self.assertTemplateUsed('questionanswer.html')         
         self.assertEqual(len(resp.context['context']), 0)
+        
 
         
         
@@ -201,11 +200,16 @@ class QuestionnaireViewTests(TestCase):
             3. context should contain the answers in such a way that can be rendered by their group
             4. Any unanswered questions should show that they haven't yet been answered
         """
+        self.question_answer_1 = QuestionAnswer.objects.create(question=Question.objects.get(pk=1),answer="charfield",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_2 = QuestionAnswer.objects.create(question=Question.objects.get(pk=2),answer="textfield",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_3 = QuestionAnswer.objects.create(question=Question.objects.get(pk=3),answer="True",answer_set=AnswerSet.objects.get(pk=1))
+
         self.client.login(username='user', password='password')    
-        resp = self.client.get('/questionnaire/Answer/1/')
+        resp = self.client.get('/questionnaire/Answer/1')
         self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
         self.assertTemplateUsed('questionanswer.html') 
-        self.assert_(False, 'Not yet implemented')
+        self.assertLess(len(resp.context['context']), 6)
+        
         
     def test_display_question_answer_valid_questionnaire_fully_answered(self):
         """
@@ -215,11 +219,20 @@ class QuestionnaireViewTests(TestCase):
             2. template used should be questionAnswer.html
             3. context should contain the answers in such a way that can be rendered by their group
         """
-        self.client.login(username='user', password='password')    
-        resp = self.client.get('/questionnaire/Answer/1/')
+        self.question_answer_1 = QuestionAnswer.objects.create(question=Question.objects.get(pk=1),answer="charfield",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_2 = QuestionAnswer.objects.create(question=Question.objects.get(pk=2),answer="textfield",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_3 = QuestionAnswer.objects.create(question=Question.objects.get(pk=3),answer="True",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_4 = QuestionAnswer.objects.create(question=Question.objects.get(pk=4),answer="Radio 1",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_5 = QuestionAnswer.objects.create(question=Question.objects.get(pk=5),answer="Drop 1",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_6 = QuestionAnswer.objects.create(question=Question.objects.get(pk=6),answer="[u'Multiple Choice 1']",answer_set=AnswerSet.objects.get(pk=1))
+        
+        
+        self.client.login(username='user', password='password')            
+        resp = self.client.get('/questionnaire/Answer/1')        
         self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
-        self.assertTemplateUsed('questionanswer.html') 
-        self.assert_(False, 'Not yet implemented')
+        self.assertTemplateUsed('questionanswer.html')    
+         
+        self.assertEqual(len(resp.context['context']), 6)
     
     def test_display_question_answer_valid_questionnaire_edited_answers(self):
         """
@@ -231,10 +244,21 @@ class QuestionnaireViewTests(TestCase):
             4. Where the answers have been edited (i.e. there are more than one QuestionAnswer for this questionnaire) only the
             most recent answer should be shown.
         """
+        self.question_answer_1 = QuestionAnswer.objects.create(question=Question.objects.get(pk=1),answer="charfield",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_2 = QuestionAnswer.objects.create(question=Question.objects.get(pk=2),answer="textfield",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_3 = QuestionAnswer.objects.create(question=Question.objects.get(pk=3),answer="True",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_4 = QuestionAnswer.objects.create(question=Question.objects.get(pk=4),answer="Radio 1",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_5 = QuestionAnswer.objects.create(question=Question.objects.get(pk=5),answer="Drop 1",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_6 = QuestionAnswer.objects.create(question=Question.objects.get(pk=6),answer="[u'Multiple Choice 1']",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_7 = QuestionAnswer.objects.create(question=Question.objects.get(pk=3),answer="False",answer_set=AnswerSet.objects.get(pk=1))
+        
+        
+        
+        
         self.client.login(username='user', password='password')    
-        resp = self.client.get('/questionnaire/Answer/1/')
+        resp = self.client.get('/questionnaire/Answer/1')
         self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
         self.assertTemplateUsed('questionanswer.html') 
-        self.assert_(False, 'Not yet implemented')
+        self.assertGreater(len(resp.context['context']), 6)
         
         
