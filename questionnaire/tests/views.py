@@ -161,7 +161,10 @@ class QuestionnaireViewTests(TestCase):
             GET request to ''display_question_answer'' with an invalid question id (ie it doesn't exist)(but logged in) should:
             1. yield a http 404 response
         """
-        self.assert_(False, 'Not yet implemented')
+        self.client.login(username='user', password='password') 
+        resp = self.client.get('/questionnaire/Answer/0/')
+        self.assertEqual(resp.status_code, 404, 'There are no questionnaire with id 0!')
+        
         
     def test_display_question_answer_valid_questionnaire_not_logged_in(self):
         """
