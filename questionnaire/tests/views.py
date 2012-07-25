@@ -11,8 +11,8 @@ class OtherTests(TestCase):
     
     def test(self):
         
-        test_question = Question.objects.get(pk=3)
-        self.assert_(test_question.label == 'test_question_booleanfield')
+        test_question = Question.objects.get(pk=1)
+        self.assert_(test_question.label == 'test_question_charfield')
         
         
 class QuestionnaireViewTests(TestCase):
@@ -105,10 +105,12 @@ class QuestionnaireViewTests(TestCase):
         
         self.client.login(username='user', password='password')
         post_data =  {u'1': [u'a'], u'2': [u'a'], u'3': [u'True']}
-        resp = self.client.post('/questionnaire/qs/1/',post_data)
-        print resp
+        resp = self.client.post('/questionnaire/qs/1/',post_data)        
         self.assertEqual(302, resp.status_code)      
         self.assertEqual(resp['Location'], 'http://testserver/questionnaire/qs/1/2/')
+        self.assertEqual(QuestionAnswer.objects.get(pk=1).answer, 'a')
+        self.assertEqual(AnswerSet.objects.get(pk=1).user, User.objects.get(pk=1))
+
         
     def test_handle_next_questiongroup_form_post_success_lastgroup(self):
         """
@@ -118,14 +120,9 @@ class QuestionnaireViewTests(TestCase):
             2. It should create a QuestionAnswer object for each question, related to the AnswerSet by a fk relationship
             3. It should redirect to the finish url.
         """
-        self.client.login(username='user', password='password')
-        #post_data =  {u'4': [u'Radio 1'], u'5': [u'Drop 1'], u'6': [u'Multiple Choice 1']}
-
-        
-        
+        self.client.login(username='user', password='password')        
         post_data =  {u'4': [u'Radio 1'], u'5': [u'Drop 1'], u'6': [u'Multiple Choice 1']}
-        resp = self.client.post('/questionnaire/qs/1/2',post_data)
-        print resp
+        resp = self.client.post('/questionnaire/qs/1/2',post_data)        
         self.assertEqual(resp.status_code, 301)     
         self.assertEqual(resp['Location'], 'http://testserver/questionnaire/finish/')
         
@@ -139,16 +136,28 @@ class QuestionnaireViewTests(TestCase):
             3. It should redirect to the handle_next_questiongroup_form url specifying the questionnaire id and the 
             id of the next question group for the questionniare (in this case there is one as that is how we setup the fixture)
         """
-        
         self.client.login(username='user', password='password')
-        post_data =  {u'1': [u'c'], u'2': [u'b'], u'3': [u'a']}
-        resp = self.client.post('/questionnaire/qs/1/',post_data)
-        resp_status_code = resp.status_code
-        post_data2 =  {u'1': [u'c'], u'2': [u'b'], u'3': [u'b']}
-        resp2 = self.client.post('/questionnaire/qs/1/',post_data2)
-        resp2_status_code = resp2.status_code
-        self.assertEqual(302, resp_status_code)
-        self.assertEqual(302, resp2_status_code)
+        '''
+        create object first, to simulate it is already answered! and then try to post the question id but different answer!
+        '''
+        self.question_answer_1 = QuestionAnswer.objects.create(question=Question.objects.get(pk=1),answer="charfield",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_2 = QuestionAnswer.objects.create(question=Question.objects.get(pk=2),answer="textfield",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_3 = QuestionAnswer.objects.create(question=Question.objects.get(pk=3),answer="True",answer_set=AnswerSet.objects.get(pk=1))  
+        post_data =  {u'1': [u'b'], u'2': [u'b'], u'3': [u'False']}
+        resp = self.client.post('http://testserver/questionnaire/qs/1',post_data)
+
+
+        self.assertEqual(302, resp.status_code)      
+        self.assertEqual(resp['Location'], 'http://testserver/questionnaire/qs/1/2/')
+        
+        self.assertEqual(QuestionAnswer.objects.get(pk=1).answer, 'charfield')
+        self.assertEqual(QuestionAnswer.objects.get(pk=4).answer, 'b')
+        
+        
+        self.assertNotEqual(QuestionAnswer.objects.get(pk=4).answer, QuestionAnswer.objects.get(pk=1).answer)
+        
+        
+        self.assertEqual(AnswerSet.objects.get(pk=1).user, User.objects.get(pk=1))
         
     def test_handle_next_questiongroup_form_post_failure(self):
         
@@ -231,6 +240,7 @@ class QuestionnaireViewTests(TestCase):
         self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
         self.assertTemplateUsed('questionanswer.html') 
         self.assertLess(len(resp.context['context']), 6)
+        self.assertEqual(len(resp.context['context']), 3)
         
         
     def test_display_question_answer_valid_questionnaire_fully_answered(self):
