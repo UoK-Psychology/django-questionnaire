@@ -78,7 +78,7 @@ class QuestionnaireViewTests(TestCase):
         
         self.client.login(username='user', password='password')
         resp = self.client.get('/questionnaire/qs/1')
-        self.assertEqual(resp.status_code, 302)        
+        self.assertEqual(resp.status_code, 301)        
         self.assertTemplateUsed('questionform.html') 
 
         
