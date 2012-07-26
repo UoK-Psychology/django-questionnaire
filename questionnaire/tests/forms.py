@@ -33,6 +33,7 @@ class FormsTestCase(TestCase):
         '''
             If we pass this function anything other than a question object it should raise a TypeError
         '''
+        
         self.assert_(False, 'Not yet implemented')
         
     def test_generate_charfield(self):
@@ -97,7 +98,7 @@ class FormsTestCase(TestCase):
         
 class FormsTestCase_WithFixture(TestCase):
     
-    fixtures = ['needs a fixture']
+    fixtures = ['test_questionnaire_fixtures.json']
     
     def test_make_question_group_form(self):
         '''
@@ -106,5 +107,6 @@ class FormsTestCase_WithFixture(TestCase):
             be done to ensure that the correct fields have been generated, eg does the first name field have 
             the correct lablel and is its field properly mapped according to its questiontype?
         '''
+        
         self.assert_(False, 'Not yet implemented')
         
