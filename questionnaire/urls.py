@@ -1,5 +1,4 @@
-from django.conf.urls import *
-from views import handle_next_questiongroup_form,finish,index
+from django.conf.urls import url, patterns
 from django.views.generic.simple import direct_to_template
 
 
