@@ -4,8 +4,8 @@ Created on 26 Jul 2012
 @author: jjm20
 '''
 from django.test import TestCase
-from questionnaire.forms import generate_charfield, generate_textfield, generate_boolean_field, generate_select_dropdown_field, generate_radioselect_field, generate_multiplechoice_field
-
+from questionnaire.forms import get_choices, generate_charfield, generate_textfield, generate_boolean_field, generate_select_dropdown_field, generate_radioselect_field, generate_multiplechoice_field
+from questionnaire.models import Question, Questionnaire
 from django.forms import Textarea, TextInput, BooleanField, ChoiceField, RadioSelect,CheckboxSelectMultiple
 from django.forms.fields import  MultipleChoiceField
 class FormsTestCase(TestCase):
@@ -20,21 +20,29 @@ class FormsTestCase(TestCase):
             1. A list of tuples (option text, option text)
         '''
         
-        self.assert_(False, 'Not yet implemented')
+        tuple_choices = [(u'Radio 1',u'Radio 1'), (u'Radio 2',u'Radio 2'), (u'Radio 3',u'Radio 3')]
+        choices_question = Question.objects.get(pk=4)
+        get_choices_test = get_choices(choices_question)
+        self.assert_(get_choices_test, tuple_choices)
         
     def test_get_choices_question_without_options(self):
         '''
             If we pass this function a question object that had no options defined we should get back
             None
         '''
-        self.assert_(False, 'Not yet implemented')
+        choices_question = Question.objects.create(label='test', field_type='select_dropdown_field', selectoptions=None)
+        get_choices_test = get_choices(choices_question)
+        self.assert_(get_choices_test, ValueError)
+        self.assert_(get_choices_test, TypeError)
         
     def test_get_choices_not_a_question(self):
         '''
             If we pass this function anything other than a question object it should raise a TypeError
         '''
-        
-        self.assert_(False, 'Not yet implemented')
+        choices_question = Questionnaire.objects.get(pk=1)
+        get_choices_test = get_choices(choices_question)
+        self.assert_(get_choices_test, ValueError)
+        self.assert_(get_choices_test, TypeError)
         
     def test_generate_charfield(self):
         '''
