@@ -1,0 +1,95 @@
+'''
+Created on 26 Jul 2012
+
+@author: jjm20
+'''
+from django.test import TestCase
+
+
+class FormsTestCase(TestCase):
+    
+    
+    
+    
+    def test_get_choices_question_with_options(self):
+        '''
+            Assuming that we pass this function a question object that has options defined
+            we should get back:
+            1. A list of tuples (option text, option text)
+        '''
+        self.assert_(False, 'Not yet implemented')
+        
+    def test_get_choices_question_without_options(self):
+        '''
+            If we pass this function a question object that had no options defined we should get back
+            None
+        '''
+        self.assert_(False, 'Not yet implemented')
+        
+    def test_get_choices_not_a_question(self):
+        '''
+            If we pass this function anything other than a question object it should raise a TypeError
+        '''
+        self.assert_(False, 'Not yet implemented')
+        
+    def test_generate_charfield(self):
+        '''
+            This should return us a Charfield with a max length of 100, and a TextInput widget
+        '''
+        self.assert_(False, 'Not yet implemented')
+        
+    def test_generate_textfield(self):
+        '''
+            This should return us a Charfield without a max length specified, and using a TextArea widget
+        '''
+        self.assert_(False, 'Not yet implemented')
+        
+    def test_generate_boolean_field(self):
+        '''
+            This should return a BooleanField object defaulting to false
+        '''
+        self.assert_(False, 'Not yet implemented')
+        
+    def test_generate_select_dropdown_field(self):
+        '''
+            This should return a Charfield with the choices attribute set to an empty list (to be populated later)
+        '''
+        self.assert_(False, 'Not yet implemented')
+        
+    def test_generate_radioselect_field(self):
+        '''
+            This should return a ChoiceField with a RadioSelect widget and the choices attribute set to an empty list
+        '''
+        self.assert_(False, 'Not yet implemented')
+        
+    def test_generate_multiplechoice_field(self):
+        '''
+            This should return a MultipleChoiceField with the choices attribute set to an empty list and a CheckboxSelectMultiple widget
+        '''
+        self.assert_(False, 'Not yet implemented')
+     
+    def test_FIELD_TYPES_dict(self):   
+        '''
+            charfield should map to ``generate_charfield``
+            textfield should map to ``generate_textfield``
+            booleanfield should map to ``generate_boolean_field``,
+            select_dropdown_fieldshould map to ``generate_select_dropdown_field``,
+            radioselectfield should map to ``generate_radioselect_field``,
+            multiplechoicefield should map to ``generate_multiplechoice_field``,
+        '''
+        self.assert_(False, 'Not yet implemented')
+        
+        
+class FormsTestCase_WithFixture(TestCase):
+    
+    fixtures = ['needs a fixture']
+    
+    def test_make_question_group_form(self):
+        '''
+            The fixture shoudl define a questiongroup that has one of each of the question types
+            This function should return a BaseForm object and interoggation of its fields should
+            be done to ensure that the correct fields have been generated, eg does the first name field have 
+            the correct lablel and is its field properly mapped according to its questiontype?
+        '''
+        self.assert_(False, 'Not yet implemented')
+        
