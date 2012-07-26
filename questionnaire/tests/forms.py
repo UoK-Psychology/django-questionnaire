@@ -4,11 +4,13 @@ Created on 26 Jul 2012
 @author: jjm20
 '''
 from django.test import TestCase
+from questionnaire.forms import generate_charfield, generate_textfield, generate_boolean_field, generate_select_dropdown_field, generate_radioselect_field, generate_multiplechoice_field
 
-
+from django.forms import Textarea, TextInput, BooleanField, ChoiceField, RadioSelect,CheckboxSelectMultiple
+from django.forms.fields import  MultipleChoiceField
 class FormsTestCase(TestCase):
     
-    
+    fixtures = ['test_questionnaire_fixtures.json']
     
     
     def test_get_choices_question_with_options(self):
@@ -17,6 +19,7 @@ class FormsTestCase(TestCase):
             we should get back:
             1. A list of tuples (option text, option text)
         '''
+        
         self.assert_(False, 'Not yet implemented')
         
     def test_get_choices_question_without_options(self):
@@ -36,37 +39,48 @@ class FormsTestCase(TestCase):
         '''
             This should return us a Charfield with a max length of 100, and a TextInput widget
         '''
-        self.assert_(False, 'Not yet implemented')
+        self.assertEqual(generate_charfield().max_length, 100, 'max length return should be 100')
+
+        self.assertIsInstance(generate_charfield().widget, TextInput)
         
     def test_generate_textfield(self):
         '''
             This should return us a Charfield without a max length specified, and using a TextArea widget
         '''
-        self.assert_(False, 'Not yet implemented')
+        self.assertEqual(generate_textfield().max_length, None, 'max length should be Not Set')        
+        self.assertIsInstance(generate_textfield().widget, Textarea)
+        
         
     def test_generate_boolean_field(self):
         '''
             This should return a BooleanField object defaulting to false
         '''
-        self.assert_(False, 'Not yet implemented')
+        self.assertIsInstance(generate_boolean_field(), BooleanField, 'The return class should be boolean field')
+        self.assertEqual(generate_boolean_field().initial, False, 'Default value for booleanField is false')
+        
         
     def test_generate_select_dropdown_field(self):
         '''
             This should return a Charfield with the choices attribute set to an empty list (to be populated later)
         '''
-        self.assert_(False, 'Not yet implemented')
+        self.assertIsInstance(generate_select_dropdown_field(), ChoiceField )
+        self.assertEqual(generate_select_dropdown_field().choices, [])
+
         
     def test_generate_radioselect_field(self):
         '''
             This should return a ChoiceField with a RadioSelect widget and the choices attribute set to an empty list
         '''
-        self.assert_(False, 'Not yet implemented')
+        self.assertIsInstance(generate_radioselect_field().widget, RadioSelect )
+        self.assertEqual(generate_radioselect_field().choices, [])
         
     def test_generate_multiplechoice_field(self):
         '''
             This should return a MultipleChoiceField with the choices attribute set to an empty list and a CheckboxSelectMultiple widget
         '''
-        self.assert_(False, 'Not yet implemented')
+        self.assertIsInstance(generate_multiplechoice_field().widget, CheckboxSelectMultiple)
+        self.assertEqual(generate_multiplechoice_field().choices, [])
+
      
     def test_FIELD_TYPES_dict(self):   
         '''
@@ -77,7 +91,8 @@ class FormsTestCase(TestCase):
             radioselectfield should map to ``generate_radioselect_field``,
             multiplechoicefield should map to ``generate_multiplechoice_field``,
         '''
-        self.assert_(False, 'Not yet implemented')
+        
+        self.assertEqual('charfield', generate_charfield)
         
         
 class FormsTestCase_WithFixture(TestCase):
