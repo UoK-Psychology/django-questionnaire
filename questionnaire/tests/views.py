@@ -1,18 +1,12 @@
-from questionnaire.views import *
-from questionnaire.models import Question,Questionnaire,QuestionGroup,Question_order, QuestionGroup_order, AnswerSet
+
+from questionnaire.models import Question,Questionnaire,QuestionAnswer, AnswerSet
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.test import Client
 from django.core.urlresolvers import reverse
 
 
-class OtherTests(TestCase):
-    fixtures = ['test_questionnaire_fixtures.json',]
-    
-    def test(self):
-        
-        test_question = Question.objects.get(pk=1)
-        self.assert_(test_question.label == 'test_question_charfield')
+
         
         
 class QuestionnaireViewTests(TestCase):
@@ -47,9 +41,11 @@ class QuestionnaireViewTests(TestCase):
         """
             A get request to this view without a logged in user should redirect to the default login url
         """
-        response = self.client.get('/questionnaire/qs/1/')
+        
+        url = reverse('handle_first_questiongroup_form', kwargs={'questionnaire_id':1})
+        response = self.client.get(url)
         self.assertEquals (302, response.status_code )
-        self.assertEquals (response['Location'], 'http://testserver/accounts/login/?next=/questionnaire/qs/1/' )
+        self.assertEquals (response['Location'], 'http://testserver/accounts/login/?next=%s' % url )
         
     def test_handle_next_questiongroup_form_get_valid_questionnaire_firsttime(self):
         """
