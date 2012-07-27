@@ -128,15 +128,46 @@ class FormsTestCase_WithFixture(TestCase):
         
         test_make_question_group_form_1 = make_question_group_form(questiongroup_1,1)
         test_make_question_group_form_2 = make_question_group_form(questiongroup_2,1)
+         
+        '''
+        Test the method is returning a BaseForm object
+        '''   
+        check_subclass_1 = issubclass(test_make_question_group_form_1, BaseForm)
+        check_subclass_2 = issubclass(test_make_question_group_form_2, BaseForm)
+        self.assertEqual(check_subclass_1, True, 'the method should return as a subclass of BaseForm')
+        self.assertEqual(check_subclass_2, True, 'the method should return as a subclass of BaseForm')
         
-        dictionary_1 = test_make_question_group_form_1.__name__
-        dictionary_2 = test_make_question_group_form_2.__base__
         
+        '''
+        Test the dictionary return by the method to return the correct property for each fields
+        '''
+        dictionary_1 = test_make_question_group_form_1.__dict__['base_fields']
+        dictionary_2 = test_make_question_group_form_2.__dict__['base_fields']
+  
+        self.assertIsInstance(dictionary_1['1'], CharField)
+        self.assertIsInstance(dictionary_1['2'], CharField)
+        self.assertIsInstance(dictionary_1['3'], BooleanField)
+        self.assertIsInstance(dictionary_2['4'], ChoiceField)
+        self.assertIsInstance(dictionary_2['5'], ChoiceField)
+        self.assertIsInstance(dictionary_2['6'], MultipleChoiceField)
         
-        print test_make_question_group_form_1
-        print dictionary_1
-        print dictionary_1['base_fields']
-        print dictionary_2
-        print dictionary_2['base_fields']
+        '''
+        test each questionlabel in the dictionary returned by the method is the same with the label in the database (correct label)
+        '''
+        question_1 = Question.objects.get(pk=1)
+        question_2 = Question.objects.get(pk=2)
+        question_3 = Question.objects.get(pk=3)
+        question_4 = Question.objects.get(pk=4)
+        question_5 = Question.objects.get(pk=5)
+        question_6 = Question.objects.get(pk=6)
+            
+        self.assertEqual(dictionary_1['1'].label, question_1.label)
+        self.assertEqual(dictionary_1['2'].label, question_2.label)
+        self.assertEqual(dictionary_1['3'].label, question_3.label)
+        self.assertEqual(dictionary_2['4'].label, question_4.label)
+        self.assertEqual(dictionary_2['5'].label, question_5.label)
+        self.assertEqual(dictionary_2['6'].label, question_6.label)
+        
+
         
         
