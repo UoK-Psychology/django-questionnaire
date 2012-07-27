@@ -20,10 +20,10 @@ class FormsTestCase(TestCase):
             1. A list of tuples (option text, option text)
         '''
         
-        tuple_choices = [(u'Radio 1',u'Radio 1'), (u'Radio 2',u'Radio 2'), (u'Radio 3',u'Radio 3')]
+        tuple_choices = [(u'Radio 1',u'Radio 1'), (u' Radio 2',u' Radio 2'), (u' Radio 3',u' Radio 3')]
         choices_question = Question.objects.get(pk=4)
         get_choices_test = get_choices(choices_question)
-        self.assert_(get_choices_test, tuple_choices)
+        self.assertEqual(get_choices_test, tuple_choices)
         
     def test_get_choices_question_without_options(self):
         '''
@@ -31,18 +31,14 @@ class FormsTestCase(TestCase):
             None
         '''
         choices_question = Question.objects.create(label='test', field_type='select_dropdown_field', selectoptions=None)
-        get_choices_test = get_choices(choices_question)
-        self.assert_(get_choices_test, ValueError)
-        self.assert_(get_choices_test, TypeError)
+        self.assertRaises(AttributeError, get_choices, choices_question)
         
     def test_get_choices_not_a_question(self):
         '''
             If we pass this function anything other than a question object it should raise a TypeError
         '''
         choices_question = Questionnaire.objects.get(pk=1)
-        get_choices_test = get_choices(choices_question)
-        self.assert_(get_choices_test, ValueError)
-        self.assert_(get_choices_test, TypeError)
+        self.assertRaises(AttributeError, get_choices, choices_question)
         
     def test_generate_charfield(self):
         '''
@@ -131,6 +127,7 @@ class FormsTestCase_WithFixture(TestCase):
         test_make_question_group_form_2 = make_question_group_form(questiongroup_2,1)
         
 
+        
         
         
         
