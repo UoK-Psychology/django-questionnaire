@@ -31,11 +31,14 @@ class FormsTestCase(TestCase):
             None
         '''
         choices_question = Question.objects.create(label='test', field_type='select_dropdown_field', selectoptions=None)
-        self.assertRaises(AttributeError, get_choices, choices_question)
+        get_choices_test = get_choices(choices_question)
+        self.assertEqual(get_choices_test, None)
         
     def test_get_choices_not_a_question(self):
         '''
-            If we pass this function anything other than a question object it should raise a TypeError
+            If we pass this function anything other than a question object it should raise an AttributeError
+            Raising AttributeError is choosen because eventhough the method error type are using TypeError and
+            ValueError, the return value always shows AttributeError
         '''
         choices_question = Questionnaire.objects.get(pk=1)
         self.assertRaises(AttributeError, get_choices, choices_question)
