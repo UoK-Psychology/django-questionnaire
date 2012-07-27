@@ -4,9 +4,9 @@ Created on 26 Jul 2012
 @author: jjm20
 '''
 from django.test import TestCase
-from questionnaire.forms import get_choices, generate_charfield, generate_textfield, generate_boolean_field, generate_select_dropdown_field, generate_radioselect_field, generate_multiplechoice_field, FIELD_TYPES
-from questionnaire.models import Question, Questionnaire
-from django.forms import Textarea, TextInput, BooleanField, ChoiceField, RadioSelect,CheckboxSelectMultiple
+from questionnaire.forms import get_choices, generate_charfield, generate_textfield, generate_boolean_field, generate_select_dropdown_field, generate_radioselect_field, generate_multiplechoice_field, FIELD_TYPES, make_question_group_form
+from questionnaire.models import Question, Questionnaire, QuestionGroup
+from django.forms import Textarea, TextInput, BooleanField, ChoiceField, RadioSelect,CheckboxSelectMultiple, CharField
 from django.forms.fields import  MultipleChoiceField
 class FormsTestCase(TestCase):
     
@@ -48,8 +48,8 @@ class FormsTestCase(TestCase):
         '''
             This should return us a Charfield with a max length of 100, and a TextInput widget
         '''
+        self.assertIsInstance(generate_charfield(), CharField)
         self.assertEqual(generate_charfield().max_length, 100, 'max length return should be 100')
-
         self.assertIsInstance(generate_charfield().widget, TextInput)
         
     def test_generate_textfield(self):
@@ -57,7 +57,9 @@ class FormsTestCase(TestCase):
             This should return us a Charfield without a max length specified, and using a TextArea widget
         '''
         self.assertEqual(generate_textfield().max_length, None, 'max length should be Not Set')        
+        self.assertIsInstance(generate_textfield(), CharField, 'this returns a charfield!')
         self.assertIsInstance(generate_textfield().widget, Textarea)
+        
         
         
     def test_generate_boolean_field(self):
@@ -80,13 +82,15 @@ class FormsTestCase(TestCase):
         '''
             This should return a ChoiceField with a RadioSelect widget and the choices attribute set to an empty list
         '''
-        self.assertIsInstance(generate_radioselect_field().widget, RadioSelect )
+        self.assertIsInstance(generate_radioselect_field(), ChoiceField)
+        self.assertIsInstance(generate_radioselect_field().widget, RadioSelect )        
         self.assertEqual(generate_radioselect_field().choices, [])
         
     def test_generate_multiplechoice_field(self):
         '''
             This should return a MultipleChoiceField with the choices attribute set to an empty list and a CheckboxSelectMultiple widget
         '''
+        self.assertIsInstance(generate_multiplechoice_field(), MultipleChoiceField)
         self.assertIsInstance(generate_multiplechoice_field().widget, CheckboxSelectMultiple)
         self.assertEqual(generate_multiplechoice_field().choices, [])
 
@@ -115,11 +119,21 @@ class FormsTestCase_WithFixture(TestCase):
     
     def test_make_question_group_form(self):
         '''
-            The fixture shoudl define a questiongroup that has one of each of the question types
+            The fixture should define a questiongroup that has one of each of the question types
             This function should return a BaseForm object and interoggation of its fields should
             be done to ensure that the correct fields have been generated, eg does the first name field have 
-            the correct lablel and is its field properly mapped according to its questiontype?
+            the correct label and is its field properly mapped according to its questiontype?
         '''
+        questiongroup_1 = QuestionGroup.objects.get(pk=1)
+        questiongroup_2 = QuestionGroup.objects.get(pk=2)
+        
+        test_make_question_group_form_1 = make_question_group_form(questiongroup_1,1)
+        test_make_question_group_form_2 = make_question_group_form(questiongroup_2,1)
+        
+
+        
+        
+        
         
         self.assert_(False, 'Not yet implemented')
         
