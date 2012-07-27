@@ -6,7 +6,7 @@ Created on 26 Jul 2012
 from django.test import TestCase
 from questionnaire.forms import get_choices, generate_charfield, generate_textfield, generate_boolean_field, generate_select_dropdown_field, generate_radioselect_field, generate_multiplechoice_field, FIELD_TYPES, make_question_group_form
 from questionnaire.models import Question, Questionnaire, QuestionGroup
-from django.forms import Textarea, TextInput, BooleanField, ChoiceField, RadioSelect,CheckboxSelectMultiple, CharField
+from django.forms import Textarea, TextInput, BooleanField, ChoiceField, RadioSelect,CheckboxSelectMultiple, CharField, BaseForm
 from django.forms.fields import  MultipleChoiceField
 class FormsTestCase(TestCase):
     
@@ -126,11 +126,14 @@ class FormsTestCase_WithFixture(TestCase):
         test_make_question_group_form_1 = make_question_group_form(questiongroup_1,1)
         test_make_question_group_form_2 = make_question_group_form(questiongroup_2,1)
         
-
+        dictionary_1 = test_make_question_group_form_1.__name__
+        dictionary_2 = test_make_question_group_form_2.__base__
         
         
+        print test_make_question_group_form_1
+        print dictionary_1
+        print dictionary_1['base_fields']
+        print dictionary_2
+        print dictionary_2['base_fields']
         
-        
-        
-        self.assert_(False, 'Not yet implemented')
         
