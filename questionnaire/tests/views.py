@@ -65,6 +65,11 @@ class QuestionnaireViewTests(TestCase):
         self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
         self.assertTemplateUsed('questionform.html') 
         
+        form = resp.context['form']
+        print form.__dict__
+        
+         
+        
     def test_handle_next_questiongroup_form_get_valid_questionnaire_retry(self):
         """
             A GET request to the ''handle_next_questiongroup_form'' view specifying a valid questionnaire id,
