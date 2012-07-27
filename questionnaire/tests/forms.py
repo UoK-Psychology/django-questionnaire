@@ -4,7 +4,7 @@ Created on 26 Jul 2012
 @author: jjm20
 '''
 from django.test import TestCase
-from questionnaire.forms import get_choices, generate_charfield, generate_textfield, generate_boolean_field, generate_select_dropdown_field, generate_radioselect_field, generate_multiplechoice_field
+from questionnaire.forms import get_choices, generate_charfield, generate_textfield, generate_boolean_field, generate_select_dropdown_field, generate_radioselect_field, generate_multiplechoice_field, FIELD_TYPES
 from questionnaire.models import Question, Questionnaire
 from django.forms import Textarea, TextInput, BooleanField, ChoiceField, RadioSelect,CheckboxSelectMultiple
 from django.forms.fields import  MultipleChoiceField
@@ -100,8 +100,13 @@ class FormsTestCase(TestCase):
             radioselectfield should map to ``generate_radioselect_field``,
             multiplechoicefield should map to ``generate_multiplechoice_field``,
         '''
-        
-        self.assertEqual('charfield', generate_charfield)
+
+        self.assertEqual(FIELD_TYPES['charfield'], generate_charfield)
+        self.assertEqual(FIELD_TYPES['textfield'], generate_textfield)
+        self.assertEqual(FIELD_TYPES['booleanfield'], generate_boolean_field)
+        self.assertEqual(FIELD_TYPES['select_dropdown_field'], generate_select_dropdown_field)
+        self.assertEqual(FIELD_TYPES['radioselectfield'], generate_radioselect_field)
+        self.assertEqual(FIELD_TYPES['multiplechoicefield'], generate_multiplechoice_field)
         
         
 class FormsTestCase_WithFixture(TestCase):
