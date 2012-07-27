@@ -8,6 +8,10 @@ from questionnaire.forms import get_choices, generate_charfield, generate_textfi
 from questionnaire.models import Question, Questionnaire, QuestionGroup
 from django.forms import Textarea, TextInput, BooleanField, ChoiceField, RadioSelect,CheckboxSelectMultiple, CharField, BaseForm
 from django.forms.fields import  MultipleChoiceField
+
+
+
+
 class FormsTestCase(TestCase):
     
     fixtures = ['test_questionnaire_fixtures.json']
@@ -114,8 +118,27 @@ class FormsTestCase(TestCase):
         
 class FormsTestCase_WithFixture(TestCase):
     
-    fixtures = ['test_questionnaire_fixtures.json']
+    fixtures = ['forms_test_fixture.json']
     
+    def assertQuestionType(self, question_type,question):
+            
+        assertion_map = {'charfield':(CharField, TextInput,None), 
+         'textfield': (CharField, Textarea, None), 
+         'booleanfield': (BooleanField, None, None),
+         'select_dropdown_field':(ChoiceField,None, list),
+         'radioselectfield':(ChoiceField,RadioSelect, list),
+         'multiplechoicefield':(MultipleChoiceField,CheckboxSelectMultiple,list)}
+        
+        assertions = assertion_map[question_type]
+        
+        
+        self.assertIsInstance(question , assertions[0])
+        
+        if assertions[1] != None:
+            self.assertIsInstance(question.widget , assertions[1])
+        if assertions[2] != None:
+            self.assertIsInstance(question.choices , assertions[2])
+
     def test_make_question_group_form(self):
         '''
             The fixture should define a questiongroup that has one of each of the question types
@@ -123,50 +146,23 @@ class FormsTestCase_WithFixture(TestCase):
             be done to ensure that the correct fields have been generated, eg does the first name field have 
             the correct label and is its field properly mapped according to its questiontype?
         '''
-        questiongroup_1 = QuestionGroup.objects.get(pk=1)
-        questiongroup_2 = QuestionGroup.objects.get(pk=2)
         
-        test_make_question_group_form_1 = make_question_group_form(questiongroup_1,1)
-        test_make_question_group_form_2 = make_question_group_form(questiongroup_2,1)
-         
-        '''
-        Test the method is returning a BaseForm object
-        '''   
-        check_subclass_1 = issubclass(test_make_question_group_form_1, BaseForm)
-        check_subclass_2 = issubclass(test_make_question_group_form_2, BaseForm)
-        self.assertEqual(check_subclass_1, True, 'the method should return as a subclass of BaseForm')
-        self.assertEqual(check_subclass_2, True, 'the method should return as a subclass of BaseForm')
+
+        test_form = make_question_group_form(QuestionGroup.objects.get(pk=1),1)
         
-        
-        '''
-        Test the dictionary return by the method to return the correct property for each fields
-        '''
-        dictionary_1 = test_make_question_group_form_1.__dict__['base_fields']
-        dictionary_2 = test_make_question_group_form_2.__dict__['base_fields']
-  
-        self.assertIsInstance(dictionary_1['1'], CharField)
-        self.assertIsInstance(dictionary_1['2'], CharField)
-        self.assertIsInstance(dictionary_1['3'], BooleanField)
-        self.assertIsInstance(dictionary_2['4'], ChoiceField)
-        self.assertIsInstance(dictionary_2['5'], ChoiceField)
-        self.assertIsInstance(dictionary_2['6'], MultipleChoiceField)
-        
-        '''
-        test each questionlabel in the dictionary returned by the method is the same with the label in the database (correct label)
-        '''
-        question_1 = Question.objects.get(pk=1)
-        question_2 = Question.objects.get(pk=2)
-        question_3 = Question.objects.get(pk=3)
-        question_4 = Question.objects.get(pk=4)
-        question_5 = Question.objects.get(pk=5)
-        question_6 = Question.objects.get(pk=6)
-            
-        self.assertEqual(dictionary_1['1'].label, question_1.label)
-        self.assertEqual(dictionary_1['2'].label, question_2.label)
-        self.assertEqual(dictionary_1['3'].label, question_3.label)
-        self.assertEqual(dictionary_2['4'].label, question_4.label)
-        self.assertEqual(dictionary_2['5'].label, question_5.label)
-        self.assertEqual(dictionary_2['6'].label, question_6.label)
+        self.assertTrue(issubclass(test_form, BaseForm))
+
+        expected = [    ('question 1','charfield'),
+                        ('question 2','textfield'),
+                        ('question 3','booleanfield'),
+                        ('question 4','select_dropdown_field'),
+                        ('question 5','radioselectfield'),
+                        ('question 6','multiplechoicefield'),]
+       
+        for index in range(len(test_form.base_fields)):
+                
+            self.assertEqual(test_form.base_fields.value_for_index(index).label, expected[index][0])
+            self.assertQuestionType(expected[index][1], test_form.base_fields.value_for_index(index))  
         
 
         
