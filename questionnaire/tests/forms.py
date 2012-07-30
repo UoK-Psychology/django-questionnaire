@@ -150,6 +150,7 @@ class FormsTestCase_WithFixture(TestCase):
 
         test_form = make_question_group_form(QuestionGroup.objects.get(pk=1),1)
         
+        
         self.assertTrue(issubclass(test_form, BaseForm))
 
         expected = [    ('question 1','charfield'),
@@ -162,7 +163,9 @@ class FormsTestCase_WithFixture(TestCase):
         for index in range(len(test_form.base_fields)):
                 
             self.assertEqual(test_form.base_fields.value_for_index(index).label, expected[index][0])
-            self.assertQuestionType(expected[index][1], test_form.base_fields.value_for_index(index))  
+            self.assertQuestionType(expected[index][1], test_form.base_fields.value_for_index(index)) 
+
+            
         
 
         
