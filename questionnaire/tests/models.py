@@ -1,4 +1,6 @@
 from django.test import TestCase
+from django.db import models
+from questionnaire.models import Question, QuestionGroup, Questionnaire, CustomListField
 
 
 class CustomListFieldTests(TestCase):
@@ -54,6 +56,7 @@ class CustomListFieldTests(TestCase):
         self.assert_(False, 'Not yet implemented')
         
 class QuestionTestCase(TestCase):
+    fixtures = ['test_questionnaire_fixtures.json']
     
     def test_all_fields(self):
         '''
@@ -68,22 +71,71 @@ class QuestionTestCase(TestCase):
                 f. multiplechoicefield
             3. selectoptions which is a CustomListField
         '''
-        self.assert_(False, 'Not yet implemented')
-       
+        question_label101 = Question.objects.create(label='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 
+                                                   field_type='charfield', selectoptions=None)
+        self.assertIsInstance(question_label101.label, models.CharField, 'question_label101.label is not an instance of models.CharField')
+        self.assertLessEqual(len(question_label101.label), 100,'label length is greater than 100')
+        self.assertEqual(question_label101.field_type, 'charfield', 'field_type is not charfield')
+        self.assertIsInstance(question_label101.field_type, CustomListField, 'field_type is not an instance of CustomListField')
+        
+        question_textfield = Question.objects.create(label='question_textfield', field_type='charfield', selectoptions=None)
+        self.assertEqual(question_textfield.field_type, 'textfield', 'field_type is not textfield')
+        
+        question_booleanfield = Question.objects.create(label='question_booleanfield', field_type='charfield', selectoptions=None)
+        self.assertEqual(question_booleanfield.field_type, 'boolean', 'field_type is not booleanfield')
+        
+        question_select_dropdown_field = Question.objects.create(label='question_select_dropdown_field', field_type='select_dropdown_field', selectoptions=None)
+        self.assertEqual(question_select_dropdown_field.field_type, 'select_dropdown_field', 'field_type is not select_dropdown_field')
+        
+        question_radioselectfield = Question.objects.create(label='question_radioselectfield', field_type='radioselectfield', selectoptions=None)
+        self.assertEqual(question_radioselectfield.field_type, 'radioselectfield', 'field_type is not radioselectfield')
+        
+        question_multiplechoicefield = Question.objects.create(label='question_multiplechoicefield', field_type='multiplechoicefield', selectoptions=None)
+        self.assertEqual(question_multiplechoicefield.field_type, 'multiplechoicefield', 'field_type is not multiplechoicefield')
+        
     def test_required_fields(self):
         '''
             label and field_type are mandatory, you should not be able to save without these fields
             you should be able to save without selectoptions
         '''
-        self.assert_(False, 'Not yet implemented')
+        question_test = Question.objects.create(label='question_test', field_type=None, selectoptions=None)
+        question_test1 = Question.objects.create(label='question_test1', field_type='charfield', selectoptions=None)
+        
+        self.assertFalse(question_test.save(),"can't be saved without field_type")
+        self.assertTrue(question_test1.save(), 'can be saved')
          
     def test_save(self):
         '''
-            If the field type is not either select_dropdown_field, radioselectfield ormultiplechoicefield
+            If the field type is not either select_dropdown_field, radioselectfield or multiplechoicefield
             then the selectoptions should be set as None prior to saving (even if select options have been set)
         '''
-        self.assert_(False, 'Not yet implemented')
-
+        question_test1 = Question.objects.create(label='question_test1', field_type='textfield', selectoptions='Select 1,Select 2,Select 3')
+        question_test2 = Question.objects.create(label='question_test2', field_type='charfield', selectoptions='Select 1,Select 2,Select 3')
+        question_test3 = Question.objects.create(label='question_test3', field_type='boolean', selectoptions='Select 1,Select 2,Select 3')
+        question_test4 = Question.objects.create(label='question_test4', field_type='select_dropdown_field', selectoptions='Select 1,Select 2,Select 3')
+        question_test5 = Question.objects.create(label='question_test5', field_type='radioselectfield', selectoptions='Select 1,Select 2,Select 3')
+        question_test6 = Question.objects.create(label='question_test6', field_type='multiplechoicefield', selectoptions='Select 1,Select 2,Select 3')
+        '''
+        self.assertTrue(question_test1.save(), 'question_test1 is not saved')
+        self.assertTrue(question_test2.save(), 'question_test2 is not saved')
+        self.assertTrue(question_test3.save(), 'question_test3 is not saved')
+        self.assertTrue(question_test4.save(), 'question_test4 is not saved')
+        self.assertTrue(question_test5.save(), 'question_test5 is not saved')
+        self.assertTrue(question_test6.save(), 'question_test6 is not saved')
+        '''
+        question_test1.save()
+        question_test2.save()
+        question_test3.save()
+        question_test4.save()
+        question_test5.save()
+        question_test6.save()
+        self.assertEqual(question_test1.selectoption, None, 'question_test1.selectoption is not None')
+        self.assertEqual(question_test2.selectoption, None, 'question_test2.selectoption is not None')
+        self.assertEqual(question_test3.selectoption, None, 'question_test3.selectoption is not None')
+        self.assertNotEqual(question_test4.selectoption, None, 'question_test4.selectoption is None')
+        self.assertNotEqual(question_test5.selectoption, None, 'question_test5.selectoption is None')
+        self.assertNotEqual(question_test6.selectoption, None, 'question_test6.selectoption is None')
+        
         
 class QuestionGroupTestCase(TestCase):
     
