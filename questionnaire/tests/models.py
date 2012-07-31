@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.db import models
-from questionnaire.models import Question, QuestionGroup, Questionnaire, CustomListField
+from questionnaire.models import Question, QuestionGroup, Questionnaire, CustomListField, QuestionGroup_order, Question_order
 
 
 class CustomListFieldTests(TestCase):
@@ -129,15 +129,16 @@ class QuestionTestCase(TestCase):
         question_test4.save()
         question_test5.save()
         question_test6.save()
-        self.assertEqual(question_test1.selectoption, None, 'question_test1.selectoption is not None')
-        self.assertEqual(question_test2.selectoption, None, 'question_test2.selectoption is not None')
-        self.assertEqual(question_test3.selectoption, None, 'question_test3.selectoption is not None')
-        self.assertNotEqual(question_test4.selectoption, None, 'question_test4.selectoption is None')
-        self.assertNotEqual(question_test5.selectoption, None, 'question_test5.selectoption is None')
-        self.assertNotEqual(question_test6.selectoption, None, 'question_test6.selectoption is None')
+        self.assertEqual(question_test1.selectoptions, None, 'question_test1.selectoption is not None')
+        self.assertEqual(question_test2.selectoptions, None, 'question_test2.selectoption is not None')
+        self.assertEqual(question_test3.selectoptions, None, 'question_test3.selectoption is not None')
+        self.assertNotEqual(question_test4.selectoptions, None, 'question_test4.selectoption is None')
+        self.assertNotEqual(question_test5.selectoptions, None, 'question_test5.selectoption is None')
+        self.assertNotEqual(question_test6.selectoptions, None, 'question_test6.selectoption is None')
         
         
 class QuestionGroupTestCase(TestCase):
+    fixtures = ['test_questionnaire_fixtures_formodels.json']
     
     def test_fields_all_fields(self):
         '''
@@ -145,20 +146,35 @@ class QuestionGroupTestCase(TestCase):
             1. name - which is a charfield, has a max length of 255 and should be unique and *required*
             2. questions ManyToMay field related to Question through question_order
         '''
-        self.assert_(False, 'Not yet implemented')
+        question_group_test = QuestionGroup.objects.get(pk=1)
+        question_group_test1 = QuestionGroup.objects.create()
+        question_group_test1.name = 'questiongroup_test_group_2'
+        self.assertRaises(QuestionGroup, question_group_test1)
+        self.assertIsInstance(question_group_test.name, models.CharField, 'question_group_test.name is not an instance of models.CharField')
+        self.assertLessEqual(len(question_group_test.name), 255,'name length is greater than 255')
+        
         
     def test_required_fields(self):
         '''
             Name is required so you should not be able to save the object without it
         '''
-        self.assert_(False, 'Not yet implemented')
+        question_group_test2 = QuestionGroup.objects.create()
+        self.assertRaises(QuestionGroup, question_group_test2.save())
         
     def test_get_ordered_questions(self):
         '''
             This function should give you a list of Question objects, this list should be based upon the order_info
             provided by the through relationship with Question_order
         '''
-        self.assert_(False, 'Not yet implemented')
+        question_group_test = QuestionGroup.objects.get(pk=1)
+        questions = question_group_test.get_ordered_questions()
+        question_order = Question_order.objects.get(pk=1)
+        print questions[0]
+        print questions[0].label
+        
+        self.assertEqual(questions[0].label, question_order.question.label)
+        #(question_order[1],'Question:question_test_textfield FieldType:textfield Selectoptions:None')
+        #self.assertEqual(question_order, '<Question: Question:question_test_charfield FieldType:charfield Selectoptions:None>, <Question: Question:question_test_textfield FieldType:textfield Selectoptions:None>, <Question: Question:question_test_booleanfield FieldType:booleanfield Selectoptions:None>')
         
     
         
