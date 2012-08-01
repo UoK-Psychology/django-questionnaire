@@ -115,14 +115,6 @@ class QuestionTestCase(TestCase):
         question_test4 = Question.objects.create(label='question_test4', field_type='select_dropdown_field', selectoptions='Select 1,Select 2,Select 3')
         question_test5 = Question.objects.create(label='question_test5', field_type='radioselectfield', selectoptions='Select 1,Select 2,Select 3')
         question_test6 = Question.objects.create(label='question_test6', field_type='multiplechoicefield', selectoptions='Select 1,Select 2,Select 3')
-        '''
-        self.assertTrue(question_test1.save(), 'question_test1 is not saved')
-        self.assertTrue(question_test2.save(), 'question_test2 is not saved')
-        self.assertTrue(question_test3.save(), 'question_test3 is not saved')
-        self.assertTrue(question_test4.save(), 'question_test4 is not saved')
-        self.assertTrue(question_test5.save(), 'question_test5 is not saved')
-        self.assertTrue(question_test6.save(), 'question_test6 is not saved')
-        '''
         question_test1.save()
         question_test2.save()
         question_test3.save()
@@ -147,20 +139,18 @@ class QuestionGroupTestCase(TestCase):
             2. questions ManyToMay field related to Question through question_order
         '''
         question_group_test = QuestionGroup.objects.get(pk=1)
-        question_group_test1 = QuestionGroup.objects.create()
-        question_group_test1.name = 'questiongroup_test_group_2'
-        self.assertRaises(QuestionGroup, question_group_test1)
         self.assertIsInstance(question_group_test.name, models.CharField, 'question_group_test.name is not an instance of models.CharField')
-        self.assertLessEqual(len(question_group_test.name), 255,'name length is greater than 255')
+        self.assertLessEqual(len(question_group_test.name), 255, 'name length is %s, greater than 255' %(len(question_group_test.name)))
         
         
     def test_required_fields(self):
         '''
             Name is required so you should not be able to save the object without it
         '''
-        question_group_test2 = QuestionGroup.objects.create()
-        self.assertRaises(QuestionGroup, question_group_test2.save())
-        
+        question_group_test1 = QuestionGroup.objects.create()
+        question_group_test1.save()
+        self.assertFalse(question_group_test1.save())
+          
     def test_get_ordered_questions(self):
         '''
             This function should give you a list of Question objects, this list should be based upon the order_info
@@ -168,37 +158,45 @@ class QuestionGroupTestCase(TestCase):
         '''
         question_group_test = QuestionGroup.objects.get(pk=1)
         questions = question_group_test.get_ordered_questions()
-        question_order = Question_order.objects.get(pk=1)
-        print questions[0]
-        print questions[0].label
-        
-        self.assertEqual(questions[0].label, question_order.question.label)
-        #(question_order[1],'Question:question_test_textfield FieldType:textfield Selectoptions:None')
-        #self.assertEqual(question_order, '<Question: Question:question_test_charfield FieldType:charfield Selectoptions:None>, <Question: Question:question_test_textfield FieldType:textfield Selectoptions:None>, <Question: Question:question_test_booleanfield FieldType:booleanfield Selectoptions:None>')
-        
-    
-        
+        question_order1 = Question_order.objects.get(pk=1)
+        question_order2 = Question_order.objects.get(pk=2)
+        question_order3 = Question_order.objects.get(pk=3) 
+        self.assertEqual(questions[0].label, question_order1.question.label)
+        self.assertEqual(questions[1].label, question_order2.question.label)
+        self.assertEqual(questions[2].label, question_order3.question.label)
+       
 class QuestionnaireTestCase(TestCase):
+    fixtures = ['test_questionnaire_fixtures_formodels.json']
+    
     def test_fields_all_fields(self):
         '''
             A Questionaire must have :
             1. name - which is a charfield, has a max length of 255 and should be unique and *required*
             2. questiongroups ManyToMay field related to QuestionGroup through questionGroup_order
         '''
-        self.assert_(False, 'Not yet implemented')
+        questionnaire_test = Questionnaire.objects.get(pk=2)
+        self.assertIsInstance(questionnaire_test.name, models.CharField, 'question_group_test.name is not an instance of models.CharField')
+        self.assertLessEqual(len(questionnaire_test.name), 250, 'name length is %s, greater than 255' %(len(questionnaire_test.name)))
         
     def test_required_fields(self):
         '''
             Name is required so you should not be able to save the object without it
         '''
-        self.assert_(False, 'Not yet implemented')
+        questionnaire_test1 = Questionnaire.objects.create()
+        questionnaire_test1.save()
+        self.assertFalse(questionnaire_test1.save())
         
-    def test_get_ordered_questions(self):
+    def test_get_ordered_question_group(self):
         '''
-            This function should give you a list of QuestionGroub objects, this list should be based upon the order_info
+            This function should give you a list of QuestionGroup objects, this list should be based upon the order_info
             provided by the through relationship with QuestionGroup_order
         '''
-        self.assert_(False, 'Not yet implemented')
+        questionnaire_test = Questionnaire.objects.get(pk=1)
+        question_group = questionnaire_test.get_ordered_groups()
+        question_group1 = QuestionGroup_order.objects.get(pk=1)
+        question_group2 = QuestionGroup_order.objects.get(pk=2) 
+        self.assertEqual(question_group[0].questiongroup.name, question_group1.questiongroup.name)
+        self.assertEqual(question_group[1].questiongroup.name, question_group2.questiongroup.name)
         
 class Questiongroup_OrderTestCase(TestCase):
     

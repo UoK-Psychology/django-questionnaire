@@ -49,7 +49,7 @@
     "model" : "questionnaire.questiongroup",
     "pk" : 2
   },
-  { "fields" : { "name" : "questionnaire_test" },
+  { "fields" : { "name" : "questionnaire_test1" },
     "model" : "questionnaire.questionnaire",
     "pk" : 1
   },
@@ -66,6 +66,24 @@
       },
     "model" : "questionnaire.questiongroup_order",
     "pk" : 2
+  },
+  { "fields" : { "name" : "questionnaire_test2aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" },
+    "model" : "questionnaire.questionnaire",
+    "pk" : 2
+  },
+  { "fields" : { "order_info" : 1,
+        "questiongroup" : 2,
+        "questionnaire" : 2
+      },
+    "model" : "questionnaire.questiongroup_order",
+    "pk" : 3
+  },
+  { "fields" : { "order_info" : 2,
+        "questiongroup" : 1,
+        "questionnaire" : 2
+      },
+    "model" : "questionnaire.questiongroup_order",
+    "pk" : 4
   },
   { "fields" : { "order_info" : 1,
         "question" : 1,
