@@ -18,15 +18,15 @@ class CustomListFieldTests(TestCase):
             and it should be a subclass of TextField
         '''
         string_test = 'A,B,C'
-        New_Custom_List = CustomListField(string_test)
+        new_custom_list = CustomListField(string_test)
         empty_string = ''
         
-        self.assertEqual(New_Custom_List.default, None)
-        self.assertEqual(New_Custom_List.null, True)
-        self.assertEqual(New_Custom_List.blank, True)
-        self.assertEqual(New_Custom_List.token, ',')
-        self.assertNotEqual(New_Custom_List.help_text, empty_string)
-        self.assertTrue(isinstance(New_Custom_List, models.TextField), 'CustomListField is an instance of TextField')
+        self.assertEqual(new_custom_list.default, None)
+        self.assertEqual(new_custom_list.null, True)
+        self.assertEqual(new_custom_list.blank, True)
+        self.assertEqual(new_custom_list.token, ',')
+        self.assertNotEqual(new_custom_list.help_text, empty_string)
+        self.assertTrue(isinstance(new_custom_list, models.TextField), 'CustomListField is an instance of TextField')
         
 
 
@@ -38,9 +38,9 @@ class CustomListFieldTests(TestCase):
         '''
         string = 'A,B,C'
         expected_list = ['A', 'B', 'C']
-        New_Custom_List = CustomListField(string).to_python(string)
-        self.assertEqual(New_Custom_List, expected_list, 'The new custom list will return list as expected')
-        self.assertEqual(type(New_Custom_List), list, 'The string with delimiter returns object type list')
+        new_custom_list = CustomListField(string).to_python(string)
+        self.assertEqual(new_custom_list, expected_list, 'The new custom list will return list as expected')
+        self.assertEqual(type(new_custom_list), list, 'The string with delimiter returns object type list')
         
         
         
@@ -57,9 +57,9 @@ class CustomListFieldTests(TestCase):
         '''
         string = ''
         #expected_list = []
-        New_Custom_List = CustomListField(string).to_python(string)
-        #self.assertEqual(New_Custom_List, expected_list, 'The new custom list will return empty list as expected')
-        self.assertEqual(New_Custom_List, None, 'Empty list will return None, instead of Error')
+        new_custom_list = CustomListField(string).to_python(string)
+        #self.assertEqual(new_custom_list, expected_list, 'The new custom list will return empty list as expected')
+        self.assertEqual(new_custom_list, None, 'Empty list will return None, instead of Error')
 
         
     def test_db_prep_value_default(self):
@@ -68,9 +68,9 @@ class CustomListFieldTests(TestCase):
         '''
         string = 'A,B,C'
         expected_list = ['A', 'B', 'C']
-        New_Custom_List = CustomListField(string)
+        new_custom_list = CustomListField(string)
 
-        get_db_prep_value = New_Custom_List.get_db_prep_value(expected_list, expected_list)
+        get_db_prep_value = new_custom_list.get_db_prep_value(expected_list, expected_list)
         self.assertEqual(get_db_prep_value, string)
         
     
@@ -87,8 +87,8 @@ class CustomListFieldTests(TestCase):
         '''
         string = 'A,B,C'
         expected_list = ['A', 'B', 'C']
-        New_Custom_List = CustomListField(string)
-        value_to_string = New_Custom_List.value_to_string(New_Custom_List)
+        new_custom_list = CustomListField(string)
+        value_to_string = new_custom_list.value_to_string(new_custom_list)
         print value_to_string
         
 class QuestionTestCase(TestCase):
@@ -107,9 +107,12 @@ class QuestionTestCase(TestCase):
                 f. multiplechoicefield
             3. selectoptions which is a CustomListField
         '''
+        
+
+        
         question_label101 = Question.objects.create(label='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 
                                                    field_type='charfield', selectoptions=None)
-        self.assertIsInstance(question_label101.label, models.CharField, 'question_label101.label is not an instance of models.CharField')
+        self.assertIsInstance(question_label101, CharField)
         self.assertLessEqual(len(question_label101.label), 100,'label length is greater than 100')
         self.assertEqual(question_label101.field_type, 'charfield', 'field_type is not charfield')
         self.assertIsInstance(question_label101.field_type, CustomListField, 'field_type is not an instance of CustomListField')
@@ -184,7 +187,6 @@ class QuestionGroupTestCase(TestCase):
             Name is required so you should not be able to save the object without it
         '''
         question_group_test1 = QuestionGroup.objects.create()
-        question_group_test1.save()
         self.assertFalse(question_group_test1.save())
           
     def test_get_ordered_questions(self):
@@ -219,7 +221,6 @@ class QuestionnaireTestCase(TestCase):
             Name is required so you should not be able to save the object without it
         '''
         questionnaire_test1 = Questionnaire.objects.create()
-        questionnaire_test1.save()
         self.assertFalse(questionnaire_test1.save())
         
     def test_get_ordered_question_group(self):
@@ -249,7 +250,8 @@ class Questiongroup_OrderTestCase(TestCase):
         '''
             You shouldn't be able to make a QuestionGroup_order without any of the fields
         '''
-        self.assert_(False, 'Not yet implemented')
+        QuestionGroup_order_test = QuestionGroup_order.objects.create()
+        self.assertFalse(QuestionGroup_order_test.save())
         
     
         
@@ -268,7 +270,8 @@ class Question_OrderTestCase(TestCase):
         '''
             You shouldn't be able to make a QuestionGroup_order without any of the fields
         '''
-        self.assert_(False, 'Not yet implemented')
+        Question_order_test = QuestionGroup_order.objects.create()
+        self.assertFalse(Question_order_test.save())
         
     
         
