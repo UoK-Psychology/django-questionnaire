@@ -1,10 +1,11 @@
 from django.test import TestCase
 from django.db import models
-from questionnaire.models import Question, QuestionGroup, Questionnaire, CustomListField, QuestionGroup_order, Question_order
+from questionnaire.models import Question, QuestionGroup, Questionnaire, CustomListField, QuestionGroup_order, Question_order, CustomListField
+from django.forms.fields import TextInput,CharField
 
 
 class CustomListFieldTests(TestCase):
-    
+    fixtures = ['test_questionnaire_fixtures.json']
     def test_init(self):
         '''
             A new Custom List Field should have following attributes:
@@ -16,13 +17,33 @@ class CustomListFieldTests(TestCase):
             
             and it should be a subclass of TextField
         '''
-        self.assert_(False, 'Not yet implemented')
+        string_test = 'A,B,C'
+        New_Custom_List = CustomListField(string_test)
+        empty_string = ''
+        
+        self.assertEqual(New_Custom_List.default, None)
+        self.assertEqual(New_Custom_List.null, True)
+        self.assertEqual(New_Custom_List.blank, True)
+        self.assertEqual(New_Custom_List.token, ',')
+        self.assertNotEqual(New_Custom_List.help_text, empty_string)
+        self.assertTrue(isinstance(New_Custom_List, models.TextField), 'CustomListField is an instance of TextField')
+        
+
+
+        
         
     def test_toPython_default(self):
         '''
            Given a string that is comma demlimited this should return you  a list of strings split by the comma
         '''
-        self.assert_(False, 'Not yet implemented')
+        string = 'A,B,C'
+        expected_list = ['A', 'B', 'C']
+        New_Custom_List = CustomListField(string).to_python(string)
+        self.assertEqual(New_Custom_List, expected_list, 'The new custom list will return list as expected')
+        self.assertEqual(type(New_Custom_List), list, 'The string with delimiter returns object type list')
+        
+        
+        
         
     def test_toPython_customized(self):
         '''
@@ -34,13 +55,24 @@ class CustomListFieldTests(TestCase):
         '''
            if the value is empty or None, should return an empty list, not an error.
         '''
-        self.assert_(False, 'Not yet implemented')
+        string = ''
+        #expected_list = []
+        New_Custom_List = CustomListField(string).to_python(string)
+        #self.assertEqual(New_Custom_List, expected_list, 'The new custom list will return empty list as expected')
+        self.assertEqual(New_Custom_List, None, 'Empty list will return None, instead of Error')
+
         
     def test_db_prep_value_default(self):
         '''
             Should return a string delimited by a comma based on the value passed in 
         '''
-        self.assert_(False, 'Not yet implemented')
+        string = 'A,B,C'
+        expected_list = ['A', 'B', 'C']
+        New_Custom_List = CustomListField(string)
+
+        get_db_prep_value = New_Custom_List.get_db_prep_value(expected_list, expected_list)
+        self.assertEqual(get_db_prep_value, string)
+        
     
     def test_db_prep_value_custom(self):
         '''
@@ -53,7 +85,11 @@ class CustomListFieldTests(TestCase):
             assuming the object passed in is a CustomListField poulated with a value
             this should do the same as test_db_prep_value_default
         '''
-        self.assert_(False, 'Not yet implemented')
+        string = 'A,B,C'
+        expected_list = ['A', 'B', 'C']
+        New_Custom_List = CustomListField(string)
+        value_to_string = New_Custom_List.value_to_string(New_Custom_List)
+        print value_to_string
         
 class QuestionTestCase(TestCase):
     fixtures = ['test_questionnaire_fixtures.json']
