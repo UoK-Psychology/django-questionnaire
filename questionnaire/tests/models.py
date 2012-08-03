@@ -1,7 +1,8 @@
 from django.test import TestCase
 from django.db import models
-from questionnaire.models import Question, QuestionGroup, Questionnaire, CustomListField, QuestionGroup_order, Question_order, CustomListField
-from django.forms.fields import TextInput,CharField
+from questionnaire.models import Question, QuestionGroup, Questionnaire, CustomListField, QuestionGroup_order, Question_order, CustomListField, FIELD_TYPE_CHOICES
+from django.db.models.fields import CharField
+
 
 
 class CustomListFieldTests(TestCase):
@@ -92,7 +93,7 @@ class CustomListFieldTests(TestCase):
         print value_to_string
         
 class QuestionTestCase(TestCase):
-    fixtures = ['test_questionnaire_fixtures.json']
+    
     
     def test_all_fields(self):
         '''
@@ -108,35 +109,20 @@ class QuestionTestCase(TestCase):
             3. selectoptions which is a CustomListField
         '''
         
-
+        question_test = Question._meta
         
-        question_label101 = Question.objects.create(label='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 
-                                                   field_type='charfield', selectoptions=None)
-        self.assertIsInstance(question_label101, CharField)
-        self.assertLessEqual(len(question_label101.label), 100,'label length is greater than 100')
-        self.assertEqual(question_label101.field_type, 'charfield', 'field_type is not charfield')
-        self.assertIsInstance(question_label101.field_type, CustomListField, 'field_type is not an instance of CustomListField')
+        self.assertEqual(question_test.get_field('label').max_length, 255, 'length of Charfield should be 255')
+        self.assertIsInstance(question_test.get_field('label'), CharField)
+        self.assertEqual(question_test.get_field('field_type').choices, FIELD_TYPE_CHOICES)
+        self.assertIsInstance(question_test.get_field('selectoptions'), CustomListField)
         
-        question_textfield = Question.objects.create(label='question_textfield', field_type='charfield', selectoptions=None)
-        self.assertEqual(question_textfield.field_type, 'textfield', 'field_type is not textfield')
-        
-        question_booleanfield = Question.objects.create(label='question_booleanfield', field_type='charfield', selectoptions=None)
-        self.assertEqual(question_booleanfield.field_type, 'boolean', 'field_type is not booleanfield')
-        
-        question_select_dropdown_field = Question.objects.create(label='question_select_dropdown_field', field_type='select_dropdown_field', selectoptions=None)
-        self.assertEqual(question_select_dropdown_field.field_type, 'select_dropdown_field', 'field_type is not select_dropdown_field')
-        
-        question_radioselectfield = Question.objects.create(label='question_radioselectfield', field_type='radioselectfield', selectoptions=None)
-        self.assertEqual(question_radioselectfield.field_type, 'radioselectfield', 'field_type is not radioselectfield')
-        
-        question_multiplechoicefield = Question.objects.create(label='question_multiplechoicefield', field_type='multiplechoicefield', selectoptions=None)
-        self.assertEqual(question_multiplechoicefield.field_type, 'multiplechoicefield', 'field_type is not multiplechoicefield')
         
     def test_required_fields(self):
         '''
             label and field_type are mandatory, you should not be able to save without these fields
             you should be able to save without selectoptions
         '''
+        
         question_test = Question.objects.create(label='question_test', field_type=None, selectoptions=None)
         question_test1 = Question.objects.create(label='question_test1', field_type='charfield', selectoptions=None)
         
@@ -177,9 +163,15 @@ class QuestionGroupTestCase(TestCase):
             1. name - which is a charfield, has a max length of 255 and should be unique and *required*
             2. questions ManyToMay field related to Question through question_order
         '''
-        question_group_test = QuestionGroup.objects.get(pk=1)
-        self.assertIsInstance(question_group_test.name, models.CharField, 'question_group_test.name is not an instance of models.CharField')
-        self.assertLessEqual(len(question_group_test.name), 255, 'name length is %s, greater than 255' %(len(question_group_test.name)))
+        questiongroup_test = QuestionGroup._meta
+        self.assertEqual(questiongroup_test.get_field('name').max_length , 255)
+        self.assertIsInstance(questiongroup_test.get_field('name'), CharField)
+        
+        a = questiongroup_test.get_field('questions')    
+        print a  
+        print a.m2m_db_table()
+        
+
         
         
     def test_required_fields(self):
@@ -212,10 +204,12 @@ class QuestionnaireTestCase(TestCase):
             1. name - which is a charfield, has a max length of 255 and should be unique and *required*
             2. questiongroups ManyToMay field related to QuestionGroup through questionGroup_order
         '''
-        questionnaire_test = Questionnaire.objects.get(pk=2)
-        self.assertIsInstance(questionnaire_test.name, models.CharField, 'question_group_test.name is not an instance of models.CharField')
-        self.assertLessEqual(len(questionnaire_test.name), 250, 'name length is %s, greater than 255' %(len(questionnaire_test.name)))
         
+        questionnaire_test = Questionnaire._meta
+        self.assertEqual(questionnaire_test.get_field('name').max_length, 255)
+        self.assertIsInstance(questionnaire_test.get_field('name'), CharField)
+        
+         
     def test_required_fields(self):
         '''
             Name is required so you should not be able to save the object without it
@@ -244,7 +238,11 @@ class Questiongroup_OrderTestCase(TestCase):
             questionnaire = ForeignKey relationship with Questionnaire
             order_info = IntegerField
         '''
-        self.assert_(False, 'Not yet implemented')
+        questiongroup_order = QuestionGroup_order._meta
+        questiongroup = questiongroup_order.get_field('questiongroup')
+        print questiongroup
+        print questiongroup.get_all_related_objects()
+        
         
     def test_required_fields(self):
         '''
@@ -264,7 +262,9 @@ class Question_OrderTestCase(TestCase):
             questionnaire = ForeignKey relationship with Questionnaire
             order_info = IntegerField
         '''
-        self.assert_(False, 'Not yet implemented')
+        question_order = Question_order._meta
+        
+        
         
     def test_required_fields(self):
         '''
