@@ -230,6 +230,7 @@ class QuestionnaireTestCase(TestCase):
         self.assertEqual(question_group[1].questiongroup.name, question_group2.questiongroup.name)
         
 class Questiongroup_OrderTestCase(TestCase):
+    fixtures = ['test_questionnaire_fixtures_formodels.json']
     
     def test_fields(self):
         '''
@@ -238,75 +239,80 @@ class Questiongroup_OrderTestCase(TestCase):
             questionnaire = ForeignKey relationship with Questionnaire
             order_info = IntegerField
         '''
-        questiongroup_order = QuestionGroup_order._meta
-        questiongroup = questiongroup_order.get_field('questiongroup')
-        print questiongroup
-        print questiongroup.get_all_related_objects()
-        
+        object_test = QuestionGroup_order.objects.get(pk=1)
+        self.assertIsInstance(object_test.questiongroup, QuestionGroup)
+        self.assertIsInstance(object_test.questionnaire, Questionnaire)
+        self.assertIsInstance(object_test.order_info, int)
         
     def test_required_fields(self):
         '''
             You shouldn't be able to make a QuestionGroup_order without any of the fields
         '''
-        QuestionGroup_order_test = QuestionGroup_order.objects.create()
-        self.assertFalse(QuestionGroup_order_test.save())
+        self.assertFalse(QuestionGroup_order.objects.create(), 'can not be created')
         
-    
-        
+
 class Question_OrderTestCase(TestCase):
+    fixtures = ['test_questionnaire_fixtures_formodels.json']
     
     def test_fields(self):
         '''
             Question_order should have the following fields (all of which are required):
             question = ForeignKey relationship with Question
-            questionnaire = ForeignKey relationship with Questionnaire
+            questiongroup = ForeignKey relationship with QuestionGroup
             order_info = IntegerField
         '''
-        question_order = Question_order._meta
-        
-        
+        object_test = Question_order.objects.get(pk=1)
+        self.assertIsInstance(object_test.question, Question)
+        self.assertIsInstance(object_test.questiongroup, QuestionGroup)
+        self.assertIsInstance(object_test.order_info, int)
         
     def test_required_fields(self):
         '''
-            You shouldn't be able to make a QuestionGroup_order without any of the fields
+            You shouldn't be able to make a Question_order without any of the fields
         '''
-        Question_order_test = QuestionGroup_order.objects.create()
-        self.assertFalse(Question_order_test.save())
+        self.assertFalse(Question_order.objects.create(), 'can not be created')
         
     
         
-class AnswerSetTestCase(TestCase):
+class AnswerSetTestCase(TestCase):  
+    fixtures = ['test_questionnaire_fixtures_formodels.json']
     
     def test_fields(self):
         '''
             An AnswerSet should have the following required fields:
-            1. User - FK to django.auth.models.User
+            1. User - FK to django.contrib.auth.models.User
             2. questionniare - FK to Questionnaire
         '''
-        self.assert_(False, 'Not yet implemented')
+        answer_set_test = AnswerSet._meta
+        self.assertEqual(str(answer_set_test.get_field('user')), '<django.db.models.fields.related.ForeignKey: user>',)
+        self.assertEqual(str(answer_set_test.get_field('questionnaire')), '<django.db.models.fields.related.ForeignKey: questionnaire>',)
         
     def test_required_fields(self):
         '''
             An AnswerSet should not be able to be saved without all of its fields present
         '''
-        self.assert_(False, 'Not yet implemented')
+        object_test = AnswerSet.objects.create()
+        self.assertRaisesMessage('IntegrityError', 'answer_set.user_id may not be NULL', object_test.save())
         
     
 class QuestionAnswerTestCase(TestCase):
     
     def test_fields(self):
         '''
-            A Question Answer should ahve the following fields:
+            A Question Answer should have the following fields:
             1. question - FK to a Question
             2. answer - Charfield max length = 255 can be blank
             3. answer_Set - FK to a AnswerSet object
         '''
-        self.assert_(False, 'Not yet implemented')
-        
+        question_answer_test = QuestionAnswer._meta
+        self.assertEqual(str(question_answer_test.get_field('question')),'<django.db.models.fields.related.ForeignKey: question>')
+        self.assertEqual(str(question_answer_test.get_field('answer')),'<django.db.models.fields.CharField: answer>')
+        self.assertEqual(str(question_answer_test.get_field('answer_set')),'<django.db.models.fields.related.ForeignKey: answer_set>')                
+        self.assertEqual(question_answer_test.get_field('answer').max_length,255)
+    
+    
     def test_required_fields(self):
         '''
             You shouldn't be able to save a QuestionAnswer without question or answer_Set
             However you should be able to do without specifying an answer, and this should be saved as an empty string.
         '''
-        
-        
