@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.db import models
-from questionnaire.models import Question, QuestionGroup, Questionnaire, CustomListField, QuestionGroup_order, Question_order, CustomListField, FIELD_TYPE_CHOICES
+from questionnaire.models import QuestionAnswer, AnswerSet, Question, QuestionGroup, Questionnaire, CustomListField, QuestionGroup_order, Question_order, CustomListField
 from django.db.models.fields import CharField
 
 
