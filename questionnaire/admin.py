@@ -44,7 +44,7 @@ class Question_OrderAdmin(admin.ModelAdmin):
 
 
 class AnswerSetAdmin(admin.ModelAdmin):
-    list_display=('user','questionnaire')
+    list_display=('user','questionnaire','questiongroup')
     
 class QuestionAnswerAdmin(admin.ModelAdmin):
     list_display =('question', 'answer', 'answer_set')

@@ -19,7 +19,7 @@ class CustomListField(models.TextField):
         self.token = kwargs.pop('token', ',')
     
         kwargs={'default':None,'null':True,'blank':True,
-                'help_text':'Enter option for select Field Type seperated by comma e.g No ,Yes,Not Applicable ./n TO EDIT EXISTING OPTIONS CLEAR THE OPTIONS AND TYPE AFRESH '}
+                'help_text':'Enter option for select Field Type seperated by comma e.g No ,Yes,Not Applicable . TO EDIT EXISTING OPTIONS CLEAR THE OPTIONS AND TYPE AFRESH '}
         
         super(CustomListField, self).__init__(*args, **kwargs)
 
@@ -133,6 +133,7 @@ class AnswerSet(models.Model):
         db_table ='answer_set'
     user=models.ForeignKey(User)
     questionnaire=models.ForeignKey(Questionnaire)
+    questiongroup=models.ForeignKey(QuestionGroup)
     
     def save(self, *args, **kwargs):                       
         super(AnswerSet, self).save(*args, **kwargs)
@@ -144,6 +145,9 @@ class QuestionAnswer(models.Model):
     '''
     This model is used to store reusable question, answer and answer_set
     '''
+    class Meta():
+        db_table ='questionanswer'
+        
     question = models.ForeignKey(Question)
     answer = models.CharField(max_length=255)
     answer_set = models.ForeignKey(AnswerSet)
@@ -152,4 +156,4 @@ class QuestionAnswer(models.Model):
         super(QuestionAnswer, self).save(*args, **kwargs)  
     
     def __unicode__(self):
-        return 'question:%s answer:%s answer_set:%s' %(str(self.question), str(self.answer), str(self.answer_set))   
+        return 'question:%s answer:%s answer_set:%s' %(str(self.question), str(self.answer), str(self.answer_set))

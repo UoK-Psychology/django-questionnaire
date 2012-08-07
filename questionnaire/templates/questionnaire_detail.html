@@ -1,0 +1,31 @@
+               
+      <title>{{questionnaire.name}} detail  </title>
+	 
+	         {%csrf_token %}
+	    
+            {% if context %}     
+        	        
+        	        <p><h3>Questionnaire: {{questionnaire.name}}  user: {{request.user}}</h3></p>
+        	         
+        	         <ul>	
+        	          <h4>Display Question Answers</h4> 	
+                     {% for group in context %}
+                     
+                       <li> <a href="{% url display_question_answer  questionnaire.id  group.id  %}">Show Answer QuestionGroup : {{group.id }}</a></li>
+                    
+                     {% endfor %}
+                     
+                     <br>
+                     <h4>Edit Question Answers</h4> 
+                     {% for group in context %}
+                     
+                       <li> <a href="{% url edit_question_answer  questionnaire.id  group.id  %}">Edit QuestionGroup : {{group.id }}</a></li>
+                    
+                     {% endfor %}
+                     
+                     
+                 {% else %}
+                      <li>Sorry, no group in this questionnaire.</li>
+                 {% endif %}
+                      </ul>  
+                 

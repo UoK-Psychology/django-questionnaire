@@ -6,11 +6,13 @@ Created on Jun 26, 2012
 '''
 
 from django import forms
-from models import QuestionGroup
+from models import QuestionGroup,QuestionAnswer
 from django.forms.fields import CharField,BooleanField,ChoiceField,MultipleChoiceField
 from django.forms.widgets import RadioSelect ,CheckboxSelectMultiple
 from django.utils.datastructures import SortedDict
-
+from django.db.models import Q
+from django.db.models import Max
+  
 
 
 def get_choices(question):
@@ -22,7 +24,8 @@ def get_choices(question):
         choices= [(x,x) for x in choices_list]
         return choices
     except (ValueError, TypeError) as e:
-        raise ValueError(e.error_messages['invalid_choice'] % {'value': choices_list})
+        raise e(['invalid_choice'] % {'value': choices_list})
+    
 def generate_charfield():
     '''
      @return charfield ,you can change the default attribute
@@ -37,9 +40,9 @@ def generate_textfield():
 
 def generate_boolean_field():
     '''
-     @return Boolean field , with default value of False or True 
+     @return Boolean field   
     '''    
-    return BooleanField(initial= False)
+    return BooleanField()
 
 def generate_select_dropdown_field():
     '''
@@ -53,6 +56,7 @@ def generate_radioselect_field():
     @return radioselect field no default set
     ''' 
     return ChoiceField(widget=RadioSelect,choices=[])
+
 def generate_multiplechoice_field():
     '''
     @return MultipleChoiceField
@@ -87,8 +91,9 @@ def make_question_group_form(questiongroup_id,questionnaire_id):
         if question.question.field_type in ['select_dropdown_field','radioselectfield','multiplechoicefield']:
             field=FIELD_TYPES[question.question.field_type]()
             field.choices=get_choices(question.question)
+            field.label= question.question.label          
             fields[str(question.question.id)]= field
-        else:    
+        else:     
             field = FIELD_TYPES[question.question.field_type]()
             field.label = question.question.label
             fields[str(question.question.id)]= field
@@ -96,5 +101,40 @@ def make_question_group_form(questiongroup_id,questionnaire_id):
     return type('%sForm' % id (questionnaire_id),(forms.BaseForm,),{'base_fields':fields})
 
 
-  
+def  create_question_answer_edit_form(user,this_questionnaire,this_questiongroup):
+    '''
+    create form for editing recent question answer for given user 
+    prepopulate fields with most recent answers for given user and questiongroup
+    field.initial store  most recent answers to prepopulate the form fields .xx 
+    '''  
+    q_list=QuestionAnswer.objects.values('question','answer_set').annotate(Max('id'))
+    answer_max_id_list=q_list.values_list('id__max',flat=True)
+    qs=QuestionAnswer.objects.filter(Q(answer_set__user_id=user,answer_set__questiongroup=this_questiongroup,answer_set__questionnaire=this_questionnaire)).filter(id__in=answer_max_id_list)  
+    questionanswer=[(x.question ,x.answer) for x in qs] 
+
+    fields = SortedDict([])
+    for (question,answer)in questionanswer:
+        
+        if  question.field_type in ['select_dropdown_field','radioselectfield','multiplechoicefield']:
+            field=FIELD_TYPES[question.field_type]()
+            field.label= question.label
+            field.choices=get_choices(question)
             
+            if question.field_type == 'multiplechoicefield':
+                field.initial = [str(x) for x in answer.split(',')]
+            else:
+                field.initial=str(answer)
+                
+            fields[str(question.id)]= field
+        else:
+            field=FIELD_TYPES[question.field_type]()
+            field.label= question.label
+            field.initial = answer
+            fields[str(question.id)]= field
+             
+    return type('editForm',(forms.BaseForm,),{'base_fields':fields})
+        
+
+     
+   
+        
