@@ -169,7 +169,9 @@ class QuestionGroupTestCase(TestCase):
             2. questions ManyToMay field related to Question through question_order
         '''
         questiongroup_test = QuestionGroup._meta
-        #self.assertEqual(questiongroup_test.get_field('name').max_length , 255)
+        
+
+        self.assertEqual(questiongroup_test.get_field('name').max_length , 255)
         self.assertIsInstance(questiongroup_test.get_field('name'), CharField)
         
         QuestionGroup_object = QuestionGroup.objects.get(pk=1)
@@ -206,12 +208,12 @@ class QuestionnaireTestCase(TestCase):
     def test_fields_all_fields(self):
         '''
             A Questionaire must have :
-            1. name - which is a charfield, has a max length of 255 and should be unique and *required*
+            1. name - which is a charfield, has a max length of 250 and should be unique and *required*
             2. questiongroups ManyToMay field related to QuestionGroup through questionGroup_order
         '''
         
         questionnaire_test = Questionnaire._meta
-        #self.assertEqual(questionnaire_test.get_field('name').max_length, 255)
+        self.assertEqual(questionnaire_test.get_field('name').max_length, 250)
         self.assertIsInstance(questionnaire_test.get_field('name'), CharField)        
         Questionnaire_object = Questionnaire.objects.get(pk=1)
         Questionnaire_Through = Questionnaire_object.questiongroup.through.__name__
@@ -315,7 +317,7 @@ class QuestionAnswerTestCase(TestCase):
         question_answer_test = QuestionAnswer._meta
         self.assertEqual(str(question_answer_test.get_field('question')),'<django.db.models.fields.related.ForeignKey: question>')
         self.assertEqual(str(question_answer_test.get_field('answer')),'<django.db.models.fields.CharField: answer>')
-        self.assertEqual(str(question_answer_test.get_field('answer_set')),'<django.db.models.fields.related.ForeignKey: answer_set>')                
+        self.assertEqual(str(question_answer_test.get_field('answer_set')),'<django.db.models.fields.related.ForeignKey: answer_set>')                        
         self.assertEqual(question_answer_test.get_field('answer').max_length,255)
     
     
