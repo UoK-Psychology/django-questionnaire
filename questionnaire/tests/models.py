@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.db import models
 from questionnaire.models import QuestionAnswer, AnswerSet, Question, QuestionGroup, Questionnaire, FIELD_TYPE_CHOICES, QuestionGroup_order, Question_order, CustomListField
 from django.db.models.fields import CharField
+from django.db import IntegrityError
 
 
 
@@ -50,21 +51,19 @@ class CustomListFieldTests(TestCase):
         '''
            If a token is specified e.g. | then a string that is delimited with this is returned a s a list split by it
         '''
-        string = 'A,B,C'
+        string = 'A!B!C'
+        expected_list = ['A', 'B', 'C']
+        new_custom_list = CustomListField(string, token = '!').to_python(string)
+        self.assertEqual(new_custom_list, expected_list)
         
-        new_custom_list = CustomListField(string).token(token = '.' )
-        print new_custom_list
-        
-        self.assert_(False, 'Not yet implemented')
+       
         
     def test_toPython_empy_null_string(self):
         '''
            if the value is empty or None, should return an empty list, not an error.
         '''
-        string = ''
-        #expected_list = []
-        new_custom_list = CustomListField(string).to_python(string)
-        #self.assertEqual(new_custom_list, expected_list, 'The new custom list will return empty list as expected')
+        string = ''        
+        new_custom_list = CustomListField(string).to_python(string)        
         self.assertEqual(new_custom_list, None, 'Empty list will return None, instead of Error')
 
         
@@ -84,7 +83,10 @@ class CustomListFieldTests(TestCase):
         '''
             Should return a string delimited by whatever was specified as the token based on the value passed in 
         '''
-        self.assert_(False, 'Not yet implemented')
+        string = 'A!B!C'
+        value = ['A', 'B', 'C']
+        output = CustomListField(string, token = '!').get_db_prep_value(value)
+        self.assertEqual(string, output)
     
     def test_value_to_string(self):
         '''
@@ -94,8 +96,8 @@ class CustomListFieldTests(TestCase):
         string = 'A,B,C'
         expected_list = ['A', 'B', 'C']
         new_custom_list = CustomListField(string)
-        value_to_string = new_custom_list.value_to_string(new_custom_list)
-        print value_to_string
+        valuetostring = new_custom_list.value_to_string(expected_list)
+        print valuetostring
         
 class QuestionTestCase(TestCase):
     
@@ -301,8 +303,11 @@ class AnswerSetTestCase(TestCase):
         '''
             An AnswerSet should not be able to be saved without all of its fields present
         '''
-        object_test = AnswerSet.objects.create()
-        self.assertRaisesMessage('IntegrityError', 'answer_set.user_id may not be NULL', object_test.save())
+
+        
+        self.assertRaisesMessage(IntegrityError, 'answer_set.user_id may not be NULL', AnswerSet.objects.create)
+        self.assertR
+      
         
     
 class QuestionAnswerTestCase(TestCase):
@@ -326,3 +331,4 @@ class QuestionAnswerTestCase(TestCase):
             You shouldn't be able to save a QuestionAnswer without question or answer_Set
             However you should be able to do without specifying an answer, and this should be saved as an empty string.
         '''
+        self.assertR
