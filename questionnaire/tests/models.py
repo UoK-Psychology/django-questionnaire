@@ -130,11 +130,7 @@ class QuestionTestCase(TestCase):
             you should be able to save without selectoptions
         '''
         
-        question_test = Question.objects.create(label='question_test', field_type=None, selectoptions=None)
-        question_test1 = Question.objects.create(label='question_test1', field_type='charfield', selectoptions=None)
-        
-        self.assertFalse(question_test.save(),"can't be saved without field_type")
-        self.assertTrue(question_test1.save(), 'can be saved')
+        self.assertRaises(AssertionError, Question.objects.create)
          
     def test_save(self):
         '''
@@ -187,8 +183,7 @@ class QuestionGroupTestCase(TestCase):
         '''
             Name is required so you should not be able to save the object without it
         '''
-        question_group_test1 = QuestionGroup.objects.create()
-        self.assertFalse(question_group_test1.save())
+        self.assertRaisesMessage(AssertionError, 'any', QuestionGroup.objects.create)
           
     def test_get_ordered_questions(self):
         '''
@@ -226,8 +221,7 @@ class QuestionnaireTestCase(TestCase):
         '''
             Name is required so you should not be able to save the object without it
         '''
-        questionnaire_test1 = Questionnaire.objects.create()
-        self.assertFalse(questionnaire_test1.save())
+        self.assertRaises(AssertionError, Questionnaire.objects.create)
         
     def test_get_ordered_question_group(self):
         '''
@@ -260,7 +254,7 @@ class Questiongroup_OrderTestCase(TestCase):
         '''
             You shouldn't be able to make a QuestionGroup_order without any of the fields
         '''
-        self.assertFalse(QuestionGroup_order.objects.create(), 'can not be created')
+        self.assertRaises(IntegrityError, QuestionGroup_order.objects.create)
         
 
 class Question_OrderTestCase(TestCase):
@@ -282,7 +276,7 @@ class Question_OrderTestCase(TestCase):
         '''
             You shouldn't be able to make a Question_order without any of the fields
         '''
-        self.assertFalse(Question_order.objects.create(), 'can not be created')
+        self.assertRaises(IntegrityError, Question_order.objects.create)
         
     
         
@@ -305,8 +299,8 @@ class AnswerSetTestCase(TestCase):
         '''
 
         
-        self.assertRaisesMessage(IntegrityError, 'answer_set.user_id may not be NULL', AnswerSet.objects.create)
-        self.assertR
+        self.assertRaises(IntegrityError, AnswerSet.objects.create)
+        
       
         
     
@@ -331,4 +325,4 @@ class QuestionAnswerTestCase(TestCase):
             You shouldn't be able to save a QuestionAnswer without question or answer_Set
             However you should be able to do without specifying an answer, and this should be saved as an empty string.
         '''
-        self.assertR
+        self.assertRaises(IntegrityError, QuestionAnswer.objects.create)
