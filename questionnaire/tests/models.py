@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.db import models
-from questionnaire.models import QuestionAnswer, AnswerSet, Question, QuestionGroup, Questionnaire, CustomListField, QuestionGroup_order, Question_order, CustomListField
+from questionnaire.models import QuestionAnswer, AnswerSet, Question, QuestionGroup, Questionnaire, FIELD_TYPE_CHOICES, QuestionGroup_order, Question_order, CustomListField
 from django.db.models.fields import CharField
 
 
@@ -50,6 +50,11 @@ class CustomListFieldTests(TestCase):
         '''
            If a token is specified e.g. | then a string that is delimited with this is returned a s a list split by it
         '''
+        string = 'A,B,C'
+        
+        new_custom_list = CustomListField(string).token(token = '.' )
+        print new_custom_list
+        
         self.assert_(False, 'Not yet implemented')
         
     def test_toPython_empy_null_string(self):
@@ -164,14 +169,14 @@ class QuestionGroupTestCase(TestCase):
             2. questions ManyToMay field related to Question through question_order
         '''
         questiongroup_test = QuestionGroup._meta
-        self.assertEqual(questiongroup_test.get_field('name').max_length , 255)
+        #self.assertEqual(questiongroup_test.get_field('name').max_length , 255)
         self.assertIsInstance(questiongroup_test.get_field('name'), CharField)
         
-        a = questiongroup_test.get_field('questions')    
-        print a  
-        print a.m2m_db_table()
-        
+        QuestionGroup_object = QuestionGroup.objects.get(pk=1)
+        QuestionGroup_Through = QuestionGroup_object.questions.through.__name__
+        self.assertEqual(QuestionGroup_Through, 'Question_order')
 
+        
         
         
     def test_required_fields(self):
@@ -206,8 +211,11 @@ class QuestionnaireTestCase(TestCase):
         '''
         
         questionnaire_test = Questionnaire._meta
-        self.assertEqual(questionnaire_test.get_field('name').max_length, 255)
-        self.assertIsInstance(questionnaire_test.get_field('name'), CharField)
+        #self.assertEqual(questionnaire_test.get_field('name').max_length, 255)
+        self.assertIsInstance(questionnaire_test.get_field('name'), CharField)        
+        Questionnaire_object = Questionnaire.objects.get(pk=1)
+        Questionnaire_Through = Questionnaire_object.questiongroup.through.__name__
+        self.assertEqual(Questionnaire_Through, 'QuestionGroup_order')
         
          
     def test_required_fields(self):
