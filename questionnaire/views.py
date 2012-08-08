@@ -89,13 +89,14 @@ def display_question_answer(request,questionnaire_id,questiongroup_id):
         
         q_list=QuestionAnswer.objects.values('question','answer_set').annotate(Max('id'))
         answer_max_id_list=q_list.values_list('id__max',flat=True)
+        print answer_max_id_list
         
         orderedgroups = QuestionGroup_order.objects.filter(questionnaire= this_questionnaire).order_by('order_info')    
         groups_list=[(x.questiongroup) for x in orderedgroups]
         
         y=QuestionAnswer.objects.filter(Q(answer_set__user_id=user,answer_set__questiongroup=this_questiongroup,answer_set__questionnaire=this_questionnaire)).filter(id__in=answer_max_id_list)          
         questionanswer=[(x.question.id,x.question.label ,x.answer) for x in y]
-    
+        
         context=questionanswer
         return render_to_response('display_questionanswer.html',{'context':context,'user':user,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
 
@@ -120,23 +121,36 @@ def edit_question_answer(request,questionnaire_id,questiongroup_id):
     groups= list(groups_list) 
 
                 
-    editform= create_question_answer_edit_form(user,this_questionnaire,this_questiongroup) 
-                
+    editForm= create_question_answer_edit_form(user,this_questionnaire,this_questiongroup) 
+    
+             
     if  request.method == "POST":
-        form=editform(request.POST)
+        print "posted"
+        
+        form=editForm(request.POST)
         
         if form.is_valid():
+            print "valid"
             this_answer_set, created = AnswerSet.objects.get_or_create(user=request.user,questionnaire=this_questionnaire,questiongroup=this_questiongroup)
 
             for question, answer in form.cleaned_data.items():
                 if isinstance(answer,list):
                         answer = ', '.join(answer)
+                        print "anwser list"
+                        print answer
                 this_question_answer, create = QuestionAnswer.objects.get_or_create(question= get_object_or_404(Question, pk=question),answer=str(answer),answer_set=this_answer_set)
                             
-            return HttpResponseRedirect(reverse('questionnaire_finish'))
+            return HttpResponseRedirect(reverse('questionnaire_finish'))            
+        else:
+                       
+            print "not valid form"
+            print form
+            return render_to_response('edit_questionanswer_form.html', 
+        {'form': form,'user':user,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
+    
     else :
         return render_to_response('edit_questionanswer_form.html', 
-        {'form': editform,'user':user,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
+                                      {'form': editForm,'user':user,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
 
 
     

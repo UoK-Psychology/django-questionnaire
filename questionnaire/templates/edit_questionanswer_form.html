@@ -22,13 +22,19 @@
                       <li>Sorry, no group in this questionnaire.</li>
                  {% endif %}
                       </ul>  
-        	        
+        	       
                 {% for field in form %}
+                 
                   <div class="fieldWrapper">       
-                  <p>  {{ field.errors }}</p> 
+                  <p style="color: red;"> {{ form.errors }}</p>
+                 
+                     
                   <p>  {{ field.label}}:{{ field }}</p>
                   </div>
                 {% endfor %}
+                
+              
+         
                 <input type="submit" value="Submit Revision" />
                 </form>
       {% else %}

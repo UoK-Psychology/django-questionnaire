@@ -12,6 +12,7 @@ from django.forms.widgets import RadioSelect ,CheckboxSelectMultiple
 from django.utils.datastructures import SortedDict
 from django.db.models import Q
 from django.db.models import Max
+from django.forms.forms import NON_FIELD_ERRORS
   
 
 
@@ -42,7 +43,7 @@ def generate_boolean_field():
     '''
      @return Boolean field   
     '''    
-    return BooleanField()
+    return BooleanField(required=False)
 
 def generate_select_dropdown_field():
     '''
@@ -61,7 +62,7 @@ def generate_multiplechoice_field():
     '''
     @return MultipleChoiceField
     '''
-    return MultipleChoiceField(choices=[], widget=forms.CheckboxSelectMultiple())
+    return MultipleChoiceField(choices=[], widget=forms.CheckboxSelectMultiple(),error_messages={'required': 'Please enter some value '})
 
 
 
