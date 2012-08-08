@@ -16,6 +16,7 @@ from operator import itemgetter
 from itertools import groupby
 from django.db.models import Max
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 import copy
 from copy import deepcopy
 
@@ -24,7 +25,7 @@ from copy import deepcopy
 def index (request):
     return HttpResponseRedirect(reverse('index'))
 
-
+@login_required
 def handle_next_questiongroup_form(request,questionnaire_id,order_info=None):
     questionnaire_id = int(questionnaire_id)
     if order_info==None:
@@ -74,7 +75,7 @@ def finish(request):
     return render_to_response('finish.html')     
       
 
-
+@login_required
 def display_question_answer(request,questionnaire_id,questiongroup_id):
     '''
     display a user's most recent  question and answers for given  questiongroups in a given questionnaire
@@ -100,7 +101,7 @@ def display_question_answer(request,questionnaire_id,questiongroup_id):
         context=questionanswer
         return render_to_response('display_questionanswer.html',{'context':context,'user':user,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
 
-
+@login_required
 def edit_question_answer(request,questionnaire_id,questiongroup_id):
     '''
     edit a user most recent answers for a given questiongroup in a given questionnaire 
@@ -151,7 +152,7 @@ def edit_question_answer(request,questionnaire_id,questiongroup_id):
                                       {'form': editForm,'user':user,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
 
 
-    
+@login_required    
 def all_question_answers_for_questiongroup(request,user_id,questionnaire_id,questiongroup_id):
     
     '''
@@ -182,7 +183,7 @@ def all_question_answers_for_questiongroup(request,user_id,questionnaire_id,ques
         return render_to_response('all_questionanswers.html',{'context':context,'user':user,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
 
 
-
+@login_required
 def questionnaire_detail_list(request,questionnaire_id):
     '''
     show  detail list as links  for all questiongroups in a given questionnaire ordered by order_info

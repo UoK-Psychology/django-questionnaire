@@ -62,7 +62,7 @@ def generate_multiplechoice_field():
     '''
     @return MultipleChoiceField
     '''
-    return MultipleChoiceField(choices=[], widget=forms.CheckboxSelectMultiple(),error_messages={'required': 'Please enter some value '})
+    return MultipleChoiceField(choices=[], widget=forms.CheckboxSelectMultiple(),error_messages={'required': 'This question is required can not be empty select one or more answer '})
 
 
 

@@ -22,19 +22,29 @@
                       <li>Sorry, no group in this questionnaire.</li>
                  {% endif %}
                       </ul>  
-        	       
+        	      
+        	       {% if form.non_field_errors %}
+                    <div class="form_errors">
+                      {% for err in form.non_field_errors %}
+                           <div class="form_error_message">{{ err }}</div>
+                       {% endfor %}
+                       </div>	
+                  {% endif %}
+                  
                 {% for field in form %}
                  
-                  <div class="fieldWrapper">       
-                  <p style="color: red;"> {{ form.errors }}</p>
+                  <div class="fieldWrapper"> 
+                         
+                  <p>  {{ field.label_tag}}:{{ field }}
+                  	
+                        {% for error in field.errors %}
+                  <span class="error_message"><strong> {{ error }}</strong></span> </P>
+                       {% endfor %}
                  
-                     
-                  <p>  {{ field.label}}:{{ field }}</p>
                   </div>
                 {% endfor %}
-                
-              
-         
+             
+             
                 <input type="submit" value="Submit Revision" />
                 </form>
       {% else %}
