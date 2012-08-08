@@ -125,12 +125,11 @@ def edit_question_answer(request,questionnaire_id,questiongroup_id):
     
              
     if  request.method == "POST":
-        print "posted"
         
         form=editForm(request.POST)
         
         if form.is_valid():
-            print "valid"
+           
             this_answer_set, created = AnswerSet.objects.get_or_create(user=request.user,questionnaire=this_questionnaire,questiongroup=this_questiongroup)
 
             for question, answer in form.cleaned_data.items():
@@ -143,8 +142,7 @@ def edit_question_answer(request,questionnaire_id,questiongroup_id):
             return HttpResponseRedirect(reverse('questionnaire_finish'))            
         else:
                        
-            print "not valid form"
-            print form
+       
             return render_to_response('edit_questionanswer_form.html', 
         {'form': form,'user':user,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
     
