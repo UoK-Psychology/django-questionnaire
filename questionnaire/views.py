@@ -6,7 +6,7 @@ Created on Jun 26, 2012
 '''
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
-from models import QuestionGroup_order, Questionnaire,QuestionGroup,AnswerSet,QuestionAnswer,Question,Question_order
+from models import QuestionGroup_order, Questionnaire,QuestionGroup,AnswerSet,QuestionAnswer,Question
 from django.template import  RequestContext
 from django.shortcuts import render_to_response
 from questionnaire.forms import make_question_group_form,create_question_answer_edit_form
@@ -17,8 +17,6 @@ from itertools import groupby
 from django.db.models import Max
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-import copy
-from copy import deepcopy
 
 
 
@@ -90,7 +88,7 @@ def display_question_answer(request,questionnaire_id,questiongroup_id):
         
         q_list=QuestionAnswer.objects.values('question','answer_set').annotate(Max('id'))
         answer_max_id_list=q_list.values_list('id__max',flat=True)
-        print answer_max_id_list
+       
         
         orderedgroups = QuestionGroup_order.objects.filter(questionnaire= this_questionnaire).order_by('order_info')    
         groups_list=[(x.questiongroup) for x in orderedgroups]
@@ -101,45 +99,46 @@ def display_question_answer(request,questionnaire_id,questiongroup_id):
         context=questionanswer
         return render_to_response('display_questionanswer.html',{'context':context,'user':user,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
 
+
+
 @login_required
 def edit_question_answer(request,questionnaire_id,questiongroup_id):
     '''
     edit a user most recent answers for a given questiongroup in a given questionnaire 
     pre-populates form with most recent answers 
-    doest not overwrite questionanswer it create new questionanswer  for  given questiongroup for purpose of queationanswers trail
+    does not overwrite questionanswer it create new questionanswer  for answerset   for purpose of keeping queationanswers trail
      
     '''
-
+    
     user=request.user   
     questionnaire_id=int(questionnaire_id)
     questiongroup_id=int(questiongroup_id)
     this_questionnaire=get_object_or_404(Questionnaire,pk=questionnaire_id)
     this_questiongroup=get_object_or_404(QuestionGroup,pk=questiongroup_id)
-    
-    
+        
     orderedgroups = QuestionGroup_order.objects.filter(questionnaire= this_questionnaire).order_by('order_info')    
     groups_list=[(x.questiongroup.id) for x in orderedgroups]
-    groups= list(groups_list) 
 
-                
     editForm= create_question_answer_edit_form(user,this_questionnaire,this_questiongroup) 
-    
              
     if  request.method == "POST":
         
         form=editForm(request.POST)
         
         if form.is_valid():
-           
+                        
             this_answer_set, created = AnswerSet.objects.get_or_create(user=request.user,questionnaire=this_questionnaire,questiongroup=this_questiongroup)
-
+            
+            
             for question, answer in form.cleaned_data.items():
                 if isinstance(answer,list):
                         answer = ', '.join(answer)
-                        print "anwser list"
-                        print answer
-                this_question_answer, create = QuestionAnswer.objects.get_or_create(question= get_object_or_404(Question, pk=question),answer=str(answer),answer_set=this_answer_set)
-                            
+                        
+
+                this_question_answer= QuestionAnswer(question= get_object_or_404(Question, pk=question),answer=answer,answer_set=this_answer_set)
+                this_question_answer.save()
+                
+                                                  
             return HttpResponseRedirect(reverse('questionnaire_finish'))            
         else:
                        
@@ -150,6 +149,7 @@ def edit_question_answer(request,questionnaire_id,questiongroup_id):
     else :
         return render_to_response('edit_questionanswer_form.html', 
                                       {'form': editForm,'user':user,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
+
 
 
 @login_required    
@@ -181,6 +181,7 @@ def all_question_answers_for_questiongroup(request,user_id,questionnaire_id,ques
         context= questionanswer_list
 
         return render_to_response('all_questionanswers.html',{'context':context,'user':user,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
+
 
 
 @login_required

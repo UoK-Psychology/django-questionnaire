@@ -139,7 +139,7 @@ class AnswerSet(models.Model):
         super(AnswerSet, self).save(*args, **kwargs)
         
     def __unicode__(self):
-        return 'user:%s questionnaire:%s' %(str(self.user), str(self.questionnaire))  
+        return 'user:%s questionnaire:%s  questiongroup:%s ' %(str(self.user), str(self.questionnaire),str(self.questiongroup)) 
         
 class QuestionAnswer(models.Model):    
     '''

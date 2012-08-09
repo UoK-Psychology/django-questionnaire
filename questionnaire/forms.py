@@ -42,8 +42,9 @@ def generate_textfield():
 def generate_boolean_field():
     '''
      @return Boolean field   
+     initial value set to True and required =False to allow dynamic change of value to etheir False or True
     '''    
-    return BooleanField(required=False)
+    return BooleanField(required=False ,initial=True)
 
 def generate_select_dropdown_field():
     '''
@@ -102,6 +103,7 @@ def make_question_group_form(questiongroup_id,questionnaire_id):
     return type('%sForm' % id (questionnaire_id),(forms.BaseForm,),{'base_fields':fields})
 
 
+
 def  create_question_answer_edit_form(user,this_questionnaire,this_questiongroup):
     '''
     create form for editing recent question answer for given user 
@@ -130,7 +132,10 @@ def  create_question_answer_edit_form(user,this_questionnaire,this_questiongroup
         else:
             field=FIELD_TYPES[question.field_type]()
             field.label= question.label
-            field.initial = answer
+            
+            if not question.field_type =='booleanfield':
+                field.initial = answer
+                
             fields[str(question.id)]= field
              
     return type('editForm',(forms.BaseForm,),{'base_fields':fields})
