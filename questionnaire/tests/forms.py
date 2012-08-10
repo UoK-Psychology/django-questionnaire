@@ -25,7 +25,7 @@ class FormsTestCase(TestCase):
         '''
         
         tuple_choices = [(u'Radio 1',u'Radio 1'), (u' Radio 2',u' Radio 2'), (u' Radio 3',u' Radio 3')]
-        choices_question = Question.objects.get(pk=4)
+        choices_question = Question.objects.get(pk=5)
         get_choices_test = get_choices(choices_question)
         self.assertEqual(get_choices_test, tuple_choices)
         
