@@ -80,8 +80,8 @@ class QuestionGroup(models.Model):
     name = models.CharField('questiongroupname',max_length=255,unique=True)
     questions = models.ManyToManyField(Question, through = 'Question_order')
     
-    def get_ordered_groups(self):
-        return Question_order.objects.filter(questiongroup=self).order_by('order_info')
+    def get_ordered_questions(self):
+        return [order.question for order in Question_order.objects.filter(questiongroup=self).order_by('order_info')]
     
     def __unicode__(self):
         return self.name

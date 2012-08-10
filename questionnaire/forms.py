@@ -76,7 +76,7 @@ FIELD_TYPES={
             'multiplechoicefield':generate_multiplechoice_field,
             }
 
-def make_question_group_form(questiongroup_id,questionnaire_id):
+def make_question_group_form(questiongroup,questionnaire_id):
     '''
      mapping questions fields  type  to form fields type 
      @return: type form for specific questiongroup 
@@ -84,21 +84,23 @@ def make_question_group_form(questiongroup_id,questionnaire_id):
     '''
     fields = SortedDict([])
        
-    group = QuestionGroup.objects.get(pk=questiongroup_id)
-    orderedgroups = group.get_ordered_groups()
+    
+    orderedgroups = questiongroup.get_ordered_questions()
     
     
     for question in orderedgroups:
         
-        if question.question.field_type in ['select_dropdown_field','radioselectfield','multiplechoicefield']:
-            field=FIELD_TYPES[question.question.field_type]()
-            field.choices=get_choices(question.question)
-            field.label= question.question.label          
-            fields[str(question.question.id)]= field
-        else:     
-            field = FIELD_TYPES[question.question.field_type]()
-            field.label = question.question.label
-            fields[str(question.question.id)]= field
+
+        if question.field_type in ['select_dropdown_field','radioselectfield','multiplechoicefield']:
+            field=FIELD_TYPES[question.field_type]()
+            field.choices=get_choices(question)
+            field.label = question.label
+            fields[str(question.id)]= field
+        else:    
+            field = FIELD_TYPES[question.field_type]()
+            field.label = question.label
+            fields[str(question.id)]= field
+
             
     return type('%sForm' % id (questionnaire_id),(forms.BaseForm,),{'base_fields':fields})
 
