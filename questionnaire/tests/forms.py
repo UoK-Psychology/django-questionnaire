@@ -35,6 +35,7 @@ class FormsTestCase(TestCase):
             None
         '''
         choices_question = Question.objects.create(label='test', field_type='select_dropdown_field', selectoptions=None)
+
         get_choices_test = get_choices(choices_question)
         self.assertEqual(get_choices_test, None)
         
@@ -70,7 +71,7 @@ class FormsTestCase(TestCase):
             This should return a BooleanField object defaulting to false
         '''
         self.assertIsInstance(generate_boolean_field(), BooleanField, 'The return class should be boolean field')
-        self.assertEqual(generate_boolean_field().initial, False, 'Default value for booleanField is false')
+        self.assertEqual(generate_boolean_field().initial, True, 'Default value for booleanField is True')
         
         
     def test_generate_select_dropdown_field(self):

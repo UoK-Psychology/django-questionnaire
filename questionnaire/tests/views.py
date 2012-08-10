@@ -1,5 +1,5 @@
 
-from questionnaire.models import Question,Questionnaire,QuestionAnswer, AnswerSet
+from questionnaire.models import Question,Questionnaire,QuestionAnswer, AnswerSet, QuestionGroup
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.test import Client
@@ -32,9 +32,10 @@ class QuestionnaireViewTests(TestCase):
             2. A Questionnaire defined, which has 2 QuestionGroup defined, each with 1 question of each question type
         """
         testquestionnaire = Questionnaire.objects.get(pk=1)      
+        testquestiongroup=QuestionGroup.objects.get(pk=1)
         self.client = Client()
         self.user_test = User.objects.create_user('user', 'email@email.com', 'password')          
-        self.answerset = AnswerSet.objects.create(user=self.user_test,questionnaire=testquestionnaire)
+        self.answerset = AnswerSet.objects.create(user=self.user_test,questionnaire=testquestionnaire,questiongroup=testquestiongroup)
 
         
         super(QuestionnaireViewTests,self).setUp()
@@ -44,7 +45,7 @@ class QuestionnaireViewTests(TestCase):
             A get request to this view without a logged in user should redirect to the default login url
         """
         
-        url = reverse('handle_first_questiongroup_form', kwargs={'questionnaire_id':1})
+        url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id':1, 'order_info':1})
         response = self.client.get(url)
         self.assertEquals (302, response.status_code )
         self.assertEquals (response['Location'], 'http://testserver/accounts/login/?next=%s' % url )
@@ -60,7 +61,7 @@ class QuestionnaireViewTests(TestCase):
         """        
         
         self.client.login(username='user', password='password') 
-        url = reverse('handle_first_questiongroup_form', kwargs={'questionnaire_id':1})   
+        url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id':1, 'order_info':1})   
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
         self.assertTemplateUsed('questionform.html') 
@@ -73,15 +74,15 @@ class QuestionnaireViewTests(TestCase):
        
         
         
-        expected = [    ('question_test_charfield','charfield'),
-                        ('question_test_textfield','textfield'),
-                        ('question_test_booleanfield','booleanfield'),]
+        expected = [    ('Q1 G1 Charfield','charfield'),
+                        ('Q2 G1 Textfield','textfield'),
+                        ('Q3 G1 boolean','booleanfield'),]
         
         
         for index in range(len(form.base_fields)):
             
             self.assertEqual(form.base_fields.value_for_index(index).label, expected[index][0])
-            self.assertQuestionType(expected[index][1], form.base_fields.value_for_index(index))  
+            
         
     def test_handle_next_questiongroup_form_get_valid_questionnaire_retry(self):
         """
@@ -94,7 +95,7 @@ class QuestionnaireViewTests(TestCase):
         """
         
         self.client.login(username='user', password='password')
-        url = reverse('handle_first_questiongroup_form', kwargs={'questionnaire_id':1})
+        url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id':1, 'order_info':1})
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)        
         self.assertTemplateUsed('questionform.html') 
@@ -104,9 +105,9 @@ class QuestionnaireViewTests(TestCase):
         self.question_answer_3 = QuestionAnswer.objects.create(question=Question.objects.get(pk=3),answer="True",answer_set=AnswerSet.objects.get(pk=1))
         
          
-        expected_answers = [('question_test_charfield',QuestionAnswer.objects.get(pk=1).answer),
-                           ('question_test_charfield',QuestionAnswer.objects.get(pk=1).answer),
-                           ('question_test_charfield',QuestionAnswer.objects.get(pk=1).answer),]
+        expected_answers = [('Q1 G1 Charfield',QuestionAnswer.objects.get(pk=1).answer),
+                           ('Q2 G1 Textfield',QuestionAnswer.objects.get(pk=1).answer),
+                           ('Q3 G1 boolean',QuestionAnswer.objects.get(pk=1).answer),]
         
         form = resp.context['form']
         
@@ -121,7 +122,7 @@ class QuestionnaireViewTests(TestCase):
         """
         
         self.client.login(username='user', password='password') 
-        url = reverse('handle_first_questiongroup_form', kwargs={'questionnaire_id': 2})
+        url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id': 2, 'order_info':1})
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404, 'There are no questionnaire with id 2!')
         
@@ -137,7 +138,7 @@ class QuestionnaireViewTests(TestCase):
         """
         
         self.client.login(username='user', password='password')
-        url = reverse('handle_first_questiongroup_form', kwargs={'questionnaire_id':1})
+        url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id':1, 'order_info':1})
         post_data =  {u'1': [u'a'], u'2': [u'a'], u'3': [u'True']}
         resp = self.client.post(url,post_data)        
         self.assertEqual(302, resp.status_code)      
@@ -156,8 +157,8 @@ class QuestionnaireViewTests(TestCase):
         """
         self.client.login(username='user', password='password')        
         url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id': 1, 'order_info': 2})
-        post_data =  {u'4': [u'Radio 1'], u'5': [u'Drop 1'], u'6': [u'Multiple Choice 1']}
-        resp = self.client.post(url,post_data)        
+        post_data =  {u'4': [u'Radio 1'], u'5': [u'Dropdown 1'], u'6': [u'MultipleChoice 1']}
+        resp = self.client.post(url,post_data)     
         self.assertEqual(resp.status_code, 302)     
         self.assertEqual(resp['Location'], 'http://testserver/questionnaire/finish/')
         
@@ -180,7 +181,7 @@ class QuestionnaireViewTests(TestCase):
         self.question_answer_3 = QuestionAnswer.objects.create(question=Question.objects.get(pk=3),answer="True",answer_set=AnswerSet.objects.get(pk=1))  
         
         self.client.login(username='user', password='password')
-        url = reverse('handle_first_questiongroup_form', kwargs={'questionnaire_id': 1})
+        url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id': 1, 'order_info':1})
         post_data =  {u'1': [u'b'], u'2': [u'b'], u'3': [u'True']}
         resp = self.client.post(url,post_data)
 
@@ -242,7 +243,7 @@ class QuestionnaireViewTests(TestCase):
         i.e. still using objects.get.all() - this however will pass if the actual view code have been implemented
         '''
         self.client.login(username='user', password='password') 
-        url = reverse('display_question_answer', kwargs={'questionnaire_id':2})
+        url = reverse('display_question_answer', kwargs={'questionnaire_id':2 , 'questiongroup_id': 1})
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404, 'There are no questionnaire with id 2!')
         
@@ -252,7 +253,7 @@ class QuestionnaireViewTests(TestCase):
             GET request to ''display_question_answer'' without being logged in should:
             1. redirect to the default login url
         """
-        url = reverse('display_question_answer', kwargs={'questionnaire_id':1})
+        url = reverse('display_question_answer', kwargs={'questionnaire_id':1, 'questiongroup_id': 1})
         response = self.client.get(url)
         self.assertEquals (302, response.status_code)
         
@@ -266,7 +267,7 @@ class QuestionnaireViewTests(TestCase):
             3. context should not contain any answers (which will cause the template to show that you have no answers)
         """
         self.client.login(username='user', password='password')
-        url = reverse('display_question_answer', kwargs={'questionnaire_id':1})    
+        url = reverse('display_question_answer', kwargs={'questionnaire_id':1, 'questiongroup_id' : 1})    
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
         self.assertTemplateUsed('questionanswer.html')         
@@ -289,7 +290,7 @@ class QuestionnaireViewTests(TestCase):
         self.question_answer_3 = QuestionAnswer.objects.create(question=Question.objects.get(pk=3),answer="True",answer_set=AnswerSet.objects.get(pk=1))
 
         self.client.login(username='user', password='password')
-        url = reverse('display_question_answer', kwargs={'questionnaire_id':1})    
+        url = reverse('display_question_answer', kwargs={'questionnaire_id':1 , 'questiongroup_id':1})    
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
         self.assertTemplateUsed('questionanswer.html') 
@@ -314,13 +315,16 @@ class QuestionnaireViewTests(TestCase):
         
         
         self.client.login(username='user', password='password')
-        url = reverse('display_question_answer', kwargs={'questionnaire_id':1})            
+        url = reverse('display_question_answer', kwargs={'questionnaire_id':1, 'questiongroup_id':1})            
         resp = self.client.get(url)        
         self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
-        self.assertTemplateUsed('questionanswer.html')    
+        self.assertTemplateUsed('display_questionanswer.html')    
          
         self.assertEqual(len(resp.context['context']), 6)
-    
+        
+
+        
+                
     def test_display_question_answer_valid_questionnaire_edited_answers(self):
         """
             GET request to ''display_question_answer'' with a logged in user and a valid question id for a questionnaire that
@@ -334,20 +338,18 @@ class QuestionnaireViewTests(TestCase):
         self.question_answer_1 = QuestionAnswer.objects.create(question=Question.objects.get(pk=1),answer="charfield",answer_set=AnswerSet.objects.get(pk=1))
         self.question_answer_2 = QuestionAnswer.objects.create(question=Question.objects.get(pk=2),answer="textfield",answer_set=AnswerSet.objects.get(pk=1))
         self.question_answer_3 = QuestionAnswer.objects.create(question=Question.objects.get(pk=3),answer="True",answer_set=AnswerSet.objects.get(pk=1))
-        self.question_answer_4 = QuestionAnswer.objects.create(question=Question.objects.get(pk=4),answer="Radio 1",answer_set=AnswerSet.objects.get(pk=1))
-        self.question_answer_5 = QuestionAnswer.objects.create(question=Question.objects.get(pk=5),answer="Drop 1",answer_set=AnswerSet.objects.get(pk=1))
-        self.question_answer_6 = QuestionAnswer.objects.create(question=Question.objects.get(pk=6),answer="[u'Multiple Choice 1']",answer_set=AnswerSet.objects.get(pk=1))
         self.question_answer_7 = QuestionAnswer.objects.create(question=Question.objects.get(pk=3),answer="False",answer_set=AnswerSet.objects.get(pk=1))
         
         
         
         
         self.client.login(username='user', password='password')
-        url = reverse('display_question_answer', kwargs={'questionnaire_id':1})    
+        url = reverse('display_question_answer', kwargs={'questionnaire_id':1 , 'questiongroup_id': 1})    
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
-        self.assertTemplateUsed('questionanswer.html') 
-        self.assertGreater(len(resp.context['context']), 6)
+        self.assertTemplateUsed('edit_questionanswer_form.html') 
+ 
+        self.assertEqual(len(resp.context['context']), 3)
         
         
         

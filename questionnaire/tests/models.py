@@ -88,16 +88,7 @@ class CustomListFieldTests(TestCase):
         output = CustomListField(string, token = '!').get_db_prep_value(value)
         self.assertEqual(string, output)
     
-    def test_value_to_string(self):
-        '''
-            assuming the object passed in is a CustomListField poulated with a value
-            this should do the same as test_db_prep_value_default
-        '''
-        string = 'A,B,C'
-        expected_list = ['A', 'B', 'C']
-        new_custom_list = CustomListField(string)
-        valuetostring = new_custom_list.value_to_string(expected_list)
-        print valuetostring
+
         
 class QuestionTestCase(TestCase):
     

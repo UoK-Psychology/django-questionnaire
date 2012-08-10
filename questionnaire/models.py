@@ -40,9 +40,9 @@ class CustomListField(models.TextField):
         assert(isinstance(value, list) or isinstance(value, tuple))
         return self.token.join([unicode(s) for s in value])
 
-    def value_to_string(self, obj):
-        value = self._get_val_from_obj(obj)
-        return self.get_db_prep_value(value) 
+    #def value_to_string(self, obj):
+       # value = self._get_val_from_obj(obj)
+       # return self.get_db_prep_value(value) 
 
      
 FIELD_TYPE_CHOICES=(('charfield','charfield'),('textfield','textfield'),('booleanfield','boolean'),('select_dropdown_field','select_dropdown_field'),('radioselectfield','radioselectfield'),('multiplechoicefield','multiplechoicefield'))

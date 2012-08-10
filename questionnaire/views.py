@@ -38,8 +38,9 @@ def handle_next_questiongroup_form(request,questionnaire_id,order_info=None):
     orderedgroups = this_questionnaire.get_ordered_groups()
     
     questiongroup_id = orderedgroups[order_info-1].questiongroup.id
-    this_questiongroup=get_object_or_404(QuestionGroup,pk=questiongroup_id)    
-    questionForm = make_question_group_form(questiongroup_id,questionnaire_id)
+    this_questiongroup=get_object_or_404(QuestionGroup,pk=questiongroup_id)   
+    questiongroup = this_questiongroup
+    questionForm = make_question_group_form(questiongroup,questionnaire_id)
 
     
     

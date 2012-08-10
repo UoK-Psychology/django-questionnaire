@@ -1,56 +1,55 @@
 [ 
-
   { "fields" : { "field_type" : "charfield",
-        "label" : "Q1 G1 Charfield",
+        "label" : "question_test_charfield",
         "selectoptions" : null
       },
     "model" : "questionnaire.question",
     "pk" : 1
   },
   { "fields" : { "field_type" : "textfield",
-        "label" : "Q2 G1 Textfield",
+        "label" : "question_test_textfield",
         "selectoptions" : null
       },
     "model" : "questionnaire.question",
     "pk" : 2
   },
   { "fields" : { "field_type" : "booleanfield",
-        "label" : "Q3 G1 boolean",
+        "label" : "question_test_booleanfield",
         "selectoptions" : null
       },
     "model" : "questionnaire.question",
     "pk" : 3
   },
-  { "fields" : { "field_type" : "select_dropdown_field",
-        "label" : "Q4 G2",
-        "selectoptions" : "Dropdown 1, Dropdown 2, Dropdown 3"
+  { "fields" : { "field_type" : "radioselectfield",
+        "label" : "question_test_radioselectfield",
+        "selectoptions" : "Radio 1, Radio 2, Radio 3"
       },
     "model" : "questionnaire.question",
     "pk" : 4
   },
-  { "fields" : { "field_type" : "radioselectfield",
-        "label" : "Q5 G2",
-        "selectoptions" : "Radio 1, Radio 2, Radio 3"
+  { "fields" : { "field_type" : "select_dropdown_field",
+        "label" : "question_test_select_dropdown_field",
+        "selectoptions" : "Drop 1, Drop 2, Drop 3"
       },
     "model" : "questionnaire.question",
     "pk" : 5
   },
   { "fields" : { "field_type" : "multiplechoicefield",
-        "label" : "Q6 G2",
-        "selectoptions" : "MultipleChoice 1, MultipleChoice 2, MultipleChoice 3"
+        "label" : "question_test_multiplechoicefield",
+        "selectoptions" : "Multiple Choice 1, Multiple Choice 2, Multiple Choice 3"
       },
     "model" : "questionnaire.question",
     "pk" : 6
   },
-  { "fields" : { "name" : "QG 1" },
+  { "fields" : { "name" : "questiongroup_test_group_1" },
     "model" : "questionnaire.questiongroup",
     "pk" : 1
   },
-  { "fields" : { "name" : "QG 2" },
+  { "fields" : { "name" : "questiongroup_test_group_2" },
     "model" : "questionnaire.questiongroup",
     "pk" : 2
   },
-  { "fields" : { "name" : "Questionnaire 1" },
+  { "fields" : { "name" : "questionnaire_test" },
     "model" : "questionnaire.questionnaire",
     "pk" : 1
   },
@@ -110,5 +109,6 @@
     "model" : "questionnaire.question_order",
     "pk" : 6
   }
-
-]
+  ]
+  
+  
