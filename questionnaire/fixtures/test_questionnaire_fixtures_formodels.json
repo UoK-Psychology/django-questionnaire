@@ -1,0 +1,132 @@
+[ 
+  { "fields" : { "field_type" : "charfield",
+        "label" : "question_test_charfield",
+        "selectoptions" : null
+      },
+    "model" : "questionnaire.question",
+    "pk" : 1
+  },
+  { "fields" : { "field_type" : "textfield",
+        "label" : "question_test_textfield",
+        "selectoptions" : null
+      },
+    "model" : "questionnaire.question",
+    "pk" : 2
+  },
+  { "fields" : { "field_type" : "booleanfield",
+        "label" : "question_test_booleanfield",
+        "selectoptions" : null
+      },
+    "model" : "questionnaire.question",
+    "pk" : 3
+  },
+  { "fields" : { "field_type" : "radioselectfield",
+        "label" : "question_test_radioselectfield",
+        "selectoptions" : "Radio 1, Radio 2, Radio 3"
+      },
+    "model" : "questionnaire.question",
+    "pk" : 4
+  },
+  { "fields" : { "field_type" : "select_dropdown_field",
+        "label" : "question_test_select_dropdown_field",
+        "selectoptions" : "Drop 1, Drop 2, Drop 3"
+      },
+    "model" : "questionnaire.question",
+    "pk" : 5
+  },
+  { "fields" : { "field_type" : "multiplechoicefield",
+        "label" : "question_test_multiplechoicefield",
+        "selectoptions" : "Multiple Choice 1, Multiple Choice 2, Multiple Choice 3"
+      },
+    "model" : "questionnaire.question",
+    "pk" : 6
+  },
+  { "fields" : { "name" : "questiongroup_test_group_1_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" },
+    "model" : "questionnaire.questiongroup",
+    "pk" : 1
+  },
+  { "fields" : { "name" : "questiongroup_test_group_2" },
+    "model" : "questionnaire.questiongroup",
+    "pk" : 2
+  },
+  { "fields" : { "name" : "questionnaire_test1" },
+    "model" : "questionnaire.questionnaire",
+    "pk" : 1
+  },
+  { "fields" : { "order_info" : 1,
+        "questiongroup" : 1,
+        "questionnaire" : 1
+      },
+    "model" : "questionnaire.questiongroup_order",
+    "pk" : 1
+  },
+  { "fields" : { "order_info" : 2,
+        "questiongroup" : 2,
+        "questionnaire" : 1
+      },
+    "model" : "questionnaire.questiongroup_order",
+    "pk" : 2
+  },
+  { "fields" : { "name" : "questionnaire_test2aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" },
+    "model" : "questionnaire.questionnaire",
+    "pk" : 2
+  },
+  { "fields" : { "order_info" : 1,
+        "questiongroup" : 2,
+        "questionnaire" : 2
+      },
+    "model" : "questionnaire.questiongroup_order",
+    "pk" : 3
+  },
+  { "fields" : { "order_info" : 2,
+        "questiongroup" : 1,
+        "questionnaire" : 2
+      },
+    "model" : "questionnaire.questiongroup_order",
+    "pk" : 4
+  },
+  { "fields" : { "order_info" : 1,
+        "question" : 1,
+        "questiongroup" : 1
+      },
+    "model" : "questionnaire.question_order",
+    "pk" : 1
+  },
+  { "fields" : { "order_info" : 2,
+        "question" : 2,
+        "questiongroup" : 1
+      },
+    "model" : "questionnaire.question_order",
+    "pk" : 2
+  },
+  { "fields" : { "order_info" : 3,
+        "question" : 3,
+        "questiongroup" : 1
+      },
+    "model" : "questionnaire.question_order",
+    "pk" : 3
+  },
+  { "fields" : { "order_info" : 1,
+        "question" : 4,
+        "questiongroup" : 2
+      },
+    "model" : "questionnaire.question_order",
+    "pk" : 4
+  },
+  { "fields" : { "order_info" : 2,
+        "question" : 5,
+        "questiongroup" : 2
+      },
+    "model" : "questionnaire.question_order",
+    "pk" : 5
+  },
+  { "fields" : { "order_info" : 3,
+        "question" : 6,
+        "questiongroup" : 2
+      },
+    "model" : "questionnaire.question_order",
+    "pk" : 6
+  }
+  ]
+  
+  
