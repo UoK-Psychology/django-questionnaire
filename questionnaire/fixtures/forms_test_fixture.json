@@ -1,0 +1,96 @@
+[ 
+  { "fields" : { "field_type" : "charfield",
+        "label" : "question 1",
+        "selectoptions" : null
+      },
+    "model" : "questionnaire.question",
+    "pk" : 1
+  },
+  { "fields" : { "field_type" : "textfield",
+        "label" : "question 2",
+        "selectoptions" : null
+      },
+    "model" : "questionnaire.question",
+    "pk" : 2
+  },
+  { "fields" : { "field_type" : "booleanfield",
+        "label" : "question 3",
+        "selectoptions" : null
+      },
+    "model" : "questionnaire.question",
+    "pk" : 3
+  },
+  { "fields" : { "field_type" : "select_dropdown_field",
+        "label" : "question 4",
+        "selectoptions" : "Drop 1, Drop 2, Drop 3"
+      },
+    "model" : "questionnaire.question",
+    "pk" : 4
+  },
+  { "fields" : { "field_type" : "radioselectfield",
+        "label" : "question 5",
+        "selectoptions" : "Radio 1, Radio 2, Radio 3"
+      },
+    "model" : "questionnaire.question",
+    "pk" : 5
+  },
+  { "fields" : { "field_type" : "multiplechoicefield",
+        "label" : "question 6",
+        "selectoptions" : "Multiple Choice 1, Multiple Choice 2, Multiple Choice 3"
+      },
+    "model" : "questionnaire.question",
+    "pk" : 6
+  },
+  { "fields" : { "name" : "questiongroup_test_group_1" },
+    "model" : "questionnaire.questiongroup",
+    "pk" : 1
+  },
+  { "fields" : { "name" : "questionnaire_test" },
+    "model" : "questionnaire.questionnaire",
+    "pk" : 1
+  },
+  { "fields" : { "order_info" : 1,
+        "question" : 1,
+        "questiongroup" : 1
+      },
+    "model" : "questionnaire.question_order",
+    "pk" : 1
+  },
+  { "fields" : { "order_info" : 1,
+        "question" : 2,
+        "questiongroup" : 1
+      },
+    "model" : "questionnaire.question_order",
+    "pk" : 2
+  },
+  { "fields" : { "order_info" : 1,
+        "question" : 3,
+        "questiongroup" : 1
+      },
+    "model" : "questionnaire.question_order",
+    "pk" : 3
+  },
+  { "fields" : { "order_info" : 1,
+        "question" : 4,
+        "questiongroup" : 1
+      },
+    "model" : "questionnaire.question_order",
+    "pk" : 4
+  },
+  { "fields" : { "order_info" : 1,
+        "question" : 5,
+        "questiongroup" : 1
+      },
+    "model" : "questionnaire.question_order",
+    "pk" : 5
+  },
+  { "fields" : { "order_info" : 1,
+        "question" : 6,
+        "questiongroup" : 1
+      },
+    "model" : "questionnaire.question_order",
+    "pk" : 6
+  }
+  ]
+  
+  

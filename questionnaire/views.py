@@ -68,12 +68,13 @@ def handle_next_questiongroup_form(request,questionnaire_id,order_info=None):
         return render_to_response('questionform.html', 
         {'form': questionForm,},context_instance=RequestContext(request))
     
-
+        
 
 
 def finish(request):
     return render_to_response('finish.html')     
       
+
 
 @login_required
 def display_question_answer(request,questionnaire_id,questiongroup_id):
@@ -83,6 +84,7 @@ def display_question_answer(request,questionnaire_id,questiongroup_id):
     '''
     questiongroup_id=int(questiongroup_id)
     
+
     if request.method=='GET':
         user=request.user
         this_questionnaire=get_object_or_404(Questionnaire,pk=questionnaire_id)
@@ -98,8 +100,10 @@ def display_question_answer(request,questionnaire_id,questiongroup_id):
         y=QuestionAnswer.objects.filter(Q(answer_set__user_id=user,answer_set__questiongroup=this_questiongroup,answer_set__questionnaire=this_questionnaire)).filter(id__in=answer_max_id_list)          
         questionanswer=[(x.question.id,x.question.label ,x.answer) for x in y]
         
+
         context=questionanswer
         return render_to_response('display_questionanswer.html',{'context':context,'user':user,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
+
 
 
 
