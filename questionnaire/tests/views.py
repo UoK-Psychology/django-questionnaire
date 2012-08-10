@@ -65,6 +65,24 @@ class QuestionnaireViewTests(TestCase):
         self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
         self.assertTemplateUsed('questionform.html') 
         
+        
+        form = resp.context['form']
+        
+        
+        print form.base_fields
+       
+        
+        
+        expected = [    ('question_test_charfield','charfield'),
+                        ('question_test_textfield','textfield'),
+                        ('question_test_booleanfield','booleanfield'),]
+        
+        
+        for index in range(len(form.base_fields)):
+            
+            self.assertEqual(form.base_fields.value_for_index(index).label, expected[index][0])
+            self.assertQuestionType(expected[index][1], form.base_fields.value_for_index(index))  
+        
     def test_handle_next_questiongroup_form_get_valid_questionnaire_retry(self):
         """
             A GET request to the ''handle_next_questiongroup_form'' view specifying a valid questionnaire id,
@@ -80,7 +98,21 @@ class QuestionnaireViewTests(TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)        
         self.assertTemplateUsed('questionform.html') 
-
+        
+        self.question_answer_1 = QuestionAnswer.objects.create(question=Question.objects.get(pk=1),answer="charfield",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_2 = QuestionAnswer.objects.create(question=Question.objects.get(pk=2),answer="textfield",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_3 = QuestionAnswer.objects.create(question=Question.objects.get(pk=3),answer="True",answer_set=AnswerSet.objects.get(pk=1))
+        
+         
+        expected_answers = [('question_test_charfield',QuestionAnswer.objects.get(pk=1).answer),
+                           ('question_test_charfield',QuestionAnswer.objects.get(pk=1).answer),
+                           ('question_test_charfield',QuestionAnswer.objects.get(pk=1).answer),]
+        
+        form = resp.context['form']
+        
+        for index in range(len(form.base_answer)):
+            
+            self.assertEqual(form.base_answers.value_for_index(index).answer, expected_answers[index][0])
         
     def test_handle_next_questiongroup_form_get_invalid_questionnaire(self):
         """
@@ -316,5 +348,6 @@ class QuestionnaireViewTests(TestCase):
         self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
         self.assertTemplateUsed('questionanswer.html') 
         self.assertGreater(len(resp.context['context']), 6)
+        
         
         
