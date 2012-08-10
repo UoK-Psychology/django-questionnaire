@@ -130,7 +130,8 @@ class QuestionTestCase(TestCase):
             you should be able to save without selectoptions
         '''
         
-        self.assertRaises(AssertionError, Question.objects.create)
+        self.assertRaises(IntegrityError, Question.objects.create(label="test_question_without_field_type").save() )
+        self.assertRaises(IntegrityError, Question.objects.create(field_type='charfield').save() )
          
     def test_save(self):
         '''
@@ -183,7 +184,8 @@ class QuestionGroupTestCase(TestCase):
         '''
             Name is required so you should not be able to save the object without it
         '''
-        self.assertRaisesMessage(AssertionError, 'any', QuestionGroup.objects.create)
+          
+        self.assertRaises(IntegrityError, QuestionGroup.objects.create(name='').save() )
           
     def test_get_ordered_questions(self):
         '''
@@ -221,7 +223,7 @@ class QuestionnaireTestCase(TestCase):
         '''
             Name is required so you should not be able to save the object without it
         '''
-        self.assertRaises(AssertionError, Questionnaire.objects.create)
+        self.assertRaises(IntegrityError, Questionnaire.objects.create(name='').save() )
         
     def test_get_ordered_question_group(self):
         '''
