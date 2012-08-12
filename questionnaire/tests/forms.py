@@ -4,11 +4,11 @@ Created on 26 Jul 2012
 @author: jjm20
 '''
 from django.test import TestCase
-from questionnaire.forms import get_choices, generate_charfield, generate_textfield, generate_boolean_field, generate_select_dropdown_field, generate_radioselect_field, generate_multiplechoice_field, FIELD_TYPES, make_question_group_form
-from questionnaire.models import Question, Questionnaire, QuestionGroup
+from questionnaire.forms import get_choices, generate_charfield, generate_textfield, generate_boolean_field, generate_select_dropdown_field, generate_radioselect_field, generate_multiplechoice_field, FIELD_TYPES, make_question_group_form, create_question_answer_edit_form
+from questionnaire.models import Question, Questionnaire, QuestionGroup, AnswerSet, QuestionAnswer
 from django.forms import Textarea, TextInput, BooleanField, ChoiceField, RadioSelect,CheckboxSelectMultiple, CharField, BaseForm
 from django.forms.fields import  MultipleChoiceField
-
+from django.contrib.auth.models import User
 
 
 
@@ -165,9 +165,37 @@ class FormsTestCase_WithFixture(TestCase):
                 
             self.assertEqual(test_form.base_fields.value_for_index(index).label, expected[index][0])
             self.assertQuestionType(expected[index][1], test_form.base_fields.value_for_index(index)) 
+            
+            
+    
+    def  test_create_question_answer_edit_form(self):
+        '''
+        The test is almost the same as the previous one but with the difference of form having
+        'initial' data
+        '''
+        testquestionnaire = Questionnaire.objects.get(pk=1)      
+        testquestiongroup=QuestionGroup.objects.get(pk=1)
+        self.user_test = User.objects.create_user('user', 'email@email.com', 'password')          
+        self.answerset = AnswerSet.objects.create(user=self.user_test,questionnaire=testquestionnaire,questiongroup=testquestiongroup)
+        user = User.objects.get(pk=1)
+        
+        self.question_answer_1 = QuestionAnswer.objects.create(question=Question.objects.get(pk=1),answer="charfield_answer",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_2 = QuestionAnswer.objects.create(question=Question.objects.get(pk=2),answer="textfield_answer",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_3 = QuestionAnswer.objects.create(question=Question.objects.get(pk=3),answer="True",answer_set=AnswerSet.objects.get(pk=1))  
+        
+        test_edit_form = create_question_answer_edit_form(user,testquestionnaire,testquestiongroup)
+        
+        expected = [    ('question 1','charfield_answer'),
+                        ('question 2','textfield_answer'),
+                        ('question 3',True)]
+        
+        self.assertTrue(issubclass(test_edit_form, BaseForm))
+        
+        
+        
+        for index in range(len(test_edit_form.base_fields)):
 
             
-        
-
-        
+            self.assertEqual(test_edit_form.base_fields.value_for_index(index).label, expected[index][0])
+            self.assertEqual(expected[index][1], test_edit_form.base_fields.value_for_index(index).initial) 
         
