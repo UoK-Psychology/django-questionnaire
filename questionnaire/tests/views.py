@@ -364,7 +364,7 @@ class QuestionnaireViewTests(TestCase):
     
     def test_edit_question_answer_first_group_submit(self):
         """
-            A GET request to the ''handle_next_questiongroup_form'' view specifying a valid questionnaire id,
+            A GET request to the ''edit_question_answer'' view specifying a valid questionnaire id,
             which the user hasn't participated in yet should:
             1. yield a http 200 response
             2. use the questionform.html template
@@ -414,4 +414,49 @@ class QuestionnaireViewTests(TestCase):
         self.assertEqual(resp['Location'], 'http://testserver/questionnaire/edit/1/2/')
 
          
+    def test_all_question_answers_for_questiongroup(self):
+        """
+            A GET request to the ''all_question_answers_for_questiongroup'' view specifying a valid questionnaire id,
+            which the user hasn't participated in yet should:
+            1. yield a http 200 response
+            2. use the questionform.html template
+            3. Since its showing all of the answer for a questiongroup, it is expected the number of answer is more than one for each question
+
+        """        
+        self.question_answer_1 = QuestionAnswer.objects.create(question=Question.objects.get(pk=1),answer="charfield_answer",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_2 = QuestionAnswer.objects.create(question=Question.objects.get(pk=2),answer="textfield_answer",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_3 = QuestionAnswer.objects.create(question=Question.objects.get(pk=3),answer="True",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_4 = QuestionAnswer.objects.create(question=Question.objects.get(pk=1),answer="charfield_answer_edited",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_5 = QuestionAnswer.objects.create(question=Question.objects.get(pk=2),answer="textfield_answer_edited",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_6 = QuestionAnswer.objects.create(question=Question.objects.get(pk=3),answer="False",answer_set=AnswerSet.objects.get(pk=1))
+
+          
+        
+        self.client.login(username='user', password='password') 
+        url = reverse('all_question_answers_for_questiongroup', kwargs={'user_id':1,'questionnaire_id':1, 'questiongroup_id':1})   
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
+        self.assertTemplateUsed('all_questionanswers.html') 
+        self.assertGreater(len(resp.context['context']), 3)
+        
+        
+    def test_questionnaire_detail_list(self):
+        """
+            A GET request to the ''questionnaire_detail_list'' view specifying a valid questionnaire id,
+            which the user hasn't participated in yet should:
+            1. yield a http 200 response
+            2. use the questionform.html template
+
+        """        
+        self.question_answer_1 = QuestionAnswer.objects.create(question=Question.objects.get(pk=1),answer="charfield_answer",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_2 = QuestionAnswer.objects.create(question=Question.objects.get(pk=2),answer="textfield_answer",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_3 = QuestionAnswer.objects.create(question=Question.objects.get(pk=3),answer="True",answer_set=AnswerSet.objects.get(pk=1))
+
+          
+        
+        self.client.login(username='user', password='password') 
+        url = reverse('questionnaire_detail_list', kwargs={'questionnaire_id':1})   
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
+        self.assertTemplateUsed('questionnaire_detail.html')         
         
