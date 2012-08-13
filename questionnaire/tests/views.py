@@ -156,7 +156,7 @@ class QuestionnaireViewTests(TestCase):
         """
         self.client.login(username='user', password='password')        
         url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id': 1, 'order_info': 2})
-        post_data =  {u'4': [u'Radio 1'], u'5': [u'Dropdown 1'], u'6': [u'MultipleChoice 1']}
+        post_data =  {u'4': [u'Dropdown 1'], u'5': [u'Radio 1'], u'6': [u'MultipleChoice 1']}
         resp = self.client.post(url,post_data)     
         self.assertEqual(resp.status_code, 302)     
         self.assertEqual(resp['Location'], 'http://testserver/questionnaire/finish/')
@@ -459,4 +459,6 @@ class QuestionnaireViewTests(TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
         self.assertTemplateUsed('questionnaire_detail.html')         
+        self.assertEqual(len(resp.context['context']), 2)
+        
         
