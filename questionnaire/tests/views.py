@@ -281,7 +281,7 @@ class QuestionnaireViewTests(TestCase):
             has been partially answered should:
             1. return htt 200 response
             2. template used should be questionAnswer.html
-            3. context should contain the answers in such a way that can be rendered by their group
+            3. context should contain the answers in such2 a way that can be rendered by their group
             4. Any unanswered questions should show that they haven't yet been answered
         """
         self.question_answer_1 = QuestionAnswer.objects.create(question=Question.objects.get(pk=1),answer="charfield",answer_set=AnswerSet.objects.get(pk=1))
@@ -407,11 +407,13 @@ class QuestionnaireViewTests(TestCase):
         self.question_answer_6 = QuestionAnswer.objects.create(question=Question.objects.get(pk=6),answer="MultipleChoice 3",answer_set=AnswerSet.objects.get(pk=1))
         
 
-        post_data =  {u'1': [u'charfield_answer_edited'], u'2': [u'textfield_answer_edited'], u'3': [u'True']}
-        resp_2 = self.client.post(url,post_data)
-
-        self.assertEqual(302, resp_2.status_code)      
-        self.assertEqual(resp['Location'], 'http://testserver/questionnaire/edit/1/2/')
+        post_data =  {u'1': u'Dropdown 3', u'2': u'Radio 3', u'3': u'MultipleChoice 3'}
+        url_2 = reverse('edit_question_answer', kwargs={'questionnaire_id':1, 'questiongroup_id':2})   
+        resp_2 = self.client.post(url_2,post_data)
+        
+        self.assertEqual(302, resp_2.status_code)   
+           
+        self.assertEqual(resp_2['Location'], 'http://testserver/questionnaire/finish/')
 
          
     def test_all_question_answers_for_questiongroup(self):

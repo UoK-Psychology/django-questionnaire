@@ -195,7 +195,6 @@ class FormsTestCase_WithFixture(TestCase):
         
         for index in range(len(test_edit_form.base_fields)):
 
-            
             self.assertEqual(test_edit_form.base_fields.value_for_index(index).label, expected[index][0])
             self.assertEqual(expected[index][1], test_edit_form.base_fields.value_for_index(index).initial) 
         
