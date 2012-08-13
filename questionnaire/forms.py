@@ -20,12 +20,21 @@ def get_choices(question):
     '''
      @return: choices for a given select type question
     '''
-    try: 
+#    try: 
+#        choices_list = question.selectoptions
+#        choices= [(x,x) for x in choices_list]
+#        return choices
+#    except (ValueError, TypeError) as e:
+#        e('Value Error or Type Error')
+        
+
+    if question.selectoptions == None:
+        return None
+    
+    else:
         choices_list = question.selectoptions
         choices= [(x,x) for x in choices_list]
         return choices
-    except (ValueError, TypeError) as e:
-        raise e(['invalid_choice'] % {'value': choices_list})
     
 def generate_charfield():
     '''
@@ -93,7 +102,9 @@ def make_question_group_form(questiongroup,questionnaire_id):
 
         if question.field_type in ['select_dropdown_field','radioselectfield','multiplechoicefield']:
             field=FIELD_TYPES[question.field_type]()
-            field.choices=get_choices(question)
+            if get_choices(question):
+                field.choices=get_choices(question)
+            
             field.label = question.label
             fields[str(question.id)]= field
         else:    

@@ -83,36 +83,6 @@ class QuestionnaireViewTests(TestCase):
             self.assertEqual(form.base_fields.value_for_index(index).label, expected[index][0])
             
         
-    def test_handle_next_questiongroup_form_get_valid_questionnaire_retry(self):
-        """
-            A GET request to the ''handle_next_questiongroup_form'' view specifying a valid questionnaire id,
-            which the user has already reponsed to:
-            1. yield a http 200 response
-            2. use the questionform.html template
-            3. have a form in the context containing fields representing the first group in the questionnaire
-            but that is bound to the answers that were previously given by the user.
-        """
-        
-        self.client.login(username='user', password='password')
-        url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id':1, 'order_info':1})
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)        
-        self.assertTemplateUsed('questionform.html') 
-        
-        self.question_answer_1 = QuestionAnswer.objects.create(question=Question.objects.get(pk=1),answer="charfield",answer_set=AnswerSet.objects.get(pk=1))
-        self.question_answer_2 = QuestionAnswer.objects.create(question=Question.objects.get(pk=2),answer="textfield",answer_set=AnswerSet.objects.get(pk=1))
-        self.question_answer_3 = QuestionAnswer.objects.create(question=Question.objects.get(pk=3),answer="True",answer_set=AnswerSet.objects.get(pk=1))
-        
-         
-        expected_answers = [('Q1 G1 Charfield',QuestionAnswer.objects.get(pk=1).answer),
-                           ('Q2 G1 Textfield',QuestionAnswer.objects.get(pk=1).answer),
-                           ('Q3 G1 boolean',QuestionAnswer.objects.get(pk=1).answer),]
-        
-        form = resp.context['form']
-        
-        for index in range(len(form.base_answer)):
-            
-            self.assertEqual(form.base_answers.value_for_index(index).answer, expected_answers[index][0])
         
     def test_handle_next_questiongroup_form_get_invalid_questionnaire(self):
         """

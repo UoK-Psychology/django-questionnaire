@@ -67,6 +67,7 @@ class Question(models.Model):
             if not self.field_type in ['select_dropdown_field','radioselectfield', 'multiplechoicefield'] :              
                 self.selectoptions = None
             
+            
         super(Question,self).save(*args,**kwgs)
 
     

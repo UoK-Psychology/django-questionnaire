@@ -35,9 +35,12 @@ class FormsTestCase(TestCase):
             None
         '''
         choices_question = Question.objects.create(label='test', field_type='select_dropdown_field', selectoptions=None)
+        
 
         get_choices_test = get_choices(choices_question)
         self.assertEqual(get_choices_test, None)
+        
+        
         
     def test_get_choices_not_a_question(self):
         '''
