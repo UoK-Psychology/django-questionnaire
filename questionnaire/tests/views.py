@@ -70,7 +70,6 @@ class QuestionnaireViewTests(TestCase):
         form = resp.context['form']
         
         
-        print form.base_fields
        
         
         
@@ -351,5 +350,68 @@ class QuestionnaireViewTests(TestCase):
  
         self.assertEqual(len(resp.context['context']), 3)
         
+    def test_edit_question_answer_no_user(self):
         
+        '''
+            A get request to this view without a logged in user should redirect to the default login url
+        '''
+        
+        url = reverse('edit_question_answer', kwargs={'questionnaire_id':1, 'questiongroup_id':1})
+        response = self.client.get(url)
+        self.assertEquals (302, response.status_code )
+        self.assertEquals (response['Location'], 'http://testserver/accounts/login/?next=%s' % url )   
+        
+    
+    def test_edit_question_answer_first_group_submit(self):
+        """
+            A GET request to the ''handle_next_questiongroup_form'' view specifying a valid questionnaire id,
+            which the user hasn't participated in yet should:
+            1. yield a http 200 response
+            2. use the questionform.html template
+            3. have a form in the context containing fields representing the first group in the questionnaire
+            but Bound to any data (ie. Have data initialize and bound to them!)
+            4. After form submission, it goes to the next questiongroup
+        """        
+        self.question_answer_1 = QuestionAnswer.objects.create(question=Question.objects.get(pk=1),answer="charfield_answer",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_2 = QuestionAnswer.objects.create(question=Question.objects.get(pk=2),answer="textfield_answer",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_3 = QuestionAnswer.objects.create(question=Question.objects.get(pk=3),answer="True",answer_set=AnswerSet.objects.get(pk=1))
+
+          
+        
+        self.client.login(username='user', password='password') 
+        url = reverse('edit_question_answer', kwargs={'questionnaire_id':1, 'questiongroup_id':1})   
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
+        self.assertTemplateUsed('edit_questionanswer_form.html') 
+        
+        
+        form = resp.context['form']
+        
+
+        expected = [    ('Q1 G1 Charfield','charfield_answer'),
+                        ('Q2 G1 Textfield','textfield_answer'),
+                        ('Q3 G1 boolean',True),]
+        
+        
+        for index in range(len(form.base_fields)):
+            
+            self.assertEqual(form.base_fields.value_for_index(index).label, expected[index][0])
+            self.assertEqual(form.base_fields.value_for_index(index).initial, expected[index][1])
+            
+         
+        '''
+        Adds 3 more answer for questiongroup 2
+        '''
+        self.question_answer_4 = QuestionAnswer.objects.create(question=Question.objects.get(pk=4),answer="Dropdown 3",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_5 = QuestionAnswer.objects.create(question=Question.objects.get(pk=5),answer="Radio 3",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_6 = QuestionAnswer.objects.create(question=Question.objects.get(pk=6),answer="MultipleChoice 3",answer_set=AnswerSet.objects.get(pk=1))
+        
+
+        post_data =  {u'1': [u'charfield_answer_edited'], u'2': [u'textfield_answer_edited'], u'3': [u'True']}
+        resp_2 = self.client.post(url,post_data)
+
+        self.assertEqual(302, resp_2.status_code)      
+        self.assertEqual(resp['Location'], 'http://testserver/questionnaire/edit/1/2/')
+
+         
         
