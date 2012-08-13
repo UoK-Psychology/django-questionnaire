@@ -64,7 +64,12 @@ def handle_next_questiongroup_form(request,questionnaire_id,order_info=None):
             else: 
                 order_info = order_info + 1
                 return HttpResponseRedirect(reverse('handle_next_questiongroup_form', kwargs = {'questionnaire_id': questionnaire_id, 'order_info' : order_info}))
-               
+        
+        else:
+            
+            return render_to_response('questionform.html', 
+        {'form': form,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,},context_instance=RequestContext(request))       
+            
     else:
         return render_to_response('questionform.html', 
         {'form': questionForm,},context_instance=RequestContext(request))

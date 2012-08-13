@@ -11,16 +11,11 @@
 {% for field in form %}
     <div class="fieldWrapper">
      
-  
-       {% if field.field.widget|klass == 'ChoiceField' %}
-       <p>  {{ field.errors }}</p>
-       <p>  {{ field.label_tag }}: <br>{{ field }}</p>
+ 
      
-        {% else %}
-           <p>  {{ field.errors }}</p> 
-            <p>  {{ field.label_tag }}:{{ field }}</p>
-          
-      {% endif %}
+       <p>  {{ field.label_tag }}: {{ field }} <strong>{{ field.errors }}</strong></p>
+     
+    
     
        </div>
 {% endfor %}
@@ -29,3 +24,4 @@
 <input type="submit" value="Submit" />
 
 </form>
+
