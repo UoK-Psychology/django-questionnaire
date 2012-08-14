@@ -4,12 +4,12 @@ Created on Jul 11, 2012
 @author: mzd2
 '''
 from django.contrib import admin
-from models import Question, QuestionGroup, Questionnaire, QuestionGroup_order, Question_order, AnswerSet, QuestionAnswer
+from models import Question, QuestionGroup, Questionnaire, QuestionGroup_order, Question_order, AnswerSet, QuestionAnswer,QuestionAdminForm
  
 class QuestionAdmin(admin.ModelAdmin):
-    list_display=('label','field_type')
+    form=QuestionAdminForm
+    list_display=('label','field_type','selectoptions')
     
-
 
 
 class QuestionnaireInline(admin.TabularInline):
