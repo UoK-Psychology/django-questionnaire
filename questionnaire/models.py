@@ -72,6 +72,18 @@ class Question(models.Model):
         super(Question,self).save(*args,**kwgs)
 
 
+class FlattenListWidget(forms.Textarea):
+    '''
+    create custom widget flatten Custom List Field 
+    displays select optionsList as string of strings  separated by comma 
+    '''
+    def render(self, name, value, attrs=None):
+        if not value is None:
+            value = ','.join(str(v) for v in value)
+        return super(FlattenListWidget, self).render(name, value, attrs)
+
+
+
 class QuestionAdminForm(forms.ModelForm):
     '''
     overide admin form for validation of  Question selectoptions 
@@ -82,6 +94,7 @@ class QuestionAdminForm(forms.ModelForm):
     '''
     class Meta:
         model = Question
+        widgets = {'selectoptions': FlattenListWidget(),}
 
     def clean(self):
         label=self.cleaned_data["label"]
@@ -98,6 +111,8 @@ class QuestionAdminForm(forms.ModelForm):
                 raise forms.ValidationError("SelectOptions Must Be Empty  not required  for this field type")
         
         return self.cleaned_data
+    
+
 
     
 class QuestionGroup(models.Model):

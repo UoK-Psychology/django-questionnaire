@@ -8,8 +8,11 @@ from models import Question, QuestionGroup, Questionnaire, QuestionGroup_order, 
  
 class QuestionAdmin(admin.ModelAdmin):
     form=QuestionAdminForm
-    list_display=('label','field_type','selectoptions')
-    
+    list_display=('label','field_type','selectoptions_list')
+    def selectoptions_list(self, obj):
+        if obj.selectoptions:
+            return ', '.join(str(x) for x in obj.selectoptions)
+        return None
 
 
 class QuestionnaireInline(admin.TabularInline):
