@@ -68,11 +68,11 @@ def handle_next_questiongroup_form(request,questionnaire_id,order_info=None):
         else:
             
             return render_to_response('questionform.html', 
-        {'form': form,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,},context_instance=RequestContext(request))       
+        {'form': form,'questionnaire':this_questionnaire,'questiongroup':questiongroup,},context_instance=RequestContext(request))       
             
     else:
         return render_to_response('questionform.html', 
-        {'form': questionForm,},context_instance=RequestContext(request))
+        {'form': questionForm,'questionnaire':this_questionnaire,'questiongroup':questiongroup,},context_instance=RequestContext(request))
     
         
 

@@ -7,6 +7,8 @@ Created on Jul 10, 2012
 from django.db import models
 
 from django.contrib.auth.models import User
+from django import forms
+
 
 
 class CustomListField(models.TextField):
@@ -44,7 +46,6 @@ class CustomListField(models.TextField):
        # value = self._get_val_from_obj(obj)
        # return self.get_db_prep_value(value) 
 
-     
 FIELD_TYPE_CHOICES=(('charfield','charfield'),('textfield','textfield'),('booleanfield','boolean'),('select_dropdown_field','select_dropdown_field'),('radioselectfield','radioselectfield'),('multiplechoicefield','multiplechoicefield'))
     
 class Question(models.Model):
@@ -69,6 +70,34 @@ class Question(models.Model):
             
             
         super(Question,self).save(*args,**kwgs)
+
+
+class QuestionAdminForm(forms.ModelForm):
+    '''
+    overide admin form for validation of  Question selectoptions 
+    ensure user enter valid selectionoptions/choice for all  field types 
+    1.check selectoptions field for choicefield i.e multiplechoice ,radioselectfield and select_dropdown_field field_type 
+    is not empty and is   ","  separated string
+    2.check the selectioptions for Non choice field types are None or Empty i.e charfield,textfield ,booleanfield 
+    '''
+    class Meta:
+        model = Question
+
+    def clean(self):
+        label=self.cleaned_data["label"]
+        field_type=self.cleaned_data["field_type"]
+        selectoptions = self.cleaned_data["selectoptions"]
+        
+        
+        if field_type  in ['select_dropdown_field','radioselectfield', 'multiplechoicefield'] : 
+            if  not selectoptions or  ","  not in  selectoptions :
+                raise forms.ValidationError("Select Options is required for this field type enter valid options seperated by comma  e.g No ,Yes,Not Applicable")
+            
+        elif field_type in ['charfield','textfield','booleanfield']:
+            if selectoptions :
+                raise forms.ValidationError("SelectOptions Must Be Empty  not required  for this field type")
+        
+        return self.cleaned_data
 
     
 class QuestionGroup(models.Model):

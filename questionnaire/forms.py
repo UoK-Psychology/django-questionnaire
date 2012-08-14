@@ -20,21 +20,9 @@ def get_choices(question):
     '''
      @return: choices for a given select type question
     '''
-#    try: 
-#        choices_list = question.selectoptions
-#        choices= [(x,x) for x in choices_list]
-#        return choices
-#    except (ValueError, TypeError) as e:
-#        e('Value Error or Type Error')
-        
-
-    if question.selectoptions == None:
-        return None
-    
-    else:
-        choices_list = question.selectoptions
-        choices= [(x,x) for x in choices_list]
-        return choices
+    choices_list = question.selectoptions
+    choices= [(x,x) for x in choices_list]
+    return choices
     
 def generate_charfield():
     '''
@@ -121,7 +109,7 @@ def  create_question_answer_edit_form(user,this_questionnaire,this_questiongroup
     '''
     create form for editing recent question answer for given user 
     prepopulate fields with most recent answers for given user and questiongroup
-    field.initial store  most recent answers to prepopulate the form fields .xx 
+    field.initial store  most recent answers to prepopulate the form fields 
     '''  
     q_list=QuestionAnswer.objects.values('question','answer_set').annotate(Max('id'))
     answer_max_id_list=q_list.values_list('id__max',flat=True)

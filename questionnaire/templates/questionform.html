@@ -1,22 +1,16 @@
 
 <form method="post" action=".">
-{% load questionapp_extra %}
-	<title> {{thisquestionnairename}}</title>
+
+	<title> {{questionnaire.name}} {{questiongroup}}</title>
 	 
-	<h2>{{thisquestionnairename}}</h2> 
-	<h3>Group :{{questionnaire_id}}</h3>
+	<h2>{{questionnaire.name}}</h2> 
+	<h3>QuestionGroup :{{questiongroup}}</h3>
 	
 {%csrf_token %}
 
 {% for field in form %}
-    <div class="fieldWrapper">
-     
- 
-     
-       <p>  {{ field.label_tag }}: {{ field }} <strong>{{ field.errors }}</strong></p>
-     
-    
-    
+    <div class="fieldWrapper"> 
+       <p>  {{ field.label_tag }}: {{ field }} <strong>{{ field.errors }}</strong></p
        </div>
 {% endfor %}
 
