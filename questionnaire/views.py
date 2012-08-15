@@ -25,6 +25,10 @@ def index (request):
 
 @login_required
 def handle_next_questiongroup_form(request,questionnaire_id,order_info=None):
+    
+    '''
+        TODO: Document me!!
+    '''
     questionnaire_id = int(questionnaire_id)
     if order_info==None:
         order_info = 1
@@ -78,6 +82,9 @@ def handle_next_questiongroup_form(request,questionnaire_id,order_info=None):
 
 
 def finish(request):
+    '''
+        TODO: Document me!!
+    '''
     return render_to_response('finish.html')     
       
 
