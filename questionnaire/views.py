@@ -168,8 +168,6 @@ def edit_question_answer(request,questionnaire_id,questiongroup_id):
         
         form=editForm(request.POST)
         
-        
-        
         if form.is_valid():
             
             #TODO this logic seems very similar to the handle_next_questiongroup_form function consider refactoring, perhaps abstracting this logic to another function that can be used by both views?        
@@ -200,7 +198,7 @@ def edit_question_answer(request,questionnaire_id,questiongroup_id):
 
 #End refactor target
 
-@login_required    
+@login_required     
 def all_question_answers_for_questiongroup(request,user_id,questionnaire_id,questiongroup_id):
     
     '''
@@ -211,29 +209,29 @@ def all_question_answers_for_questiongroup(request,user_id,questionnaire_id,ques
     '''
     questiongroup_id=int(questiongroup_id)   #TODO is this really nescessary?
     
-    if request.method=='GET':#TODO: is this really nescessay?
+    #TODO: is this really nescessay?
         
         #TODO: This logic seems to be very similar to display_question_answer consider refactoring and abstracting the common logic into a shared function
-        user =get_object_or_404(User,pk=user_id)
-        this_questionnaire=get_object_or_404(Questionnaire,pk=questionnaire_id)
-        this_questiongroup=get_object_or_404(QuestionGroup,pk=questiongroup_id)
+    user =get_object_or_404(User,pk=user_id)
+    this_questionnaire=get_object_or_404(Questionnaire,pk=questionnaire_id)
+    this_questiongroup=get_object_or_404(QuestionGroup,pk=questiongroup_id)
         
         #TODO: use .get_ordered_groups() for this as it abstracts the need to know about the ordering implementation and you won't need the next line as it returns a list of questiongroups
 #        orderedgroups = QuestionGroup_order.objects.filter(questionnaire= this_questionnaire).order_by('order_info') 
-        orderedgroups=this_questionnaire.get_ordered_groups()   
-        groups_list=[(x.questiongroup) for x in orderedgroups]
+    orderedgroups=this_questionnaire.get_ordered_groups()   
+    groups_list=[(x.questiongroup) for x in orderedgroups]
         
         #TODO explain what this does
-        y=QuestionAnswer.objects.filter(Q(answer_set__user_id=user,answer_set__questiongroup=this_questiongroup,answer_set__questionnaire=this_questionnaire)) 
-        questionanswer=[(x.question.id,x.question.label ,x.answer) for x in y]
+    y=QuestionAnswer.objects.filter(Q(answer_set__user_id=user,answer_set__questiongroup=this_questiongroup,answer_set__questionnaire=this_questionnaire)) 
+    questionanswer=[(x.question.id,x.question.label ,x.answer) for x in y]
        
        
-        qs= sorted(set(questionanswer),key=itemgetter(0))            
-        questionanswer_list = list(map(itemgetter(0), groupby(qs)))        
+    qs= sorted(set(questionanswer),key=itemgetter(0))            
+    questionanswer_list = list(map(itemgetter(0), groupby(qs)))        
 #        context= questionanswer_list
 
         #
-        return render_to_response('all_questionanswers.html',{'questionanswer_list':questionanswer_list,'user':user,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
+    return render_to_response('all_questionanswers.html',{'questionanswer_list':questionanswer_list,'user':user,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
 
 
 
@@ -249,8 +247,9 @@ def questionnaire_detail_list(request,questionnaire_id):
         
     #TODO: use .get_ordered_groups() for this as it abstracts the need to know about the ordering implementation and you won't need the next line as it returns a list of questiongroups
 #        orderedgroups = QuestionGroup_order.objects.filter(questionnaire= this_questionnaire).order_by('order_info') 
-    orderedgroups=this_questionnaire.get_ordered_groups()    
-    groups_list=[(x.questiongroup) for x in orderedgroups]
+    groups_list=this_questionnaire.get_ordered_groups()    
+#    groups_list=[(x.questiongroup) for x in orderedgroups]
+   
         
         #TODO: careful about using context as a variable now it has special significance in views
    
