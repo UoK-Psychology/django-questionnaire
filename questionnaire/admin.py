@@ -25,13 +25,16 @@ class QuestionAdmin(admin.ModelAdmin):
 
 class QuestionnaireInline(admin.TabularInline):
     '''
-        TODO: Document me!!
+        This class acts as 'connecting' model class that connects many to many relationship
+        between Questionnaire and QuestionGroup
+        
     '''
     model = Questionnaire.questiongroup.through
     
 class QuestionnaireAdmin(admin.ModelAdmin):
     '''
-        TODO: Document me!!
+         Inlines enables the admin interface the ability the ability to edit models on the same page as a parent model.
+         
     '''
     inlines = [
                QuestionnaireInline,
@@ -40,7 +43,8 @@ class QuestionnaireAdmin(admin.ModelAdmin):
     
 class QuestionGroup_OrderAdmin(admin.ModelAdmin):
     '''
-        TODO: Document me!!
+        list_display is use to control which fields are displayed on the change list page of the admin.
+        i.e It also acts as a register/management of the model class, editing and addition of its object from the admin view.
     '''
     list_display = ('questiongroup','questionnaire','order_info')
     
@@ -48,13 +52,15 @@ class QuestionGroup_OrderAdmin(admin.ModelAdmin):
 
 class QuestionGroupInline(admin.TabularInline):
     '''
-        TODO: Document me!!
+        This class acts as 'connecting' model class that connects many to many relationship
+        between Questiongroup and Questions
+        
     '''
     model = QuestionGroup.questions.through
     
 class QuestiongroupAdmin(admin.ModelAdmin):
     '''
-        TODO: Document me!!
+        Inlines enables the admin interface the ability the ability to edit models on the same page as a parent model.
     '''
     inlines = [
                QuestionGroupInline,
@@ -63,7 +69,7 @@ class QuestiongroupAdmin(admin.ModelAdmin):
 
 class Question_OrderAdmin(admin.ModelAdmin):
     '''
-        TODO: Document me!!
+        list_display is use to control which fields are displayed on the change list page of the admin.
     '''
     list_display = ('questiongroup','question','order_info')
     
@@ -74,13 +80,16 @@ class Question_OrderAdmin(admin.ModelAdmin):
 
 class AnswerSetAdmin(admin.ModelAdmin):
     '''
-        TODO: Document me!!
+    list_display is use to control which fields are displayed on the change list page of the admin.
+    i.e It also acts as a register/management of the model class, editing and addition of its object from the admin view.
+       
     '''
     list_display=('user','questionnaire','questiongroup')
     
 class QuestionAnswerAdmin(admin.ModelAdmin):
     '''
-        TODO: Document me!!
+    list_display is use to control which fields are displayed on the change list page of the admin.
+    i.e It also acts as a register/management of the model class, editing and addition of its object from the admin view.
     '''
     list_display =('question', 'answer', 'answer_set')
     
