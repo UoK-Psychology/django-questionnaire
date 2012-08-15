@@ -181,7 +181,7 @@ def edit_question_answer(request,questionnaire_id,questiongroup_id):
 #TODO: you should be able to refactor this so that you dont duplicate all of this code, if you get rid of the else clauses, if you get this far then you are either
 #dealing with an invalid form or a get request, and you should be able to hand them in the same way
             return render_to_response('edit_questionanswer_form.html', 
-        {'form': form,'user':user,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
+       {'form': form,'user':user,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
     #TODO: you don't need to explicitly put user into your responses context, it will get put there by virtue of using context_instance=RequestContext(request)
     else :
         return render_to_response('edit_questionanswer_form.html', 

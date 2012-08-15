@@ -8,13 +8,15 @@ from models import Question, QuestionGroup, Questionnaire, QuestionGroup_order, 
  
 class QuestionAdmin(admin.ModelAdmin):
     '''
-        TODO: Document me!!
+    custom form for display and creating question in the admin 
+    
     '''
     form=QuestionAdminForm
     list_display=('label','field_type','selectoptions_list')
     def selectoptions_list(self, obj):
         '''
-        TODO: Document me!!
+        @return: selectoptions List  as string separated comma e.g A,B,C if question has selectoption
+        otherwise return  None
         '''
         if obj.selectoptions:
             return ', '.join(str(x) for x in obj.selectoptions)

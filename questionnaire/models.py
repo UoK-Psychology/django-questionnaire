@@ -10,7 +10,6 @@ from django.contrib.auth.models import User
 from django import forms
 
 
-
 class CustomListField(models.TextField):
     '''
     for creating  custom list field override some model.fields methods
@@ -47,8 +46,20 @@ FIELD_TYPE_CHOICES=(('charfield','charfield'),('textfield','textfield'),('boolea
     
 class Question(models.Model):
     '''
-    responsible for storing questions
-    define attributes of a question and type of questions e.g boolean ,textfield , charfield
+    model question objects attributes
+    define attributes of a question:
+    1.label : the actual question  eg what is your name?
+    2.field_type: type of questions or type of answers you expect or require for the question e.g 
+        booleanfield -if answer require is True or False
+        charfield-if answer require typing some info in a form field 
+        textfield- if answer require typing more detail info in a form text field 
+        select_dropdown_field- if answer require selecting one answer from some options 
+        multiplechoicefield-if answer require selecting one or more answer from some options
+        radioselectfield-if answer require selecting only one answer from some options 
+    3.selectoptions :list of choices or options available for  question .Required for field type is choicefields i.e select_dropdown_field,radioselectfield, multiplechoicefield
+                     otherwise selectoptions is None .options stored as comma ","seperarted strings
+                     e.g selectoptions for a question of field_type-radioselectfield may be 'Yes',' No' ,'Not Applicable'
+    
     '''
     class Meta():
         db_table ='question'
@@ -62,63 +73,70 @@ class Question(models.Model):
     
     def save(self,*args,**kwgs):
         '''
-            TODO: document how this is different from the superclass save method
+          ensure selectoption for non choicefield is saved as None 
+          only choicefields require selectoptions i.e select_dropdown_field,radioselectfield, multiplechoicefield should have options 
         '''
         if not self.id:
             if not self.field_type in ['select_dropdown_field','radioselectfield', 'multiplechoicefield'] :              
                 self.selectoptions = None
             
-            
         super(Question,self).save(*args,**kwgs)
 
 
-class FlattenListWidget(forms.Textarea):
+class CustomListWidget(forms.Textarea):
     '''
-    create custom widget flatten Custom List Field 
-    displays select optionsList as string of strings  separated by comma 
+    create flatten custom widget use to render CustomList Field 
+    displays selectoptions List as string of strings  separated by comma 
+    e.g customList field [A,B,C] will be displayed and stored as A,B,C string
     '''
     def render(self, name, value, attrs=None):
-        if not value is None:
+        if  value :
             value = ','.join(str(v) for v in value)
-        return super(FlattenListWidget, self).render(name, value, attrs)
-
+        return super(CustomListWidget, self).render(name, value, attrs)
 
 
 class QuestionAdminForm(forms.ModelForm):
     '''
-    overide admin form for validation of  Question selectoptions 
-    ensure user enter valid selectionoptions/choice for all  field types 
+    overide admin form validation for  Question selectoptions attribute 
+    ensure user enter valid selectionoptions/choices for all  field types 
     1.check selectoptions field for choicefield i.e multiplechoice ,radioselectfield and select_dropdown_field field_type 
-    is not empty and is   ","  separated string
+    is not empty and are   ","  separated string
     2.check the selectioptions for Non choice field types are None or Empty i.e charfield,textfield ,booleanfield 
+    if error appropriate error message will be displayed
+    Questions are reuseable
     '''
     class Meta:
         model = Question
-        widgets = {'selectoptions': FlattenListWidget(),}
+        widgets = {'selectoptions': CustomListWidget(),}
 
     def clean(self):
-        label=self.cleaned_data["label"]
+        '''
+        custom clean for select options validation
+        @return: cleaned_data
+        
+        '''
         field_type=self.cleaned_data["field_type"]
         selectoptions = self.cleaned_data["selectoptions"]
         
-        
         if field_type  in ['select_dropdown_field','radioselectfield', 'multiplechoicefield'] : 
-            if  not selectoptions or  ","  not in  selectoptions :
-                raise forms.ValidationError("Select Options is required for this field type enter valid options seperated by comma  e.g No ,Yes,Not Applicable")
             
+            if  not selectoptions:
+                raise forms.ValidationError("Select Options is required for "+ str(field_type)+ " enter valid options seperated with commas e.g No,Yes,Not Applicable")        
+          
+            elif  ","  not in  selectoptions :
+                raise forms.ValidationError("Enter valid options seperated with comma e.g No,Yes,Not Applicable")
+                
         elif field_type in ['charfield','textfield','booleanfield']:
             if selectoptions :
-                raise forms.ValidationError("SelectOptions Must Be Empty  not required  for this field type")
+                raise forms.ValidationError("Select Options is not required  for " + str(field_type) + " Must Be Left Empty")
         
         return self.cleaned_data
-    
-
 
     
 class QuestionGroup(models.Model):
     '''
     reponsible for question groups ,each group set can have one to  many set of questions 
-    order_no store the order or sequence the question group is to be rendered .e.g  order_no = 2 will be rendered before order_no =3  
+    order_info store the order or sequence the question group is to be rendered in a form .e.g  order_info = 2 will be rendered before order_info =3  
     '''
     class Meta():
         db_table ='questiongroup'
@@ -127,7 +145,7 @@ class QuestionGroup(models.Model):
     
     def get_ordered_questions(self):
         '''
-            TODO: Document me!!
+        @return: questions in  question group ordered by order_info
         '''
         return [order.question for order in Question_order.objects.filter(questiongroup=self).order_by('order_info')]
     
@@ -136,14 +154,19 @@ class QuestionGroup(models.Model):
    
 class Questionnaire(models.Model):
     '''
-    This class stores the Questionnaire name
+    This class models the Questionnaire and its attributes
+    name : name for the questionnaire 
+    questiongroups: the question groups in the named questionnaire
+    questiongroups are reuseable i.e a given questiongroup can be reused in one or more questionnaire  
+     
     '''
     name=models.CharField(max_length=250)
     questiongroup=models.ManyToManyField(QuestionGroup, through='QuestionGroup_order')
     
     def get_ordered_groups(self):
         '''
-            TODO: Document me!!
+        @return: the questiongroups in a questionnaire order by the order_info
+            
         '''
         return QuestionGroup_order.objects.filter(questionnaire=self).order_by('order_info')
     
@@ -152,7 +175,8 @@ class Questionnaire(models.Model):
     
 class QuestionGroup_order(models.Model):
     '''
-    This class stores the ordering of the question rendered on the page
+    This class stores the ordering of the questiongroups rendered in a questinnaire
+    order_info store the order or sequence the questiongroup is to be rendered in a form .e.g  order_info = 2 will be rendered before order_info =3  
     '''
     questiongroup=models.ForeignKey(QuestionGroup)
     questionnaire=models.ForeignKey(Questionnaire)
@@ -164,7 +188,8 @@ class QuestionGroup_order(models.Model):
     
 class Question_order(models.Model):
     '''
-    This class is responsible in storing the ordering relation ship between the question and questiongroup
+    This class is responsible in storing the ordering relationship between the question and questiongroup
+    order_info store the order or sequence the questions in a questiongroup is to be rendered in a form .e.g  order_info = 2 will be rendered before order_info =3  
     '''
     questiongroup =models.ForeignKey(QuestionGroup)
     question = models.ForeignKey(Question)
@@ -177,7 +202,8 @@ class Question_order(models.Model):
         
 class AnswerSet(models.Model):
     '''
-    this class datamodel for storing users and questionnaire
+  model store relationship for users answer for  questiongroup in a questionnaire
+  associates a user to a questiongroup in a questionnaire when answers the questionnaire
 
     '''
     class Meta():
@@ -185,19 +211,13 @@ class AnswerSet(models.Model):
     user=models.ForeignKey(User)
     questionnaire=models.ForeignKey(Questionnaire)
     questiongroup=models.ForeignKey(QuestionGroup)
-    
-    def save(self, *args, **kwargs):         
-        '''
-            TODO: document how this is different from the superclass save method
-        '''              
-        super(AnswerSet, self).save(*args, **kwargs)
         
     def __unicode__(self):
         return 'user:%s questionnaire:%s  questiongroup:%s ' %(str(self.user), str(self.questionnaire),str(self.questiongroup)) 
         
 class QuestionAnswer(models.Model):    
     '''
-    This model is used to store reusable question, answer and answer_set
+    This model stores questions, answers and related answer_set 
     '''
     class Meta():
         db_table ='questionanswer'
@@ -205,12 +225,8 @@ class QuestionAnswer(models.Model):
     question = models.ForeignKey(Question)
     answer = models.CharField(max_length=255)
     answer_set = models.ForeignKey(AnswerSet)
-    
-    def save(self, *args, **kwargs):    
-        '''
-            TODO: document how this is different from the superclass save method
-        '''
-        super(QuestionAnswer, self).save(*args, **kwargs)  
+     
     
     def __unicode__(self):
         return 'question:%s answer:%s answer_set:%s' %(str(self.question), str(self.answer), str(self.answer_set))
+
