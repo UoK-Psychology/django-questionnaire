@@ -27,11 +27,11 @@ def index (request):
 def handle_next_questiongroup_form(request,questionnaire_id,order_info=None):
     
     '''
-        TODO: Document me!!
+        TODO: Document me!! in particular what are questionniare_id and order_id and how are they used
     '''
     questionnaire_id = int(questionnaire_id)
     if order_info==None:
-        order_info = 1
+        order_info = 1 #TODO: Explain why it is 1
 
     else:
         order_info = int(order_info)
@@ -39,13 +39,16 @@ def handle_next_questiongroup_form(request,questionnaire_id,order_info=None):
     this_questionnaire = get_object_or_404(Questionnaire, pk=questionnaire_id)
     
 
-    orderedgroups = this_questionnaire.get_ordered_groups()
     
+    #Start refactor target:
+    #TODO:This is a bit over complicated, you are juggling a lot variables around when your aim is simply to get a reference to the questiongroup, and create a form based on it
+    #This could even be refactored out into a module function which could then be seperately unit tested
+    orderedgroups = this_questionnaire.get_ordered_groups()
     questiongroup_id = orderedgroups[order_info-1].questiongroup.id
-    this_questiongroup=get_object_or_404(QuestionGroup,pk=questiongroup_id)   
-    questiongroup = this_questiongroup
+    this_questiongroup=get_object_or_404(QuestionGroup,pk=questiongroup_id)  #TODO: you have already got a reference to the questiongroup object, no need to use the id to get it again!
+    questiongroup = this_questiongroup # TODO: Why not just use questiongroup as the variable name from the start?
     questionForm = make_question_group_form(questiongroup,questionnaire_id)
-
+    #End Refactor target
     
     
     if request.method =='POST':
@@ -60,21 +63,27 @@ def handle_next_questiongroup_form(request,questionnaire_id,order_info=None):
                 if isinstance(answer,list):
                         answer = ', '.join(answer)
                 
+                # TODO: I wonder if there is a more efficient way of doing this
+                #my understanding is that we are trying to cope with a situtation where we could either be dealing
+                #with a field that is new (never been submitted before) or existing but has been edited, or existing and has not changed
+                #This method works because it asks the database for each field if an QuestionAnswer exists with this signature
+                #and if not it creates it, but this is inefficient as it will lead to lots of calls to the database
+                #you could use the changed_data property on the form to achieve the same thing without going to the database?
                 this_question_answer, create = QuestionAnswer.objects.get_or_create(question= get_object_or_404(Question, pk=question),answer=str(answer),answer_set=this_answer_set)
                 
-            if order_info >= orderedgroups.count():
+            if order_info >= orderedgroups.count():#this is the last group in the questionnaire
                 return HttpResponseRedirect(reverse('questionnaire_finish'))
             
             else: 
                 order_info = order_info + 1
                 return HttpResponseRedirect(reverse('handle_next_questiongroup_form', kwargs = {'questionnaire_id': questionnaire_id, 'order_info' : order_info}))
         
-        else:
+        else:#TODO: you don't need this else block as it repeats the code below it
             
             return render_to_response('questionform.html', 
         {'form': form,'questionnaire':this_questionnaire,'questiongroup':questiongroup,},context_instance=RequestContext(request))       
             
-    else:
+    else:#TODO: this code doesn't need to be in an else block , this code could be left outside the if statement, as if you have got this far then either it is a get request or an invalid post request, and both should be handled in the same way
         return render_to_response('questionform.html', 
         {'form': questionForm,'questionnaire':this_questionnaire,'questiongroup':questiongroup,},context_instance=RequestContext(request))
     
@@ -85,7 +94,7 @@ def finish(request):
     '''
         TODO: Document me!!
     '''
-    return render_to_response('finish.html')     
+    return render_to_response('finish.html')     #you will still want to pass this through the RequestContext, which enables middleware to add things to the response  eg. context_instance=RequestContext(request)
       
 
 
@@ -98,23 +107,26 @@ def display_question_answer(request,questionnaire_id,questiongroup_id):
     questiongroup_id=int(questiongroup_id)
     
 
-    if request.method=='GET':
+    if request.method=='GET': #TODO: is it really nescessary to check that it is a GET request, worst comes to worse if someone posts to this you will just treat it like a GET? Additionaly if you don't return anything from this function then an error will be raised so if it is important that it be a get request there should be an else that either raises an appropriate message (404?!), or renders a hepful erorr message page
         user=request.user
         this_questionnaire=get_object_or_404(Questionnaire,pk=questionnaire_id)
         this_questiongroup=get_object_or_404(QuestionGroup,pk=questiongroup_id)
         
+        #TODO can you explain this?
         q_list=QuestionAnswer.objects.values('question','answer_set').annotate(Max('id'))
         answer_max_id_list=q_list.values_list('id__max',flat=True)
        
         
-        orderedgroups = QuestionGroup_order.objects.filter(questionnaire= this_questionnaire).order_by('order_info')    
+        #TODO: Why do you need to get the ordered list of groups? you have specified a specific question group_id as an argument for the function?
+        orderedgroups = QuestionGroup_order.objects.filter(questionnaire= this_questionnaire).order_by('order_info')#TODO: use .get_ordered_groups() for this as it abstracts the need to know about the ordering implementation and you won't need the next line as it returns a list of questiongroups
         groups_list=[(x.questiongroup) for x in orderedgroups]
         
+        #TODO: this seems a quite complex, and is difficult to follow, either add a comment to explain what you are doing, or consider refactoring to make it simpler?
         y=QuestionAnswer.objects.filter(Q(answer_set__user_id=user,answer_set__questiongroup=this_questiongroup,answer_set__questionnaire=this_questionnaire)).filter(id__in=answer_max_id_list)          
         questionanswer=[(x.question.id,x.question.label ,x.answer) for x in y]
-        
 
-        context=questionanswer
+        context=questionanswer#TODO: Be careful using the variable context, it has special significance, and using this way would be confusing to the reader of your code
+        #TODO: you don't need to explicitly put user into your responses context, it will get put there by virtue of using context_instance=RequestContext(request)
         return render_to_response('display_questionanswer.html',{'context':context,'user':user,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
 
 
@@ -130,11 +142,12 @@ def edit_question_answer(request,questionnaire_id,questiongroup_id):
     '''
     
     user=request.user   
-    questionnaire_id=int(questionnaire_id)
-    questiongroup_id=int(questiongroup_id)
+    questionnaire_id=int(questionnaire_id)#TODO: Do you really need to cast to an int?
+    questiongroup_id=int(questiongroup_id)#TODO: Do you really need to cast to an int?
     this_questionnaire=get_object_or_404(Questionnaire,pk=questionnaire_id)
     this_questiongroup=get_object_or_404(QuestionGroup,pk=questiongroup_id)
         
+    #TODO: use .get_ordered_groups() for this as it abstracts the need to know about the ordering implementation and you won't need the next line as it returns a list of questiongroups
     orderedgroups = QuestionGroup_order.objects.filter(questionnaire= this_questionnaire).order_by('order_info')    
     groups_list=[(x.questiongroup.id) for x in orderedgroups]
 
@@ -144,8 +157,11 @@ def edit_question_answer(request,questionnaire_id,questiongroup_id):
         
         form=editForm(request.POST)
         
+        
+        
         if form.is_valid():
-                        
+            
+            #TODO this logic seems very similar to the handle_next_questiongroup_form function consider refactoring, perhaps abstracting this logic to another function that can be used by both views?        
             this_answer_set, created = AnswerSet.objects.get_or_create(user=request.user,questionnaire=this_questionnaire,questiongroup=this_questiongroup)
             
             
@@ -161,15 +177,17 @@ def edit_question_answer(request,questionnaire_id,questiongroup_id):
             return HttpResponseRedirect(reverse('questionnaire_finish'))            
         else:
                        
-       
+#Start refactor target:  
+#TODO: you should be able to refactor this so that you dont duplicate all of this code, if you get rid of the else clauses, if you get this far then you are either
+#dealing with an invalid form or a get request, and you should be able to hand them in the same way
             return render_to_response('edit_questionanswer_form.html', 
         {'form': form,'user':user,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
-    
+    #TODO: you don't need to explicitly put user into your responses context, it will get put there by virtue of using context_instance=RequestContext(request)
     else :
         return render_to_response('edit_questionanswer_form.html', 
                                       {'form': editForm,'user':user,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
 
-
+#End refactor target
 
 @login_required    
 def all_question_answers_for_questiongroup(request,user_id,questionnaire_id,questiongroup_id):
@@ -180,18 +198,21 @@ def all_question_answers_for_questiongroup(request,user_id,questionnaire_id,ques
     permission  still need to be set and implemented as required
    
     '''
-    questiongroup_id=int(questiongroup_id)   
+    questiongroup_id=int(questiongroup_id)   #TODO is this really nescessary?
     
-    if request.method=='GET':
+    if request.method=='GET':#TODO: is this really nescessay?
+        
+        #TODO: This logic seems to be very similar to display_question_answer consider refactoring and abstracting the common logic into a shared function
         user =get_object_or_404(User,pk=user_id)
         this_questionnaire=get_object_or_404(Questionnaire,pk=questionnaire_id)
         this_questiongroup=get_object_or_404(QuestionGroup,pk=questiongroup_id)
         
+        #TODO: use .get_ordered_groups() for this as it abstracts the need to know about the ordering implementation and you won't need the next line as it returns a list of questiongroups
         orderedgroups = QuestionGroup_order.objects.filter(questionnaire= this_questionnaire).order_by('order_info')    
         groups_list=[(x.questiongroup) for x in orderedgroups]
         
-        y=QuestionAnswer.objects.filter(Q(answer_set__user_id=user,answer_set__questiongroup=this_questiongroup,answer_set__questionnaire=this_questionnaire))
-           
+        #TODO explain what this does
+        y=QuestionAnswer.objects.filter(Q(answer_set__user_id=user,answer_set__questiongroup=this_questiongroup,answer_set__questionnaire=this_questionnaire)) 
         questionanswer=[(x.question.id,x.question.label ,x.answer) for x in y]
        
        
@@ -199,6 +220,7 @@ def all_question_answers_for_questiongroup(request,user_id,questionnaire_id,ques
         questionanswer_list = list(map(itemgetter(0), groupby(qs)))        
         context= questionanswer_list
 
+        #
         return render_to_response('all_questionanswers.html',{'context':context,'user':user,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
 
 
@@ -209,12 +231,17 @@ def questionnaire_detail_list(request,questionnaire_id):
     show  detail list as links  for all questiongroups in a given questionnaire ordered by order_info
     links can be use to edit or display given  questionanswer for questiongroups in questionnaire
     '''
-    if request.method=='GET':
+    if request.method=='GET':#TODO: is this really nescessay?
         
         this_questionnaire=get_object_or_404(Questionnaire,pk=questionnaire_id)
+        
+        #TODO: use .get_ordered_groups() for this as it abstracts the need to know about the ordering implementation and you won't need the next line as it returns a list of questiongroups
         orderedgroups = QuestionGroup_order.objects.filter(questionnaire= this_questionnaire).order_by('order_info')    
         groups_list=[(x.questiongroup) for x in orderedgroups]
+        
+        #TODO: careful about using context as a variable now it has special significance in views
         context = groups_list
+        #TODO: you don't need to explicitly put user into your responses context, it will get put there by virtue of using context_instance=RequestContext(request)
         return render_to_response('questionnaire_detail.html',{'context':context, 'questionnaire':this_questionnaire,},context_instance=RequestContext(request))
 
     
