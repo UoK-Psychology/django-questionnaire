@@ -7,38 +7,62 @@ from django.contrib import admin
 from models import Question, QuestionGroup, Questionnaire, QuestionGroup_order, Question_order, AnswerSet, QuestionAnswer,QuestionAdminForm
  
 class QuestionAdmin(admin.ModelAdmin):
+    '''
+        TODO: Document me!!
+    '''
     form=QuestionAdminForm
     list_display=('label','field_type','selectoptions_list')
     def selectoptions_list(self, obj):
+        '''
+        TODO: Document me!!
+        '''
         if obj.selectoptions:
             return ', '.join(str(x) for x in obj.selectoptions)
         return None
 
 
 class QuestionnaireInline(admin.TabularInline):
+    '''
+        TODO: Document me!!
+    '''
     model = Questionnaire.questiongroup.through
     
 class QuestionnaireAdmin(admin.ModelAdmin):
+    '''
+        TODO: Document me!!
+    '''
     inlines = [
                QuestionnaireInline,
                ]
     exclude = ('questiongroup',)
     
 class QuestionGroup_OrderAdmin(admin.ModelAdmin):
+    '''
+        TODO: Document me!!
+    '''
     list_display = ('questiongroup','questionnaire','order_info')
     
 
 
 class QuestionGroupInline(admin.TabularInline):
+    '''
+        TODO: Document me!!
+    '''
     model = QuestionGroup.questions.through
     
 class QuestiongroupAdmin(admin.ModelAdmin):
+    '''
+        TODO: Document me!!
+    '''
     inlines = [
                QuestionGroupInline,
                ]   
     exclude = ('questions',)
 
 class Question_OrderAdmin(admin.ModelAdmin):
+    '''
+        TODO: Document me!!
+    '''
     list_display = ('questiongroup','question','order_info')
     
 
@@ -47,9 +71,15 @@ class Question_OrderAdmin(admin.ModelAdmin):
 
 
 class AnswerSetAdmin(admin.ModelAdmin):
+    '''
+        TODO: Document me!!
+    '''
     list_display=('user','questionnaire','questiongroup')
     
 class QuestionAnswerAdmin(admin.ModelAdmin):
+    '''
+        TODO: Document me!!
+    '''
     list_display =('question', 'answer', 'answer_set')
     
     
