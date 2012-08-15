@@ -3,7 +3,7 @@
 	 
 	{%csrf_token %}
 	    
-    {% if context %}
+    {% if questionanswer %}
     
    <h3>Questionanswer Display Questiongroup:{{questiongroup_id}} </h3>
    {% if groups_list %}
@@ -27,9 +27,9 @@
      {%endif%}
     
    <p><h3>Questionnaire : {{questionnaire.name}}     Questiongroup: {{questiongroup_id}}  </h3></p>
-	<p><h3>  user: {{user}}</h3></p>
+	<p><h3>  user: {{request.user}}</h3></p>
      
-    {% for x in context %}
+    {% for x in questionanswer %}
     
       {% ifchanged x.0 %} 
      <strong><p>Question id : {{x.0}}  Question:{{x.1|capfirst}}</p></strong>
