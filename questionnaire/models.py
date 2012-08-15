@@ -42,9 +42,6 @@ class CustomListField(models.TextField):
         assert(isinstance(value, list) or isinstance(value, tuple))
         return self.token.join([unicode(s) for s in value])
 
-    #def value_to_string(self, obj):
-       # value = self._get_val_from_obj(obj)
-       # return self.get_db_prep_value(value) 
 
 FIELD_TYPE_CHOICES=(('charfield','charfield'),('textfield','textfield'),('booleanfield','boolean'),('select_dropdown_field','select_dropdown_field'),('radioselectfield','radioselectfield'),('multiplechoicefield','multiplechoicefield'))
     
@@ -64,6 +61,9 @@ class Question(models.Model):
         return 'Question:%s FieldType:%s Selectoptions:%s' %(self.label, self.field_type,str(self.selectoptions))
     
     def save(self,*args,**kwgs):
+        '''
+            TODO: document how this is different from the superclass save method
+        '''
         if not self.id:
             if not self.field_type in ['select_dropdown_field','radioselectfield', 'multiplechoicefield'] :              
                 self.selectoptions = None
@@ -126,6 +126,9 @@ class QuestionGroup(models.Model):
     questions = models.ManyToManyField(Question, through = 'Question_order')
     
     def get_ordered_questions(self):
+        '''
+            TODO: Document me!!
+        '''
         return [order.question for order in Question_order.objects.filter(questiongroup=self).order_by('order_info')]
     
     def __unicode__(self):
@@ -139,6 +142,9 @@ class Questionnaire(models.Model):
     questiongroup=models.ManyToManyField(QuestionGroup, through='QuestionGroup_order')
     
     def get_ordered_groups(self):
+        '''
+            TODO: Document me!!
+        '''
         return QuestionGroup_order.objects.filter(questionnaire=self).order_by('order_info')
     
     def __unicode__(self):
@@ -180,7 +186,10 @@ class AnswerSet(models.Model):
     questionnaire=models.ForeignKey(Questionnaire)
     questiongroup=models.ForeignKey(QuestionGroup)
     
-    def save(self, *args, **kwargs):                       
+    def save(self, *args, **kwargs):         
+        '''
+            TODO: document how this is different from the superclass save method
+        '''              
         super(AnswerSet, self).save(*args, **kwargs)
         
     def __unicode__(self):
@@ -197,7 +206,10 @@ class QuestionAnswer(models.Model):
     answer = models.CharField(max_length=255)
     answer_set = models.ForeignKey(AnswerSet)
     
-    def save(self, *args, **kwargs):                       
+    def save(self, *args, **kwargs):    
+        '''
+            TODO: document how this is different from the superclass save method
+        '''
         super(QuestionAnswer, self).save(*args, **kwargs)  
     
     def __unicode__(self):
