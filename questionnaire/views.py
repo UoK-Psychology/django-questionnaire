@@ -20,8 +20,14 @@ from django.contrib.auth.decorators import login_required
 
 
 
-def index (request):
-    return HttpResponseRedirect(reverse('index'))
+def questionnaire_index (request):
+    questionnaire = Questionnaire.objects.all()
+    answer_set = AnswerSet.objects.all()
+    
+    group_list=[x for x in questionnaire]
+    
+    return render_to_response('questionnaire_index.html',{'group_list': group_list},context_instance=RequestContext(request))
+    
 
 @login_required
 def handle_next_questiongroup_form(request,questionnaire_id,order_info=None):
@@ -30,8 +36,9 @@ def handle_next_questiongroup_form(request,questionnaire_id,order_info=None):
         TODO: Document me!! in particular what are questionniare_id and order_id and how are they used
     '''
     questionnaire_id = int(questionnaire_id)
+    
     if order_info==None:
-        order_info = 1 #TODO: Explain why it is 1
+        order_info = 1 
 
     else:
         order_info = int(order_info)

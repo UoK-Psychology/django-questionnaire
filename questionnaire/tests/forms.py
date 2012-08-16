@@ -32,13 +32,12 @@ class FormsTestCase(TestCase):
     def test_get_choices_question_without_options(self):
         '''
             If we pass this function a question object that had no options defined we should get back
-            None
+            a TypeError as the function that handle prevention of NoneType Object is already fixed under the admin screen
+            or upon object creation
         '''
         choices_question = Question.objects.create(label='test', field_type='select_dropdown_field', selectoptions=None)
+        self.assertRaises(TypeError, get_choices(choices_question))       
         
-
-        get_choices_test = get_choices(choices_question)
-        self.assertEqual(get_choices_test, None)
         
         
         

@@ -7,9 +7,10 @@ from django.views.generic.simple import direct_to_template
 urlpatterns = patterns('questionnaire.views',
         
         #url(r'^/$', view = '<view_name>',name = 'a_name'),              
-          url (r'^$',
-         direct_to_template,
-          { 'template': 'a_template.html' }, 'index' ),
+          url (r'^$', 
+               view= 'questionnaire_index',
+               name='questionnaire_index'),
+                
                        
           url(r'^qs/(?P<questionnaire_id>\d+)/(?P<order_info>\d+)/$', 
           view = 'handle_next_questiongroup_form',
