@@ -13,8 +13,9 @@ from django import forms
 class CustomListField(models.TextField):
     '''
     for creating  custom list field override some model.fields methods
+    TODO: improve the description of what this is, and why you would want to use it
     '''
-    __metaclass__ = models.SubfieldBase
+    __metaclass__ = models.SubfieldBase#TODO: document what the significance of this is
 
     def __init__(self, *args, **kwargs):
         self.token = kwargs.pop('token', ',')
@@ -27,8 +28,9 @@ class CustomListField(models.TextField):
     def to_python(self, value):
         '''
         @return: list if it exist 
+        TODO:consider imporoving this to give more detail, ie what do you pass in to value and how does the conversion to list happen?
         '''
-        if not value: return
+        if not value: return #TODO: is this the same as return None?
         if isinstance(value, list):
             return value
         return value.split(self.token)
@@ -41,7 +43,7 @@ class CustomListField(models.TextField):
         assert(isinstance(value, list) or isinstance(value, tuple))
         return self.token.join([unicode(s) for s in value])
 
-
+#TODO: what is this tuple used for?
 FIELD_TYPE_CHOICES=(('charfield','charfield'),('textfield','textfield'),('booleanfield','boolean'),('select_dropdown_field','select_dropdown_field'),('radioselectfield','radioselectfield'),('multiplechoicefield','multiplechoicefield'))
     
 class Question(models.Model):
@@ -82,7 +84,7 @@ class Question(models.Model):
             
         super(Question,self).save(*args,**kwgs)
 
-
+#TODO: Move this to forms.py
 class CustomListWidget(forms.Textarea):
     '''
     create flatten custom widget use to render CustomList Field 
@@ -94,7 +96,7 @@ class CustomListWidget(forms.Textarea):
             value = ','.join(str(v) for v in value)
         return super(CustomListWidget, self).render(name, value, attrs)
 
-
+#TODO: move this to forms.py
 class QuestionAdminForm(forms.ModelForm):
     '''
     overide admin form validation for  Question selectoptions attribute 
@@ -140,6 +142,7 @@ class QuestionGroup(models.Model):
     '''
     class Meta():
         db_table ='questiongroup'
+        
     name = models.CharField('questiongroupname',max_length=255,unique=True)
     questions = models.ManyToManyField(Question, through = 'Question_order')
     
@@ -208,6 +211,7 @@ class AnswerSet(models.Model):
     '''
     class Meta():
         db_table ='answer_set'
+        
     user=models.ForeignKey(User)
     questionnaire=models.ForeignKey(Questionnaire)
     questiongroup=models.ForeignKey(QuestionGroup)
