@@ -240,7 +240,7 @@ class QuestionnaireViewTests(TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
         self.assertTemplateUsed('questionanswer.html')         
-        self.assertEqual(len(resp.context['context']), 0)
+        self.assertEqual(len(resp.context['questionanswer']), 0)
         
 
         
@@ -263,8 +263,8 @@ class QuestionnaireViewTests(TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
         self.assertTemplateUsed('questionanswer.html') 
-        self.assertLess(len(resp.context['context']), 6)
-        self.assertEqual(len(resp.context['context']), 3)
+        self.assertLess(len(resp.context['questionanswer']), 6)
+        self.assertEqual(len(resp.context['questionanswer']), 3)
         
         
     def test_display_question_answer_valid_questionnaire_fully_answered(self):
@@ -289,7 +289,7 @@ class QuestionnaireViewTests(TestCase):
         self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
         self.assertTemplateUsed('display_questionanswer.html')    
          
-        self.assertEqual(len(resp.context['context']), 6)
+        self.assertEqual(len(resp.context['questionanswer']), 6)
         
 
         
@@ -318,7 +318,7 @@ class QuestionnaireViewTests(TestCase):
         self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
         self.assertTemplateUsed('edit_questionanswer_form.html') 
  
-        self.assertEqual(len(resp.context['context']), 3)
+        self.assertEqual(len(resp.context['questionanswer']), 3)
         
     def test_edit_question_answer_no_user(self):
         
@@ -409,7 +409,7 @@ class QuestionnaireViewTests(TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
         self.assertTemplateUsed('all_questionanswers.html') 
-        self.assertGreater(len(resp.context['context']), 3)
+        self.assertGreater(len(resp.context['questionanswer_list']), 3)
         
         
     def test_questionnaire_detail_list(self):
@@ -431,6 +431,6 @@ class QuestionnaireViewTests(TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
         self.assertTemplateUsed('questionnaire_detail.html')         
-        self.assertEqual(len(resp.context['context']), 2)
+        self.assertEqual(len(resp.context['groups_list']), 2)
         
         

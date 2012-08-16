@@ -138,7 +138,7 @@ def display_question_answer(request,questionnaire_id,questiongroup_id):
    ##   since we are only interested in the most recent questionanswer filter(id__in=answer_max_id_list) further filter all related questionanswer objects to the one qa objects in the max id list .
    ##   [(x.question.id,x.question.label ,x.answer)for x in y] .  this retrieve the question label and the answer for  each questionanswer in the most recent questionanswer put them in a list.
     y=QuestionAnswer.objects.filter(Q(answer_set__user_id=user,answer_set__questiongroup=this_questiongroup,answer_set__questionnaire=this_questionnaire)).filter(id__in=answer_max_id_list)          
-    print y
+    
     questionanswer=[(x.question.id,x.question.label ,x.answer) for x in y]
 
     #TODO: Be careful using the variable context, it has special significance, and using this way would be confusing to the reader of your code
