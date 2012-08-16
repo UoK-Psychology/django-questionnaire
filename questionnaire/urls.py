@@ -9,7 +9,7 @@ urlpatterns = patterns('questionnaire.views',
         #url(r'^/$', view = '<view_name>',name = 'a_name'),              
           url (r'^$', 
                view= 'questionnaire_index',
-               name='questionnaire_index'),
+               name='index'),
                 
                        
           url(r'^qs/(?P<questionnaire_id>\d+)/(?P<order_info>\d+)/$', 
