@@ -36,7 +36,7 @@ class FormsTestCase(TestCase):
             or upon object creation
         '''
         choices_question = Question.objects.create(label='test', field_type='select_dropdown_field', selectoptions=None)
-        self.assertRaises(TypeError, get_choices(choices_question))       
+        self.assertRaises(TypeError, get_choices ,choices_question)       
         
         
         
