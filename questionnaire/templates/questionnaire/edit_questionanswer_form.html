@@ -1,0 +1,54 @@
+{% extends "base_questionnaire.html" %}
+
+{% block title %}   	 
+	<h1>EditForm Group: {{questiongroup_id}} {{questionnaire.name }} QuestionAnswer</h1>
+{% endblock %}	   	                         
+        
+{% block content %}
+
+	{% if  form.fields %}   
+		<form method="post" action=".">  
+		{% csrf_token %}
+        <p><h3>Edit Form  Questionnaire:{{questionnaire.name}}<br />
+		Group : {{questiongroup_id}}</h3></p>
+	    <h4>user : {{user}}</h4>	        
+        {% if groups_list %} 
+        	<ul>	
+				{% for group in groups_list %}
+					{% ifnotequal questiongroup_id group %}      
+                        <li> <a href="{% url edit_question_answer questionnaire.id group  %}">Edit QuestionGroup : {{group }}</a></li>
+                    {% endifnotequal %}
+                {% endfor %}
+        {% else %}
+                <li>Sorry, no group in this questionnaire.</li>
+        {% endif %}
+            </ul>  
+        	      
+		{% if form.non_field_errors %}
+            <div class="form_errors">
+				{% for err in form.non_field_errors %}
+					<div class="form_error_message">{{ err }}</div>
+                {% endfor %}
+            </div>	
+		{% endif %}
+               
+		{% for field in form %}
+			<div class="fieldWrapper"> 
+                <p>  {{ field.label_tag}}:{{ field }}
+					{% for error in field.errors %}
+						<span class="error_message"><strong> {{ error }}</strong></span> </P>
+					{% endfor %}
+            </div>
+        {% endfor %}
+             
+             
+		<input type="submit" value="Submit Revision" />
+        </form>
+	{% else %}
+		invalid questionnaire / questionanswer     
+	{%endif%}
+
+{% endblock %}
+     
+ 
+ 

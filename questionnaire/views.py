@@ -19,14 +19,14 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 
 
-
+@login_required
 def questionnaire_index (request):
     questionnaire = Questionnaire.objects.all()
     answer_set = AnswerSet.objects.all()
     
     group_list=[x for x in questionnaire]
     
-    return render_to_response('questionnaire_index.html',{'group_list': group_list},context_instance=RequestContext(request))
+    return render_to_response('questionnaire/questionnaire_index.html',{'group_list': group_list},context_instance=RequestContext(request))
     
 
 @login_required
@@ -87,11 +87,11 @@ def handle_next_questiongroup_form(request,questionnaire_id,order_info=None):
         
         else:#TODO: you don't need this else block as it repeats the code below it
             
-            return render_to_response('questionform.html', 
+            return render_to_response('questionnaire/questionform.html', 
         {'form': form,'questionnaire':this_questionnaire,'questiongroup':questiongroup,},context_instance=RequestContext(request))       
             
     else:#TODO: this code doesn't need to be in an else block , this code could be left outside the if statement, as if you have got this far then either it is a get request or an invalid post request, and both should be handled in the same way
-        return render_to_response('questionform.html', 
+        return render_to_response('questionnaire/questionform.html', 
         {'form': questionForm,'questionnaire':this_questionnaire,'questiongroup':questiongroup,},context_instance=RequestContext(request))
     
         
@@ -101,7 +101,7 @@ def finish(request):
     '''
         TODO: Document me!!
     '''
-    return render_to_response('finish.html')     #you will still want to pass this through the RequestContext, which enables middleware to add things to the response  eg. context_instance=RequestContext(request)
+    return render_to_response('questionnaire/finish.html')     #you will still want to pass this through the RequestContext, which enables middleware to add things to the response  eg. context_instance=RequestContext(request)
       
 
 
@@ -144,7 +144,7 @@ def display_question_answer(request,questionnaire_id,questiongroup_id):
     #TODO: Be careful using the variable context, it has special significance, and using this way would be confusing to the reader of your code
         #TODO: you don't need to explicitly put user into your responses context, it will get put there by virtue of using context_instance=RequestContext(request)
     ## EXPLAINATION : context variable REMOVED
-    return render_to_response('display_questionanswer.html',{'questionanswer':questionanswer,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
+    return render_to_response('questionnaire/display_questionanswer.html',{'questionanswer':questionanswer,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
 
 
 
@@ -196,11 +196,11 @@ def edit_question_answer(request,questionnaire_id,questiongroup_id):
 #Start refactor target:  
 #TODO: you should be able to refactor this so that you dont duplicate all of this code, if you get rid of the else clauses, if you get this far then you are either
 #dealing with an invalid form or a get request, and you should be able to hand them in the same way
-            return render_to_response('edit_questionanswer_form.html', 
+            return render_to_response('questionnaire/edit_questionanswer_form.html', 
        {'form': form,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
     #TODO: you don't need to explicitly put user into your responses context, it will get put there by virtue of using context_instance=RequestContext(request)
     else :
-        return render_to_response('edit_questionanswer_form.html', 
+        return render_to_response('questionnaire/edit_questionanswer_form.html', 
                                       {'form': editForm,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
 
 #End refactor target
@@ -238,7 +238,7 @@ def all_question_answers_for_questiongroup(request,user_id,questionnaire_id,ques
 #        context= questionanswer_list
 
         #
-    return render_to_response('all_questionanswers.html',{'questionanswer_list':questionanswer_list,'user':user,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
+    return render_to_response('questionnaire/all_questionanswers.html',{'questionanswer_list':questionanswer_list,'user':user,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
 
 
 
@@ -261,7 +261,7 @@ def questionnaire_detail_list(request,questionnaire_id):
         #TODO: careful about using context as a variable now it has special significance in views
    
         #TODO: you don't need to explicitly put user into your responses context, it will get put there by virtue of using context_instance=RequestContext(request)
-    return render_to_response('questionnaire_detail.html',{'groups_list': groups_list, 'questionnaire':this_questionnaire,},context_instance=RequestContext(request))
+    return render_to_response('questionnaire/questionnaire_detail.html',{'groups_list': groups_list, 'questionnaire':this_questionnaire,},context_instance=RequestContext(request))
 
     
     

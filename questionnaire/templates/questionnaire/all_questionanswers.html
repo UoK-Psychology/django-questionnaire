@@ -1,0 +1,38 @@
+{% extends "base_questionnaire.html" %}
+
+{% block title %}
+	<h1> allquestionanswers for  user: {{user}} {{questionnaire.name}}</h1>
+{% endblock %}
+
+{% block content %}
+
+	{%csrf_token %}
+	{% if questionanswer_list %}
+		<h3>All question answers for {{questionnaire.name}} questiongroup {{questiongroup_id}} user: {{user}}  </h3>
+		{% if groups_list %}
+        <ul>
+			{% for group in groups_list %}
+				{% ifnotequal questiongroup_id group.id %} 
+					<li>
+					<a href="{% url all_question_answers_for_questiongroup user.id questionnaire.id group.id  %}">Display Answers QuestionGroup : {{group.id }}</a></li>
+				{% endifnotequal %}
+			{% endfor %}
+		</ul>
+		{% else %}
+			<p>No group available in this questionnaire.</p>
+		{% endif %}
+    {% else %}
+		The group enter is not valid questiongroup  has no question answer
+	{%endif%}
+    
+	<h3><p>{{questionnaire.name}}</p></h3>
+    <p><h3> Question Group: {{questiongroup_id}}</h3></p>
+	
+	{% for x in questionanswer_list %}
+		{% ifchanged x.0 %} 
+			<strong><p>Question id : {{x.0}}  Question:{{x.1|capfirst}}</p></strong>
+        {% endifchanged%}
+   		<div>Answer:{{ x.2 }} </div><br>
+	{% endfor %}
+	
+{% endblock %}
