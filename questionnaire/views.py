@@ -52,11 +52,11 @@ def handle_next_questiongroup_form(request,questionnaire_id,order_info=None):
     except IndexError:
         raise Http404
     
-    questionForm = make_question_group_form(questiongroup, questionnaire_id)
+    question_form_type = make_question_group_form(questiongroup, questionnaire_id)
     
     if request.method =='POST':
         
-        form=questionForm(request.POST)
+        form=question_form_type(request.POST)
         if form.is_valid():
             
             this_answer_set, created = AnswerSet.objects.get_or_create(user=request.user,questionnaire=this_questionnaire,questiongroup=questiongroup)
@@ -80,10 +80,11 @@ def handle_next_questiongroup_form(request,questionnaire_id,order_info=None):
             else: 
                 order_info = order_info + 1
                 return HttpResponseRedirect(reverse('handle_next_questiongroup_form', kwargs = {'questionnaire_id': questionnaire_id, 'order_info' : order_info}))
-        
+    else:
+        form = question_form_type()#create unbound form
         
     return render_to_response('questionnaire/questionform.html', 
-    {'form': questionForm,'questionnaire':this_questionnaire,'questiongroup':questiongroup,},context_instance=RequestContext(request))
+    {'form': form ,'questionnaire':this_questionnaire,'questiongroup':questiongroup,},context_instance=RequestContext(request))
     
         
 
