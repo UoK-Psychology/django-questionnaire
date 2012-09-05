@@ -4,7 +4,7 @@ Created on Jun 26, 2012
 @author: ayoola_al
 
 '''
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
 from models import QuestionGroup_order, Questionnaire,QuestionGroup,AnswerSet,QuestionAnswer,Question
 from django.template import  RequestContext
@@ -29,6 +29,8 @@ def questionnaire_index (request):
     return render_to_response('questionnaire/questionnaire_index.html',{'group_list': group_list},context_instance=RequestContext(request))
     
 
+
+
 @login_required
 def handle_next_questiongroup_form(request,questionnaire_id,order_info=None):
     
@@ -38,32 +40,26 @@ def handle_next_questiongroup_form(request,questionnaire_id,order_info=None):
     questionnaire_id = int(questionnaire_id)
     
     if order_info==None:
-        order_info = 1 
+        order_info = 0# zero based index 
 
     else:
         order_info = int(order_info)
         
     this_questionnaire = get_object_or_404(Questionnaire, pk=questionnaire_id)
     
-
+    try:
+        questiongroup , count = this_questionnaire.get_group_for_index(order_info)
+    except IndexError:
+        raise Http404
     
-    #Start refactor target:
-    #TODO:This is a bit over complicated, you are juggling a lot variables around when your aim is simply to get a reference to the questiongroup, and create a form based on it
-    #This could even be refactored out into a module function which could then be seperately unit tested
-    orderedgroups = this_questionnaire.get_ordered_groups()
-    questiongroup_id = orderedgroups[order_info-1].questiongroup.id
-    this_questiongroup=get_object_or_404(QuestionGroup,pk=questiongroup_id)  #TODO: you have already got a reference to the questiongroup object, no need to use the id to get it again!
-    questiongroup = this_questiongroup # TODO: Why not just use questiongroup as the variable name from the start?
-    questionForm = make_question_group_form(questiongroup,questionnaire_id)
-    #End Refactor target
-    
+    questionForm = make_question_group_form(questiongroup, questionnaire_id)
     
     if request.method =='POST':
         
         form=questionForm(request.POST)
         if form.is_valid():
             
-            this_answer_set, created = AnswerSet.objects.get_or_create(user=request.user,questionnaire=this_questionnaire,questiongroup=this_questiongroup)
+            this_answer_set, created = AnswerSet.objects.get_or_create(user=request.user,questionnaire=this_questionnaire,questiongroup=questiongroup)
     
    
             for question, answer in form.cleaned_data.items():
@@ -78,21 +74,16 @@ def handle_next_questiongroup_form(request,questionnaire_id,order_info=None):
                 #you could use the changed_data property on the form to achieve the same thing without going to the database?
                 this_question_answer, create = QuestionAnswer.objects.get_or_create(question= get_object_or_404(Question, pk=question),answer=str(answer),answer_set=this_answer_set)
                 
-            if order_info >= orderedgroups.count():#this is the last group in the questionnaire
+            if count == 0:#this is the last group in the questionnaire
                 return HttpResponseRedirect(reverse('questionnaire_finish'))
             
             else: 
                 order_info = order_info + 1
                 return HttpResponseRedirect(reverse('handle_next_questiongroup_form', kwargs = {'questionnaire_id': questionnaire_id, 'order_info' : order_info}))
         
-        else:#TODO: you don't need this else block as it repeats the code below it
-            
-            return render_to_response('questionnaire/questionform.html', 
-        {'form': form,'questionnaire':this_questionnaire,'questiongroup':questiongroup,},context_instance=RequestContext(request))       
-            
-    else:#TODO: this code doesn't need to be in an else block , this code could be left outside the if statement, as if you have got this far then either it is a get request or an invalid post request, and both should be handled in the same way
-        return render_to_response('questionnaire/questionform.html', 
-        {'form': questionForm,'questionnaire':this_questionnaire,'questiongroup':questiongroup,},context_instance=RequestContext(request))
+        
+    return render_to_response('questionnaire/questionform.html', 
+    {'form': questionForm,'questionnaire':this_questionnaire,'questiongroup':questiongroup,},context_instance=RequestContext(request))
     
         
 

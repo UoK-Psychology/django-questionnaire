@@ -4,6 +4,8 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from django.test import Client
 from django.core.urlresolvers import reverse
+from django.http import Http404
+from mock import patch
 
 
 
@@ -39,7 +41,11 @@ class QuestionnaireViewTests(TestCase):
 
         
         super(QuestionnaireViewTests,self).setUp()
-            
+          
+        
+
+        
+  
     def test_handle_next_questiongroup_form_no_user(self):
         """
             A get request to this view without a logged in user should redirect to the default login url
@@ -61,7 +67,7 @@ class QuestionnaireViewTests(TestCase):
         """        
         
         self.client.login(username='user', password='password') 
-        url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id':1, 'order_info':1})   
+        url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id':1, 'order_info':0})   
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
         self.assertTemplateUsed('questionform.html') 
@@ -91,7 +97,18 @@ class QuestionnaireViewTests(TestCase):
         """
         
         self.client.login(username='user', password='password') 
-        url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id': 2, 'order_info':1})
+        url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id': 2, 'order_info':0})
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404, 'There are no questionnaire with id 2!')
+        
+    def test_handle_next_questiongroup_form_get_invalid_order_info(self):
+        """
+            A GET request to the ''handle_next_questiongroup_form'' view specifying a invalid questionnaire id
+            should yield a http 404 response as this questionnaire does not exist
+        """
+        
+        self.client.login(username='user', password='password') 
+        url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id': 2, 'order_info':10})
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404, 'There are no questionnaire with id 2!')
         
@@ -107,11 +124,11 @@ class QuestionnaireViewTests(TestCase):
         """
         
         self.client.login(username='user', password='password')
-        url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id':1, 'order_info':1})
+        url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id':1, 'order_info':0})
         post_data =  {u'1': [u'a'], u'2': [u'a'], u'3': [u'True']}
         resp = self.client.post(url,post_data)        
         self.assertEqual(302, resp.status_code)      
-        self.assertEqual(resp['Location'], 'http://testserver/questionnaire/qs/1/2/')
+        self.assertEqual(resp['Location'], 'http://testserver/questionnaire/qs/1/1/')
         self.assertEqual(QuestionAnswer.objects.get(pk=1).answer, 'a')
         self.assertEqual(AnswerSet.objects.get(pk=1).user, User.objects.get(pk=1))
 
@@ -125,7 +142,7 @@ class QuestionnaireViewTests(TestCase):
             3. It should redirect to the finish url.
         """
         self.client.login(username='user', password='password')        
-        url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id': 1, 'order_info': 2})
+        url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id': 1, 'order_info': 1})
         post_data =  {u'4': [u'Dropdown 1'], u'5': [u'Radio 1'], u'6': [u'MultipleChoice 1']}
         resp = self.client.post(url,post_data)     
         self.assertEqual(resp.status_code, 302)     
@@ -150,13 +167,13 @@ class QuestionnaireViewTests(TestCase):
         self.question_answer_3 = QuestionAnswer.objects.create(question=Question.objects.get(pk=3),answer="True",answer_set=AnswerSet.objects.get(pk=1))  
         
         self.client.login(username='user', password='password')
-        url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id': 1, 'order_info':1})
+        url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id': 1, 'order_info':0})
         post_data =  {u'1': [u'b'], u'2': [u'b'], u'3': [u'True']}
         resp = self.client.post(url,post_data)
 
 
         self.assertEqual(302, resp.status_code)      
-        self.assertEqual(resp['Location'], 'http://testserver/questionnaire/qs/1/2/')
+        self.assertEqual(resp['Location'], 'http://testserver/questionnaire/qs/1/1/')
         
         '''
         Check if the new post creates a new object and compare it is not the same answer as the previous one and check the count of the questionanswer
