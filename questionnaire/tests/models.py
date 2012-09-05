@@ -228,6 +228,41 @@ class QuestionnaireTestCase(TestCase):
         self.assertEqual(question_group[0].questiongroup.name, question_group1.questiongroup.name)
         self.assertEqual(question_group[1].questiongroup.name, question_group2.questiongroup.name)
         
+    def test_get_group_for_index_invalid_index(self):
+        '''
+            Thorws an index error if there isn't a group at this index
+        '''
+        
+        questionnaire_test = Questionnaire.objects.get(pk=1)
+        
+        self.assertRaises(IndexError, questionnaire_test.get_group_for_index, 5)
+        
+    def test_get_group_for_index_valid_index(self):
+        '''
+            If this index exists then we should get the correct group, and an integer representing
+            the number of groups that are left in the sequence.
+        '''
+        questionnaire_test = Questionnaire.objects.get(pk=1)
+        question_group = QuestionGroup.objects.get(pk=1)
+        
+        group, count = questionnaire_test.get_group_for_index(0)
+        
+        self.assertEqual(question_group, group)
+        self.assertEqual(1, count)#there were two groups so after this index there should be 2 remaining
+        
+    def test_get_group_for_index_last_index(self):
+        '''
+            If this is the last index in the sequence of groups zero should be returned
+        '''
+        questionnaire_test = Questionnaire.objects.get(pk=1)
+        question_group = QuestionGroup.objects.get(pk=2)
+        
+        group, count = questionnaire_test.get_group_for_index(1)
+        
+        self.assertEqual(question_group, group)
+        self.assertEqual(0, count)#there were two groups so after this index there should be 2 remaining    
+        
+        
 class Questiongroup_OrderTestCase(TestCase):
     fixtures = ['test_questionnaire_fixtures_formodels.json']
     
