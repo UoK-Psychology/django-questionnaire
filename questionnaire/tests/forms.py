@@ -1,16 +1,11 @@
-'''
-Created on 26 Jul 2012
-
-@author: jjm20
-'''
 from django.test import TestCase
 from questionnaire.forms import get_choices, generate_charfield, generate_textfield, generate_boolean_field, generate_select_dropdown_field, generate_radioselect_field, generate_multiplechoice_field, FIELD_TYPES, make_question_group_form, create_question_answer_edit_form,\
-    QuestionGroupForm
+    QuestionGroupForm, _get_fields_for_group
 from questionnaire.models import Question, Questionnaire, QuestionGroup, AnswerSet, QuestionAnswer
 from django.forms import Textarea, TextInput, BooleanField, ChoiceField, RadioSelect,CheckboxSelectMultiple, CharField, BaseForm
 from django.forms.fields import  MultipleChoiceField
 from django.contrib.auth.models import User
-from mock import MagicMock, patch
+from mock import MagicMock, patch, call
 import questionnaire.forms
 
 
@@ -119,7 +114,41 @@ class FormsTestCase(TestCase):
         self.assertEqual(FIELD_TYPES['radioselectfield'], generate_radioselect_field)
         self.assertEqual(FIELD_TYPES['multiplechoicefield'], generate_multiplechoice_field)
         
+    def test_get_fields_for_group(self):
+        '''
+            Calling this function should create a SortedDict that has the same order as
+            the ordered questions in the group, and used the FIELD_TYPES dict to create the 
+            fields. As we have already tested the FIELD_TYPE and allof the generator functions
+            this test will simply test make sure that the function returns a sortedDict
+            in the correct order
+        '''
         
+        with patch('questionnaire.forms.FIELD_TYPES') as field_dict_mock:
+            return_values = [MagicMock(name='mock1'),MagicMock(name='mock2')]
+            def side_effect(*attrs):
+                return return_values.pop()
+                
+            
+            
+            field_function_mock = MagicMock(name='field_function_mock')
+            field_function_mock.side_effect = side_effect
+            field_dict_mock.__getitem__.return_value = field_function_mock
+            
+            questiongroup = MagicMock(name='questiongroup')
+            
+            #prepare a list of mock objects to act as questions when returned by the ordered_question
+            questiongroup.get_ordered_questions.return_value = [MagicMock(label='question1', id=1, field_type='type1'),
+                                                                        MagicMock(label='question2', id=2, field_type='type2' ),  ]
+            with patch('questionnaire.forms.get_choices') as get_choices_mock:
+                test_form = _get_fields_for_group(questiongroup=questiongroup)
+            
+            
+           
+            self.assertEqual(field_dict_mock.__getitem__.mock_calls , [call('type1'), call('type2')])
+            self.assertEqual(test_form['1'].label, 'question1')
+            self.assertEqual(test_form['2'].label, 'question2')
+            self.assertEqual(get_choices_mock.call_count, 2)
+          
 class FormsTestCase_WithFixture(TestCase):
     
     fixtures = ['forms_test_fixture.json']
@@ -214,23 +243,7 @@ class QuestionGroupFormTestCase(TestCase):
             it should have a hidden field with the questionnaire id
             it should not have any initial data
         '''
-        questiongroup = MagicMock(name='questiongroup')
-        question_attrs = {'field_type':'charfield'}
-        questiongroup.get_ordered_questions.return_value = [MagicMock(name='question1', id=1, **question_attrs),
-                                                                    MagicMock(name='question2', id=2, **question_attrs),  ]
-        
-        
-        charfield_generator_mock = MagicMock()
-        charfield_mock = MagicMock()
-        charfield_generator_mock.return_value = charfield_mock
-        questionnaire.forms.FIELD_TYPES = {'charfield':charfield_generator_mock}
-        
-        test_form = QuestionGroupForm(questiongroup=questiongroup, questionnaire_id=1, initial=None, data=None)
-        
-        self.assertTrue(issubclass(test_form.__class__, BaseForm))
-        self.assertEqual(test_form.fields['1'], charfield_mock)
-        self.assertEqual(test_form.fields['2'], charfield_mock)
-        self.assertEqual(test_form.data['questionnaire_id'], 1)
+        self.assertTrue(False)
         
         
     def test_create_form_with_initial_data(self):

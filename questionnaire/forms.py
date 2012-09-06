@@ -81,6 +81,24 @@ FIELD_TYPES={
             'multiplechoicefield':generate_multiplechoice_field,
             }
 
+def _get_fields_for_group(questiongroup):
+    '''
+        This builds a sorted dict of fields that are created in the order defined in the 
+        questiongroup, and created based on the question label and the question type
+    '''
+    questions = questiongroup.get_ordered_questions()
+        
+    fields = SortedDict([])
+    
+    for question in questions:
+        
+        field = FIELD_TYPES[question.field_type]()
+        field.label = question.label
+        field.choices=get_choices(question)
+        fields[str(question.id)]= field
+    return fields
+
+
 class QuestionGroupForm(forms.Form):
     
     
