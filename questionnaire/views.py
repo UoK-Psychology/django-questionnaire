@@ -16,8 +16,6 @@ from django.contrib.auth.decorators import login_required
 @login_required
 def questionnaire_index (request):
     questionnaire = Questionnaire.objects.all()
-    answer_set = AnswerSet.objects.all()
-    
     group_list=[x for x in questionnaire]
     
     return render_to_response('questionnaire/questionnaire_index.html',{'group_list': group_list},context_instance=RequestContext(request))
@@ -81,63 +79,6 @@ def do_questionnaire(request,questionnaire_id,order_info=None):
     return render_to_response('questionnaire/questionform.html', 
     {'form': form ,'questionnaire':this_questionnaire,'questiongroup':questiongroup,},context_instance=RequestContext(request))
     
-#@login_required
-#def edit_question_answer(request,questionnaire_id,questiongroup_id):
-#    '''
-#    edit a user most recent answers for a given questiongroup in a given questionnaire 
-#    pre-populates form with most recent answers 
-#    does not overwrite questionanswer it create new questionanswer  for answerset   for purpose of keeping queationanswers trail
-#     
-#    '''
-#    
-#    user=request.user   
-##    questionnaire_id=int(questionnaire_id)#TODO: Do you really need to cast to an int?
-#    questiongroup_id=int(questiongroup_id)#TODO: Do you really need to cast to an int?
-#    this_questionnaire=get_object_or_404(Questionnaire,pk=questionnaire_id)
-#    this_questiongroup=get_object_or_404(QuestionGroup,pk=questiongroup_id)
-#        
-#    #TODO: use .get_ordered_groups() for this as it abstracts the need to know about the ordering implementation and you won't need the next line as it returns a list of questiongroups
-##    orderedgroups = QuestionGroup_order.objects.filter(questionnaire= this_questionnaire).order_by('order_info')
-#    orderedgroups=this_questionnaire.get_ordered_groups() 
-#    groups_list=[(x.questiongroup.id) for x in orderedgroups]
-#
-#    editForm= create_question_answer_edit_form(user,this_questionnaire,this_questiongroup) 
-#             
-#    if  request.method == "POST":
-#        
-#        form=editForm(request.POST)
-#        
-#        if form.is_valid():
-#            
-#            #TODO this logic seems very similar to the handle_next_questiongroup_form function consider refactoring, perhaps abstracting this logic to another function that can be used by both views?        
-#            this_answer_set, created = AnswerSet.objects.get_or_create(user=request.user,questionnaire=this_questionnaire,questiongroup=this_questiongroup)
-#            
-#            
-#            for question, answer in form.cleaned_data.items():
-#                if isinstance(answer,list):
-#                        answer = ', '.join(answer)
-#                        
-#
-#                this_question_answer= QuestionAnswer(question= get_object_or_404(Question, pk=question),answer=answer,answer_set=this_answer_set)
-#                this_question_answer.save()
-#                
-#                                                  
-#            return HttpResponseRedirect(reverse('questionnaire_finish'))            
-#        else:
-#                       
-##Start refactor target:  
-##TODO: you should be able to refactor this so that you dont duplicate all of this code, if you get rid of the else clauses, if you get this far then you are either
-##dealing with an invalid form or a get request, and you should be able to hand them in the same way
-#            return render_to_response('questionnaire/edit_questionanswer_form.html', 
-#       {'form': form,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
-#    #TODO: you don't need to explicitly put user into your responses context, it will get put there by virtue of using context_instance=RequestContext(request)
-#    else :
-#        return render_to_response('questionnaire/edit_questionanswer_form.html', 
-#                                      {'form': editForm,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
-#
-##End refactor target        
-
-
 def finish(request):
     '''
         TODO: Document me!!
