@@ -1,22 +1,16 @@
-{% extends "base_questionnaire.html" %}
+<h1>{{questionnaire.name}} {{questiongroup}}</h1><br />
+	<h2>{{questionnaire.name}}</h2><br /> 
+	<h3>QuestionGroup :{{questiongroup}}</h3><br />
 
 <form method="post" action=".">
 
-{% block title %}
-	<h1>{{questionnaire.name}} {{questiongroup}}</h1><br />
-	<h2>{{questionnaire.name}}</h2><br /> 
-	<h3>QuestionGroup :{{questiongroup}}</h3><br />
-{% endblock %}
 
-{% block content %}	
+	
+
+
 	{%csrf_token %}
 	{% for field in form %}
 		<p>{{ field.label_tag }}: {{ field }} <strong>{{ field.errors }}</strong></p> 
-	<!-- 	<tr>
-			<td>{{ field.label_tag }}:</td>
-			<td>{{ field }}</td>
-			<td><strong>{{ field.errors }}</strong></td>
-		</tr> -->
 	{% endfor %}
 	
 
@@ -25,4 +19,4 @@
 <input type="submit" value="Submit" />
 
 </form>
-{% endblock %}
+
