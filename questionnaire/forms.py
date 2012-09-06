@@ -105,20 +105,19 @@ class QuestionGroupForm(forms.Form):
     questionnaire_id = CharField(widget=HiddenInput)
     
     def __init__(self, questiongroup, questionnaire_id, initial=None, data=None):
-        #generate the fields sorted dict from the questiongroup
-        #add a hidden field for the questionnaire_id
         
-        #iif initial is passed in an it is an answe set then
-            #generate a dict mapping question id to question answer and pass this into the super constructor for initial
-            
-        #call the superconstructor
         super(QuestionGroupForm, self).__init__()
         
-        self.data['questionnaire_id'] = questionnaire_id
+        
         
         for field in _get_fields_for_group(questiongroup):
             
             self.fields[field[0]] = field[1]
+            
+        self.initial = initial or {}
+        self.data = data or {}
+        
+        self.data['questionnaire_id'] = questionnaire_id
 
          
             

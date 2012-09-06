@@ -6,7 +6,6 @@ from django.forms import Textarea, TextInput, BooleanField, ChoiceField, RadioSe
 from django.forms.fields import  MultipleChoiceField
 from django.contrib.auth.models import User
 from mock import MagicMock, patch, call
-import questionnaire.forms
 from django.forms.widgets import HiddenInput
 
 
@@ -265,5 +264,26 @@ class QuestionGroupFormTestCase(TestCase):
             If I do all of the above, but also pass a AnswerSet as the instance argument then my form
             should have initial data for all of the fields that the question group and the answerset have in common
         '''
-        self.assertTrue(False)
+        with patch('questionnaire.forms._get_fields_for_group') as get_fields_mock:
+            mock1 = MagicMock(name='1')
+            mock2 = MagicMock(name='1')
+            get_fields_mock.return_value = [('1', mock1), ('2', mock2 )]
+            question_group = MagicMock('question_group')
+            
+            initial_data = {'1':'initial1', '2':'initial2', }
+            test_data = {'1':'data1', '2':'data2',}
+            test_form = QuestionGroupForm(questiongroup=question_group, questionnaire_id=123, initial=initial_data, data=test_data)
+        
+            #sanity check should be the same as above
+            self.assertEqual(test_form.fields['1'], mock1)#assert that the fields contain the fields expected based on the mocked return value
+            self.assertEqual(test_form.fields['2'], mock2)
+            self.assertEqual(test_form.data['questionnaire_id'], 123)
+            self.assertIsInstance(test_form.fields['questionnaire_id'].widget, HiddenInput )
+            
+            #assert the intial data
+            self.assertEqual(test_form.initial['1'], 'initial1')
+            self.assertEqual(test_form.initial['2'], 'initial2')
+            
+            self.assertEqual(test_form.data['1'], 'data1')
+            self.assertEqual(test_form.data['2'], 'data2')
         
