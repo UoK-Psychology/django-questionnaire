@@ -122,15 +122,25 @@ class QuestionnaireViewTests(TestCase):
             3. It should redirect to the handle_next_questiongroup_form url specifying the questionnaire id and the 
             id of the next question group for the questionniare (in this case there is one as that is how we setup the fixture)
         """
+        #create a new user so that we know that this is the firsttime that the user has answered the questionniare
+        test_user = User.objects.create_user('test', 'test@home.com', 'testpass')
         
-        self.client.login(username='user', password='password')
-        url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id':1, 'order_info':0})
+        self.client.login(username='test', password='testpass')
+        url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id':1})
         post_data =  {u'1': [u'a'], u'2': [u'a'], u'3': [u'True']}
         resp = self.client.post(url,post_data)        
         self.assertEqual(302, resp.status_code)      
         self.assertEqual(resp['Location'], 'http://testserver/questionnaire/qs/1/1/')
-        self.assertEqual(QuestionAnswer.objects.get(pk=1).answer, 'a')
-        self.assertEqual(AnswerSet.objects.get(pk=1).user, User.objects.get(pk=1))
+        
+        
+        test_question = Question.objects.get(pk=1)
+        test_questionnaire = Questionnaire.objects.get(pk=1)
+        test_question_group = test_questionnaire.get_group_for_index(0)[0]
+        test_answer_Set = AnswerSet.objects.get(user=test_user, 
+                                                questionnaire=test_questionnaire,
+                                                questiongroup=test_question_group )
+        self.assertEqual(test_answer_Set.user, test_user)
+        self.assertEqual(QuestionAnswer.objects.get(question=test_question, answer_set=test_answer_Set).answer, 'a')
 
         
     def test_handle_next_questiongroup_form_post_success_lastgroup(self):
@@ -343,7 +353,7 @@ class QuestionnaireViewTests(TestCase):
             A get request to this view without a logged in user should redirect to the default login url
         '''
         
-        url = reverse('edit_question_answer', kwargs={'questionnaire_id':1, 'questiongroup_id':1})
+        url = reverse('edit_question_answer', kwargs={'questionnaire_id':1, 'order_info':1})
         response = self.client.get(url)
         self.assertEquals (302, response.status_code )
         self.assertEquals (response['Location'], 'http://testserver/accounts/login/?next=%s' % url )   
@@ -352,21 +362,21 @@ class QuestionnaireViewTests(TestCase):
     def test_edit_question_answer_first_group_submit(self):
         """
             A GET request to the ''edit_question_answer'' view specifying a valid questionnaire id,
-            which the user hasn't participated in yet should:
+            which the user has already got answers for should:
             1. yield a http 200 response
             2. use the questionform.html template
             3. have a form in the context containing fields representing the first group in the questionnaire
             but Bound to any data (ie. Have data initialize and bound to them!)
             4. After form submission, it goes to the next questiongroup
         """        
-        self.question_answer_1 = QuestionAnswer.objects.create(question=Question.objects.get(pk=1),answer="charfield_answer",answer_set=AnswerSet.objects.get(pk=1))
-        self.question_answer_2 = QuestionAnswer.objects.create(question=Question.objects.get(pk=2),answer="textfield_answer",answer_set=AnswerSet.objects.get(pk=1))
-        self.question_answer_3 = QuestionAnswer.objects.create(question=Question.objects.get(pk=3),answer="True",answer_set=AnswerSet.objects.get(pk=1))
+        self.question_answer_1 = QuestionAnswer.objects.create(question=Question.objects.get(pk=1),answer="charfield_answer",answer_set=self.answerset)
+        self.question_answer_2 = QuestionAnswer.objects.create(question=Question.objects.get(pk=2),answer="textfield_answer",answer_set=self.answerset)
+        self.question_answer_3 = QuestionAnswer.objects.create(question=Question.objects.get(pk=3),answer="True",answer_set=self.answerset)
 
           
         
         self.client.login(username='user', password='password') 
-        url = reverse('edit_question_answer', kwargs={'questionnaire_id':1, 'questiongroup_id':1})   
+        url = reverse('edit_question_answer', kwargs={'questionnaire_id':1, 'order_info':0})   
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
         self.assertTemplateUsed('edit_questionanswer_form.html') 
@@ -389,13 +399,16 @@ class QuestionnaireViewTests(TestCase):
         '''
         Adds 3 more answer for questiongroup 2
         '''
-        self.question_answer_4 = QuestionAnswer.objects.create(question=Question.objects.get(pk=4),answer="Dropdown 3",answer_set=AnswerSet.objects.get(pk=1))
-        self.question_answer_5 = QuestionAnswer.objects.create(question=Question.objects.get(pk=5),answer="Radio 3",answer_set=AnswerSet.objects.get(pk=1))
-        self.question_answer_6 = QuestionAnswer.objects.create(question=Question.objects.get(pk=6),answer="MultipleChoice 3",answer_set=AnswerSet.objects.get(pk=1))
+            
+        self.answerset = AnswerSet.objects.create(user=self.user_test,questionnaire=Questionnaire.objects.get(pk=1),
+                                                  questiongroup=QuestionGroup.objects.get(pk=2))
+        self.question_answer_4 = QuestionAnswer.objects.create(question=Question.objects.get(pk=4),answer="Dropdown 3",answer_set=self.answerset)
+        self.question_answer_5 = QuestionAnswer.objects.create(question=Question.objects.get(pk=5),answer="Radio 3",answer_set=self.answerset)
+        self.question_answer_6 = QuestionAnswer.objects.create(question=Question.objects.get(pk=6),answer="MultipleChoice 3",answer_set=self.answerset)
         
 
-        post_data =  {u'1': u'Dropdown 3', u'2': u'Radio 3', u'3': u'MultipleChoice 3'}
-        url_2 = reverse('edit_question_answer', kwargs={'questionnaire_id':1, 'questiongroup_id':2})   
+        post_data =  {u'4': u'Dropdown 1', u'5': u'Radio 1', u'6': u'MultipleChoice 1'}
+        url_2 = reverse('edit_question_answer', kwargs={'questionnaire_id':1, 'order_info':1})   
         resp_2 = self.client.post(url_2,post_data)
         
         self.assertEqual(302, resp_2.status_code)   
