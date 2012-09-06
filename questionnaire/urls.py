@@ -12,7 +12,7 @@ urlpatterns = patterns('questionnaire.views',
                name='questionnaire_index'),
                 
                        
-          url(r'^qs/(?P<questionnaire_id>\d+)/(?P<order_info>\d+)/$', 
+          url(r'^qs/(?P<questionnaire_id>\d+)/(?P<order_index>\d+)/$', 
           view = 'do_questionnaire',
           name = 'handle_next_questiongroup_form'),                      
     
@@ -29,7 +29,7 @@ urlpatterns = patterns('questionnaire.views',
             view = 'display_question_answer',
             name = 'display_question_answer'),
                        
-        url(r'^edit/(?P<questionnaire_id>\d+)/(?P<order_info>\d+)/$', 
+        url(r'^edit/(?P<questionnaire_id>\d+)/(?P<order_index>\d+)/$', 
             view = 'do_questionnaire',
             name = 'edit_question_answer'),
          

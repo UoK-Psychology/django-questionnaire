@@ -24,23 +24,28 @@ def questionnaire_index (request):
 
 
 @login_required
-def do_questionnaire(request,questionnaire_id,order_info=None):
+def do_questionnaire(request,questionnaire_id,order_index=None):
     
     '''
-        TODO: Document me!! in particular what are questionniare_id and order_id and how are they used
+        This view handles the presentation and submission of questiongroups. You must always specify a 
+        questionnaire, and optionally you make specify an order index. The order index represents a question group in
+        the sequence of ordered groups for the given questionnaire. The index is zero based and is not related
+        to the question group's id. If the index doesn't exist a 404 error will be thrown.
+        If the user has already asnwered the question group for this questionnaire, then this view will allow them to 
+        display, and allow them to edit their previous answers.
     '''
     questionnaire_id = int(questionnaire_id)
     
-    if order_info==None:
-        order_info = 0# zero based index 
+    if order_index==None:
+        order_index = 0# zero based index 
 
     else:
-        order_info = int(order_info)
+        order_index = int(order_index)
         
     this_questionnaire = get_object_or_404(Questionnaire, pk=questionnaire_id)
     
     try:#get the question group based on the questionnaire and the index in the ordered list of groups 
-        questiongroup , count = this_questionnaire.get_group_for_index(order_info)
+        questiongroup , count = this_questionnaire.get_group_for_index(order_index)
     except IndexError:#if it doesn't exist we should throw a 404 not an INdexError
         raise Http404
     
@@ -71,8 +76,8 @@ def do_questionnaire(request,questionnaire_id,order_info=None):
                 return HttpResponseRedirect(reverse('questionnaire_finish'))
             
             else: 
-                order_info = order_info + 1
-                return HttpResponseRedirect(reverse('handle_next_questiongroup_form', kwargs = {'questionnaire_id': questionnaire_id, 'order_info' : order_info}))
+                order_info = order_index + 1
+                return HttpResponseRedirect(reverse('handle_next_questiongroup_form', kwargs = {'questionnaire_id': questionnaire_id, 'order_index' : order_info}))
     else:
         form = form_type()#create unbound form
         
