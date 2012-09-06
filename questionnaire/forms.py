@@ -88,14 +88,14 @@ def _get_fields_for_group(questiongroup):
     '''
     questions = questiongroup.get_ordered_questions()
         
-    fields = SortedDict([])
+    fields = []
     
     for question in questions:
         
         field = FIELD_TYPES[question.field_type]()
         field.label = question.label
         field.choices=get_choices(question)
-        fields[str(question.id)]= field
+        fields.append((str(question.id),field))
     return fields
 
 
@@ -115,16 +115,10 @@ class QuestionGroupForm(forms.Form):
         super(QuestionGroupForm, self).__init__()
         
         self.data['questionnaire_id'] = questionnaire_id
-        questions = questiongroup.get_ordered_questions()
         
-        self.fields = SortedDict()
-        
-        for question in questions:
+        for field in _get_fields_for_group(questiongroup):
             
-            field = FIELD_TYPES[question.field_type]()
-            field.label = question.label
-            field.choices=get_choices(question)
-            self.fields[str(question.id)]= field
+            self.fields[field[0]] = field[1]
 
          
             

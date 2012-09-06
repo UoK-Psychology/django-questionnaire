@@ -7,6 +7,7 @@ from django.forms.fields import  MultipleChoiceField
 from django.contrib.auth.models import User
 from mock import MagicMock, patch, call
 import questionnaire.forms
+from django.forms.widgets import HiddenInput
 
 
 
@@ -116,7 +117,7 @@ class FormsTestCase(TestCase):
         
     def test_get_fields_for_group(self):
         '''
-            Calling this function should create a SortedDict that has the same order as
+            Calling this function should create a list of tuples that has the same order as
             the ordered questions in the group, and used the FIELD_TYPES dict to create the 
             fields. As we have already tested the FIELD_TYPE and allof the generator functions
             this test will simply test make sure that the function returns a sortedDict
@@ -145,8 +146,10 @@ class FormsTestCase(TestCase):
             
            
             self.assertEqual(field_dict_mock.__getitem__.mock_calls , [call('type1'), call('type2')])
-            self.assertEqual(test_form['1'].label, 'question1')
-            self.assertEqual(test_form['2'].label, 'question2')
+            self.assertEqual(test_form[0][0], '1')
+            self.assertEqual(test_form[0][1].label, 'question1')
+            self.assertEqual(test_form[1][0], '2')
+            self.assertEqual(test_form[1][1].label, 'question2')
             self.assertEqual(get_choices_mock.call_count, 2)
           
 class FormsTestCase_WithFixture(TestCase):
@@ -238,14 +241,25 @@ class QuestionGroupFormTestCase(TestCase):
         '''
             If I pass in a valid questiongroup object and valid questionaire_id then I should get back:
             
-            an subclass of BaseForm
+            an subclass of Form
             it should have fields representative of the questions in the questiongroup
             it should have a hidden field with the questionnaire id
-            it should not have any initial data
+            it should not have any initial data other than the value of questionnaire_id
         '''
-        self.assertTrue(False)
+        #mock the _get_fields_for_group function to return a predefined list of tuples
+        with patch('questionnaire.forms._get_fields_for_group') as get_fields_mock:
+            mock1 = MagicMock(name='1')
+            mock2 = MagicMock(name='1')
+            get_fields_mock.return_value = [('1', mock1), ('2', mock2 )]
+            question_group = MagicMock('question_group')
+            
+            test_form = QuestionGroupForm(questiongroup=question_group, questionnaire_id=123, initial=None, data=None)
         
-        
+            self.assertEqual(test_form.fields['1'], mock1)#assert that the fields contain the fields expected based on the mocked return value
+            self.assertEqual(test_form.fields['2'], mock2)
+            self.assertEqual(test_form.data['questionnaire_id'], 123)
+            self.assertEqual(len(test_form.data), 1)
+            self.assertIsInstance(test_form.fields['questionnaire_id'].widget, HiddenInput )
     def test_create_form_with_initial_data(self):
         '''
             If I do all of the above, but also pass a AnswerSet as the instance argument then my form
