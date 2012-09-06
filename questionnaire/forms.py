@@ -8,10 +8,11 @@ Created on Jun 26, 2012
 from django import forms
 from models import QuestionAnswer
 from django.forms.fields import CharField,BooleanField,ChoiceField,MultipleChoiceField
-from django.forms.widgets import RadioSelect 
+from django.forms.widgets import RadioSelect , HiddenInput
 from django.utils.datastructures import SortedDict
 from django.db.models import Q
 from django.db.models import Max
+from django.forms.forms import BaseForm
 
   
 
@@ -22,6 +23,9 @@ def get_choices(question):
      TODO: What might this be used for (so the reviewer doesn't have to go searching)
     '''
     choices_list = question.selectoptions
+    
+    if choices_list == None:
+        return None
     choices= [(x,x) for x in choices_list]
     return choices
     
@@ -76,6 +80,38 @@ FIELD_TYPES={
             'radioselectfield':generate_radioselect_field,
             'multiplechoicefield':generate_multiplechoice_field,
             }
+
+class QuestionGroupForm(forms.Form):
+    
+    
+    questionnaire_id = CharField(widget=HiddenInput)
+    
+    def __init__(self, questiongroup, questionnaire_id, initial=None, data=None):
+        #generate the fields sorted dict from the questiongroup
+        #add a hidden field for the questionnaire_id
+        
+        #iif initial is passed in an it is an answe set then
+            #generate a dict mapping question id to question answer and pass this into the super constructor for initial
+            
+        #call the superconstructor
+        super(QuestionGroupForm, self).__init__()
+        
+        self.data['questionnaire_id'] = questionnaire_id
+        questions = questiongroup.get_ordered_questions()
+        
+        self.fields = SortedDict()
+        
+        for question in questions:
+            
+            field = FIELD_TYPES[question.field_type]()
+            field.label = question.label
+            field.choices=get_choices(question)
+            self.fields[str(question.id)]= field
+
+         
+            
+        
+        
 
 def make_question_group_form(questiongroup,questionnaire_id):
     '''

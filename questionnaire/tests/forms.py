@@ -4,11 +4,14 @@ Created on 26 Jul 2012
 @author: jjm20
 '''
 from django.test import TestCase
-from questionnaire.forms import get_choices, generate_charfield, generate_textfield, generate_boolean_field, generate_select_dropdown_field, generate_radioselect_field, generate_multiplechoice_field, FIELD_TYPES, make_question_group_form, create_question_answer_edit_form
+from questionnaire.forms import get_choices, generate_charfield, generate_textfield, generate_boolean_field, generate_select_dropdown_field, generate_radioselect_field, generate_multiplechoice_field, FIELD_TYPES, make_question_group_form, create_question_answer_edit_form,\
+    QuestionGroupForm
 from questionnaire.models import Question, Questionnaire, QuestionGroup, AnswerSet, QuestionAnswer
 from django.forms import Textarea, TextInput, BooleanField, ChoiceField, RadioSelect,CheckboxSelectMultiple, CharField, BaseForm
 from django.forms.fields import  MultipleChoiceField
 from django.contrib.auth.models import User
+from mock import MagicMock, patch
+import questionnaire.forms
 
 
 
@@ -31,12 +34,10 @@ class FormsTestCase(TestCase):
         
     def test_get_choices_question_without_options(self):
         '''
-            If we pass this function a question object that had no options defined we should get back
-            a TypeError as the function that handle prevention of NoneType Object is already fixed under the admin screen
-            or upon object creation
+            If we pass this function a question object that had no options defined we should get None back
         '''
         choices_question = Question.objects.create(label='test', field_type='select_dropdown_field', selectoptions=None)
-        self.assertRaises(TypeError, get_choices ,choices_question)       
+        self.assertEquals(None, get_choices(choices_question)   )    
         
         
         
@@ -199,4 +200,43 @@ class FormsTestCase_WithFixture(TestCase):
 
             self.assertEqual(test_edit_form.base_fields.value_for_index(index).label, expected[index][0])
             self.assertEqual(expected[index][1], test_edit_form.base_fields.value_for_index(index).initial) 
+            
+            
+class QuestionGroupFormTestCase(TestCase):
+    
+    
+    def test_create_form_no_initial_data(self):
+        '''
+            If I pass in a valid questiongroup object and valid questionaire_id then I should get back:
+            
+            an subclass of BaseForm
+            it should have fields representative of the questions in the questiongroup
+            it should have a hidden field with the questionnaire id
+            it should not have any initial data
+        '''
+        questiongroup = MagicMock(name='questiongroup')
+        question_attrs = {'field_type':'charfield'}
+        questiongroup.get_ordered_questions.return_value = [MagicMock(name='question1', id=1, **question_attrs),
+                                                                    MagicMock(name='question2', id=2, **question_attrs),  ]
+        
+        
+        charfield_generator_mock = MagicMock()
+        charfield_mock = MagicMock()
+        charfield_generator_mock.return_value = charfield_mock
+        questionnaire.forms.FIELD_TYPES = {'charfield':charfield_generator_mock}
+        
+        test_form = QuestionGroupForm(questiongroup=questiongroup, questionnaire_id=1, initial=None, data=None)
+        
+        self.assertTrue(issubclass(test_form.__class__, BaseForm))
+        self.assertEqual(test_form.fields['1'], charfield_mock)
+        self.assertEqual(test_form.fields['2'], charfield_mock)
+        self.assertEqual(test_form.data['questionnaire_id'], 1)
+        
+        
+    def test_create_form_with_initial_data(self):
+        '''
+            If I do all of the above, but also pass a AnswerSet as the instance argument then my form
+            should have initial data for all of the fields that the question group and the answerset have in common
+        '''
+        self.assertTrue(False)
         
