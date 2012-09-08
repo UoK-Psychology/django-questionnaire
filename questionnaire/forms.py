@@ -13,6 +13,7 @@ from django.utils.datastructures import SortedDict
 from django.db.models import Q
 from django.db.models import Max
 from django.forms.forms import BaseForm
+from questionnaire.models import AnswerSet
 
   
 
@@ -98,26 +99,36 @@ def _get_fields_for_group(questiongroup):
         fields.append((str(question.id),field))
     return fields
 
+def _convert_answerset_to_intial_data(answer_set):
+    '''
+        This function takes an asnwer set and then returns the QuestionAnswers as a dictionary
+        suitable to be used as the intial data for a form
+    '''
+    if not isinstance(answer_set, AnswerSet):
+        raise AttributeError('This function only accepts an AnswerSet asn its argument')
+    initial_data = {}
+    for question_answer in answer_set.questionanswer_set.all():
+        initial_data[str(question_answer.id)] = question_answer.answer
+    return initial_data
+    
 
 class QuestionGroupForm(forms.Form):
     
     
-    questionnaire_id = CharField(widget=HiddenInput)
     
-    def __init__(self, questiongroup, questionnaire_id, initial=None, data=None):
+    def __init__(self, questiongroup, initial=None, data=None):
         
-        super(QuestionGroupForm, self).__init__()
+        #TODO test that if the initial is an answer set that the convert_answerset_to_initial_data is called
+        if isinstance(initial, AnswerSet):
+            initial = _convert_answerset_to_intial_data(initial)
+        
+        super(QuestionGroupForm, self).__init__(initial=initial, data = data)
         
         
         
         for field in _get_fields_for_group(questiongroup):
             
             self.fields[field[0]] = field[1]
-            
-        self.initial = initial or {}
-        self.data = data or {}
-        
-        self.data['questionnaire_id'] = questionnaire_id
 
          
             
