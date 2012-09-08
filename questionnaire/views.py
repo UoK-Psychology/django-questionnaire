@@ -1,9 +1,10 @@
 from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
-from models import QuestionGroup_order, Questionnaire,QuestionGroup,AnswerSet,QuestionAnswer,Question
+from models import Questionnaire,QuestionGroup,AnswerSet,QuestionAnswer,Question
 from django.template import  RequestContext
 from django.shortcuts import render_to_response
-from questionnaire.forms import make_question_group_form,create_question_answer_edit_form
+from questionnaire.forms import make_question_group_form,create_question_answer_edit_form,\
+    QuestionGroupForm
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from operator import itemgetter
@@ -38,7 +39,6 @@ def do_questionnaire(request,questionnaire_id,order_index=None):
     
     if order_index==None:
         order_index = 0# zero based index 
-
     else:
         order_index = int(order_index)
         
@@ -49,18 +49,13 @@ def do_questionnaire(request,questionnaire_id,order_index=None):
     except IndexError:#if it doesn't exist we should throw a 404 not an INdexError
         raise Http404
     
-    this_answer_set, created = AnswerSet.objects.get_or_create(user=request.user,
+    this_answer_set = AnswerSet.objects.get_or_create(user=request.user,
                                                                        questionnaire=this_questionnaire,
-                                                                       questiongroup=questiongroup)
+                                                                       questiongroup=questiongroup)[0]#we don't care if it had been created so we only need to first index of the tuple
     
-    if created:#this is the first time this user has answered this questiongroup for this questionnaire
-        form_type = make_question_group_form(questiongroup, questionnaire_id)
-    else:#we are going to be editing the previous answers
-        form_type = create_question_answer_edit_form(request.user,this_questionnaire,questiongroup) 
+    form=QuestionGroupForm(questiongroup=questiongroup,initial=this_answer_set, data=request.POST or None)
     
     if request.method =='POST':
-        
-        form=form_type(request.POST)
         if form.is_valid():
             
             for question, answer in form.cleaned_data.items():
@@ -78,9 +73,7 @@ def do_questionnaire(request,questionnaire_id,order_index=None):
             else: 
                 order_info = order_index + 1
                 return HttpResponseRedirect(reverse('handle_next_questiongroup_form', kwargs = {'questionnaire_id': questionnaire_id, 'order_index' : order_info}))
-    else:
-        form = form_type()#create unbound form
-        
+            
     return render_to_response('questionnaire/questionform.html', 
     {'form': form ,'questionnaire':this_questionnaire,'questiongroup':questiongroup,},context_instance=RequestContext(request))
     
