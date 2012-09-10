@@ -12,17 +12,17 @@ from django.contrib.auth.decorators import login_required
 
 
 @login_required
-def questionnaire_index (request, template):
+def questionnaire_index (request, template_name):
     questionnaire = Questionnaire.objects.all()
     group_list=[x for x in questionnaire]
     
-    return render_to_response(template,{'group_list': group_list},context_instance=RequestContext(request))
+    return render_to_response(template_name,{'group_list': group_list},context_instance=RequestContext(request))
     
 
 
 
 @login_required
-def do_questionnaire(request,questionnaire_id,template,order_index=None):
+def do_questionnaire(request,questionnaire_id,template_name,next_form_name, finished_url,order_index=None):
     
     '''
         This view handles the presentation and submission of questiongroups. You must always specify a 
@@ -67,25 +67,25 @@ def do_questionnaire(request,questionnaire_id,template,order_index=None):
                 
                 
             if count == 0:#this is the last group in the questionnaire
-                return HttpResponseRedirect(reverse('questionnaire_finish'))
+                return HttpResponseRedirect(finished_url)
             
             else: 
                 order_info = order_index + 1
-                return HttpResponseRedirect(reverse('handle_next_questiongroup_form', kwargs = {'questionnaire_id': questionnaire_id, 'order_index' : order_info}))
+                return HttpResponseRedirect(reverse(next_form_name, kwargs = {'questionnaire_id': questionnaire_id, 'order_index' : order_info}))
             
-    return render_to_response('questionnaire/questionform.html', 
+    return render_to_response(template_name, 
     {'form': form ,'questionnaire':this_questionnaire,'questiongroup':questiongroup,},context_instance=RequestContext(request))
     
-def finish(request, template):
+def finish(request, template_name):
     '''
         TODO: Document me!!
     '''
-    return render_to_response(template,context_instance=RequestContext(request))
+    return render_to_response(template_name,context_instance=RequestContext(request))
       
 
 
 @login_required
-def display_question_answer(request,questionnaire_id,questiongroup_id,template):
+def display_question_answer(request,questionnaire_id,questiongroup_id,template_name):
     '''
     display a user's most recent  question and answers for given  questiongroups in a given questionnaire
     request user is user that has answered the given questionnnaire questiongroup
@@ -123,7 +123,7 @@ def display_question_answer(request,questionnaire_id,questiongroup_id,template):
     #TODO: Be careful using the variable context, it has special significance, and using this way would be confusing to the reader of your code
         #TODO: you don't need to explicitly put user into your responses context, it will get put there by virtue of using context_instance=RequestContext(request)
     ## EXPLAINATION : context variable REMOVED
-    return render_to_response(template,{'questionanswer':questionanswer,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
+    return render_to_response(template_name,{'questionanswer':questionanswer,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
 
 
 
@@ -131,7 +131,7 @@ def display_question_answer(request,questionnaire_id,questiongroup_id,template):
 
 
 @login_required     
-def all_question_answers_for_questiongroup(request,user_id,questionnaire_id,questiongroup_id, template):
+def all_question_answers_for_questiongroup(request,user_id,questionnaire_id,questiongroup_id, template_name):
     
     '''
     show trail all questions and  answers for  given questiongroup in a questionnaire for a given user_id 
@@ -161,12 +161,12 @@ def all_question_answers_for_questiongroup(request,user_id,questionnaire_id,ques
 #        context= questionanswer_list
 
         #
-    return render_to_response(template,{'questionanswer_list':questionanswer_list,'user':user,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
+    return render_to_response(template_name,{'questionanswer_list':questionanswer_list,'user':user,'questionnaire':this_questionnaire,'questiongroup_id':questiongroup_id,'groups_list':groups_list,},context_instance=RequestContext(request))
 
 
 
 @login_required
-def questionnaire_detail_list(request,questionnaire_id, template):
+def questionnaire_detail_list(request,questionnaire_id, template_name):
     '''
     show  detail list as links  for all questiongroups in a given questionnaire ordered by order_info
     links can be use to edit or display given  questionanswer for questiongroups in questionnaire
@@ -184,7 +184,7 @@ def questionnaire_detail_list(request,questionnaire_id, template):
         #TODO: careful about using context as a variable now it has special significance in views
    
         #TODO: you don't need to explicitly put user into your responses context, it will get put there by virtue of using context_instance=RequestContext(request)
-    return render_to_response(template,{'groups_list': groups_list, 'questionnaire':this_questionnaire,},context_instance=RequestContext(request))
+    return render_to_response(template_name,{'groups_list': groups_list, 'questionnaire':this_questionnaire,},context_instance=RequestContext(request))
 
     
     
