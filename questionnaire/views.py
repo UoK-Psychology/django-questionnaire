@@ -112,10 +112,10 @@ def display_question_answer(request,questionnaire_id,questiongroup_id):
     groups_list=[(x.questiongroup) for x in orderedgroups]
         
     #TODO: this seems a quite complex, and is difficult to follow, either add a comment to explain what you are doing, or consider refactoring to make it simpler?
-   ##EXPLAINATION  using django Complex lookups with Q objects use for join query , it retrieve all the questionanswer related objects where the user is this user for this question group and this questionnaire
-   ##  it does this by span relationship i.e double underscore  between QuestionAnswer  answerset attribute  and Answerset object attributes i.e user ,questiongroup,questionnaire this referential relationship is already defined in the models
-   ##   since we are only interested in the most recent questionanswer filter(id__in=answer_max_id_list) further filter all related questionanswer objects to the one qa objects in the max id list .
-   ##   [(x.question.id,x.question.label ,x.answer)for x in y] .  this retrieve the question label and the answer for  each questionanswer in the most recent questionanswer put them in a list.
+    ##EXPLAINATION  using django Complex lookups with Q objects use for join query , it retrieve all the questionanswer related objects where the user is this user for this question group and this questionnaire
+    ##  it does this by span relationship i.e double underscore  between QuestionAnswer  answerset attribute  and Answerset object attributes i.e user ,questiongroup,questionnaire this referential relationship is already defined in the models
+    ##   since we are only interested in the most recent questionanswer filter(id__in=answer_max_id_list) further filter all related questionanswer objects to the one qa objects in the max id list .
+    ##   [(x.question.id,x.question.label ,x.answer)for x in y] .  this retrieve the question label and the answer for  each questionanswer in the most recent questionanswer put them in a list.
     y=QuestionAnswer.objects.filter(Q(answer_set__user_id=user,answer_set__questiongroup=this_questiongroup,answer_set__questionnaire=this_questionnaire)).filter(id__in=answer_max_id_list)          
     
     questionanswer=[(x.question.id,x.question.label ,x.answer) for x in y]

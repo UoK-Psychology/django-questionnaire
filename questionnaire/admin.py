@@ -1,8 +1,3 @@
-'''
-Created on Jul 11, 2012
-
-@author: mzd2
-'''
 from django.contrib import admin
 from models import Question, QuestionGroup, Questionnaire, QuestionGroup_order, Question_order, AnswerSet, QuestionAnswer,QuestionAdminForm
  
