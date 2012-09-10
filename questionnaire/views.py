@@ -61,9 +61,11 @@ def do_questionnaire(request,questionnaire_id,order_index=None):
                 if isinstance(answer,list):
                         answer = ', '.join(answer)
                 
-                QuestionAnswer.objects.get_or_create(
-                                                question= get_object_or_404(Question, pk=question),
-                                                answer=str(answer),answer_set=this_answer_set)
+                if question in form.changed_data:
+                    QuestionAnswer.objects.create(question= get_object_or_404(Question, pk=question),
+                                                answer=str(answer),
+                                                answer_set=this_answer_set)
+                        
                 
                 
             if count == 0:#this is the last group in the questionnaire

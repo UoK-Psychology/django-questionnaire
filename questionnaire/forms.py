@@ -107,8 +107,8 @@ def _convert_answerset_to_intial_data(answer_set):
     if not isinstance(answer_set, AnswerSet):
         raise AttributeError('This function only accepts an AnswerSet asn its argument')
     initial_data = {}
-    for question_answer in answer_set.questionanswer_set.all():
-        initial_data[str(question_answer.id)] = question_answer.answer
+    for question_answer in answer_set.get_latest_question_answers():
+        initial_data[str(question_answer.question.id)] = question_answer.answer
     return initial_data
     
 

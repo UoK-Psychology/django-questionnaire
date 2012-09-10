@@ -1,9 +1,3 @@
-'''
-Created on Jul 10, 2012
-
-@author: mzd2
-@author: ayoola
-'''
 from django.db import models
 
 from django.contrib.auth.models import User
