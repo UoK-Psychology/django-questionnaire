@@ -2,7 +2,7 @@ from django.test import TestCase
 from questionnaire.forms import get_choices, generate_charfield, generate_textfield, generate_boolean_field, generate_select_dropdown_field, generate_radioselect_field, generate_multiplechoice_field, FIELD_TYPES,\
     QuestionGroupForm, _get_fields_for_group, _convert_answerset_to_intial_data
 from questionnaire.models import Question, Questionnaire, QuestionGroup, AnswerSet, QuestionAnswer
-from django.forms import Textarea, TextInput, BooleanField, ChoiceField, RadioSelect,CheckboxSelectMultiple, CharField, BaseForm
+from django.forms import Textarea, TextInput, BooleanField, ChoiceField, RadioSelect,CheckboxSelectMultiple, CharField
 from django.forms.fields import  MultipleChoiceField
 from mock import MagicMock, patch, call
 from django.contrib.auth.models import User

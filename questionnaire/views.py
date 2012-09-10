@@ -6,8 +6,6 @@ from django.shortcuts import render_to_response
 from questionnaire.forms import QuestionGroupForm
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
-from operator import itemgetter
-from itertools import groupby
 from django.db.models import Max
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required

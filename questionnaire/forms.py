@@ -1,18 +1,6 @@
-'''
-Created on Jun 26, 2012
-
-@author: ayoola_al
-
-'''
-
 from django import forms
-from models import QuestionAnswer
 from django.forms.fields import CharField,BooleanField,ChoiceField,MultipleChoiceField
-from django.forms.widgets import RadioSelect , HiddenInput
-from django.utils.datastructures import SortedDict
-from django.db.models import Q
-from django.db.models import Max
-from django.forms.forms import BaseForm
+from django.forms.widgets import RadioSelect
 from questionnaire.models import AnswerSet
 
   
@@ -119,8 +107,6 @@ class QuestionGroupForm(forms.Form):
         the form fields required to render and validate the questions in any question group
     '''
     def __init__(self, questiongroup, initial=None, data=None):
-        
-        #TODO test that if the initial is an answer set that the convert_answerset_to_initial_data is called
         if isinstance(initial, AnswerSet):
             initial = _convert_answerset_to_intial_data(initial)
         
