@@ -1,8 +1,12 @@
 from django.test import TestCase
 from django.db import models
-from questionnaire.models import QuestionAnswer, AnswerSet, Question, QuestionGroup, Questionnaire, FIELD_TYPE_CHOICES, QuestionGroup_order, Question_order, CustomListField
+from questionnaire.models import QuestionAnswer, AnswerSet, Question, QuestionGroup, Questionnaire, FIELD_TYPE_CHOICES, QuestionGroup_order, Question_order, CustomListField,\
+    LatestQuestionAnswer
 from django.db.models.fields import CharField
 from django.db import IntegrityError
+import mock
+from mock import MagicMock
+from django.contrib.auth.models import User
 
 
 
@@ -329,11 +333,27 @@ class AnswerSetTestCase(TestCase):
         
         self.assertRaises(IntegrityError, AnswerSet.objects.create)
         
-      
+    def test_get_latest_question_answers(self):
+        '''
+            This should return a list of only the latest QuestionAnswers that relate to this answerset
+            this should be achieved by querying the LatestQuestionAnswer
+        ''' 
+        #generate an AnswerSet
         
+        test_answer_set = AnswerSet(user=User.objects.create_user('test', 'test@test.com', 'test'), 
+                                    questionnaire=Questionnaire.objects.get(pk=1),
+                                    questiongroup=QuestionGroup.objects.get(pk=1))
+        #patch the LatestQuestionAnswer objects function
+        with mock.patch('questionnaire.models.LatestQuestionAnswer.objects') as objects_patch:
+            
+            objects_patch.filter.return_value = [MagicMock(question_answer='questionAnswer1'),MagicMock(question_answer='questionAnswer2')]
+            answers = test_answer_set.get_latest_question_answers()#pass the mock in as the self argument
+        
+            objects_patch.filter.assert_called_once_with(answer_set=test_answer_set)
+            self.assertEqual(answers, ['questionAnswer1','questionAnswer2'])
     
 class QuestionAnswerTestCase(TestCase):
-    
+    fixtures = ['test_questionnaire_fixtures_formodels.json']
     def test_fields(self):
         '''
             A Question Answer should have the following fields:
@@ -354,3 +374,45 @@ class QuestionAnswerTestCase(TestCase):
             However you should be able to do without specifying an answer, and this should be saved as an empty string.
         '''
         self.assertRaises(IntegrityError, QuestionAnswer.objects.create)
+        
+        
+    def test_save_override(self):
+        '''
+            The overriden save method should ensure that the correct question answert is stored in the 
+            LatestQuestionAnswer table
+            
+            If there is no record for this question in this answer_set then create one with this question answer
+            If there is a record, but the latest is not this then update it to make this the latest
+            If there is a record, and it is already set to this do nothing
+        '''
+        #intially we need an answerset
+        test_answer_set = AnswerSet(user=User.objects.create_user('test', 'test@test.com', 'test') ,
+                                     questionnaire=Questionnaire.objects.get(pk=1), questiongroup=QuestionGroup.objects.get(pk=1))
+        
+        test_answer_set.save()
+        #initialy there shouldnt be any record in the latestquestionanswer so the function should create one
+        an_answer = QuestionAnswer(question=Question.objects.get(pk=1),
+                                   answer='my answer',
+                                   answer_set = test_answer_set)
+        an_answer.save()
+        self.assertEqual(len(LatestQuestionAnswer.objects.all()), 1)
+        self.assertEqual(LatestQuestionAnswer.objects.latest('id').question_answer, an_answer)
+        #now if we save a new question answer then the record should be updated
+        
+        a_new_answer = QuestionAnswer(question=Question.objects.get(pk=1),
+                                   answer='my new answer',
+                                   answer_set = test_answer_set)
+        a_new_answer.save()
+        self.assertEqual(len(LatestQuestionAnswer.objects.all()), 1)
+        self.assertEqual(LatestQuestionAnswer.objects.latest('id').question_answer, a_new_answer)
+        a_new_answer_created = LatestQuestionAnswer.objects.latest('id').created
+        
+        #then if we save this question asnwer again then nothing should happen
+        
+        a_new_answer.save()
+        self.assertEqual(len(LatestQuestionAnswer.objects.all()), 1)
+        self.assertEqual(LatestQuestionAnswer.objects.latest('id').question_answer, a_new_answer)
+        self.assertEqual(LatestQuestionAnswer.objects.latest('id').created, a_new_answer_created)#the timestamp should'nt have changed
+        
+        
+        
