@@ -1,15 +1,11 @@
-'''
-Created on 26 Jul 2012
-
-@author: jjm20
-'''
 from django.test import TestCase
-from questionnaire.forms import get_choices, generate_charfield, generate_textfield, generate_boolean_field, generate_select_dropdown_field, generate_radioselect_field, generate_multiplechoice_field, FIELD_TYPES, make_question_group_form, create_question_answer_edit_form
+from questionnaire.forms import get_choices, generate_charfield, generate_textfield, generate_boolean_field, generate_select_dropdown_field, generate_radioselect_field, generate_multiplechoice_field, FIELD_TYPES,\
+    QuestionGroupForm, _get_fields_for_group, _convert_answerset_to_intial_data
 from questionnaire.models import Question, Questionnaire, QuestionGroup, AnswerSet, QuestionAnswer
 from django.forms import Textarea, TextInput, BooleanField, ChoiceField, RadioSelect,CheckboxSelectMultiple, CharField, BaseForm
 from django.forms.fields import  MultipleChoiceField
+from mock import MagicMock, patch, call
 from django.contrib.auth.models import User
-
 
 
 class FormsTestCase(TestCase):
@@ -31,12 +27,10 @@ class FormsTestCase(TestCase):
         
     def test_get_choices_question_without_options(self):
         '''
-            If we pass this function a question object that had no options defined we should get back
-            a TypeError as the function that handle prevention of NoneType Object is already fixed under the admin screen
-            or upon object creation
+            If we pass this function a question object that had no options defined we should get None back
         '''
         choices_question = Question.objects.create(label='test', field_type='select_dropdown_field', selectoptions=None)
-        self.assertRaises(TypeError, get_choices ,choices_question)       
+        self.assertEquals(None, get_choices(choices_question)   )    
         
         
         
@@ -118,6 +112,93 @@ class FormsTestCase(TestCase):
         self.assertEqual(FIELD_TYPES['radioselectfield'], generate_radioselect_field)
         self.assertEqual(FIELD_TYPES['multiplechoicefield'], generate_multiplechoice_field)
         
+    def test_get_fields_for_group(self):
+        '''
+            Calling this function should create a list of tuples that has the same order as
+            the ordered questions in the group, and used the FIELD_TYPES dict to create the 
+            fields. As we have already tested the FIELD_TYPE and allof the generator functions
+            this test will simply test make sure that the function returns a sortedDict
+            in the correct order
+        '''
+        
+        with patch('questionnaire.forms.FIELD_TYPES') as field_dict_mock:
+            return_values = [MagicMock(name='mock1'),MagicMock(name='mock2')]
+            def side_effect(*attrs):
+                return return_values.pop()
+                
+            
+            
+            field_function_mock = MagicMock(name='field_function_mock')
+            field_function_mock.side_effect = side_effect
+            field_dict_mock.__getitem__.return_value = field_function_mock
+            
+            questiongroup = MagicMock(name='questiongroup')
+            
+            #prepare a list of mock objects to act as questions when returned by the ordered_question
+            questiongroup.get_ordered_questions.return_value = [MagicMock(label='question1', id=1, field_type='type1'),
+                                                                        MagicMock(label='question2', id=2, field_type='type2' ),  ]
+            with patch('questionnaire.forms.get_choices') as get_choices_mock:
+                test_form = _get_fields_for_group(questiongroup=questiongroup)
+            
+            
+           
+            self.assertEqual(field_dict_mock.__getitem__.mock_calls , [call('type1'), call('type2')])
+            self.assertEqual(test_form[0][0], '1')
+            self.assertEqual(test_form[0][1].label, 'question1')
+            self.assertEqual(test_form[1][0], '2')
+            self.assertEqual(test_form[1][1].label, 'question2')
+            self.assertEqual(get_choices_mock.call_count, 2)
+            
+    def test_convert_answerset_to_intial_data_with_data(self):
+        '''
+            if we pass in a valid questionanswer object then we should get back
+            a dicitonary, that has a entry for eacxh questionsanswer, the key of which is
+            the question id and the value of which is the question answer
+        '''
+        
+        test_answer_set = AnswerSet(user=User.objects.create_user('testUser', 'me@home.com', 'testPass'),
+                                     questionnaire=Questionnaire.objects.get(pk=1),
+                                     questiongroup=QuestionGroup.objects.get(pk=1))
+        
+        test_answer_set.save()
+        #create some answers
+        answer1 = QuestionAnswer(question=Question.objects.get(pk=1), answer='answer1', answer_set=test_answer_set)
+        answer2 = QuestionAnswer(question=Question.objects.get(pk=2), answer='answer2', answer_set=test_answer_set)
+        answer3 = QuestionAnswer(question=Question.objects.get(pk=3), answer='answer3', answer_set=test_answer_set)
+        
+        answer1.save()
+        answer2.save()
+        answer3.save()
+        
+        initial_data = _convert_answerset_to_intial_data(test_answer_set)
+        
+        self.assertEqual(initial_data[str(answer1.question.id)], answer1.answer)
+        self.assertEqual(initial_data[str(answer2.question.id)], answer2.answer)
+        self.assertEqual(initial_data[str(answer3.question.id)], answer3.answer)
+        self.assertEqual(len(initial_data), 3)
+        
+    def test_convert_answerset_to_intial_data_with_empty_data(self):
+        '''
+            if we pass in a valid questionanswer object that has not answers then we should get back
+            an empty dicitonary
+        '''
+        
+        test_answer_set = AnswerSet(user=User.objects.create_user('testUser', 'me@home.com', 'testPass'),
+                                     questionnaire=Questionnaire.objects.get(pk=1),
+                                     questiongroup=QuestionGroup.objects.get(pk=1))
+        
+        test_answer_set.save()
+        
+        
+        initial_data = _convert_answerset_to_intial_data(test_answer_set)
+
+        self.assertEqual(len(initial_data), 0)
+        
+    def test_convert_answerset_to_intial_data_with_invalid_argument(self):
+        '''
+            if we pass in anything other that a valid questionanswer object then we will get a Attribute error thrown
+        '''
+        self.assertRaises(AttributeError, _convert_answerset_to_intial_data, '123')
         
 class FormsTestCase_WithFixture(TestCase):
     
@@ -142,61 +223,82 @@ class FormsTestCase_WithFixture(TestCase):
         if assertions[2] != None:
             self.assertIsInstance(question.choices , assertions[2])
 
-    def test_make_question_group_form(self):
-        '''
-            The fixture should define a questiongroup that has one of each of the question types
-            This function should return a BaseForm object and interoggation of its fields should
-            be done to ensure that the correct fields have been generated, eg does the first name field have 
-            the correct label and is its field properly mapped according to its questiontype?
-        '''
-        
-
-        test_form = make_question_group_form(QuestionGroup.objects.get(pk=1),1)
-        
-        
-        self.assertTrue(issubclass(test_form, BaseForm))
-
-        expected = [    ('question 1','charfield'),
-                        ('question 2','textfield'),
-                        ('question 3','booleanfield'),
-                        ('question 4','select_dropdown_field'),
-                        ('question 5','radioselectfield'),
-                        ('question 6','multiplechoicefield'),]
-       
-        for index in range(len(test_form.base_fields)):
-                
-            self.assertEqual(test_form.base_fields.value_for_index(index).label, expected[index][0])
-            self.assertQuestionType(expected[index][1], test_form.base_fields.value_for_index(index)) 
-            
-            
     
-    def  test_create_question_answer_edit_form(self):
+class QuestionGroupFormTestCase(TestCase):
+    
+    
+    def test_create_form_no_initial_data(self):
         '''
-        The test is almost the same as the previous one but with the difference of form having
-        'initial' data
+            If I pass in a valid questiongroup object and valid questionaire_id then I should get back:
+            
+            an subclass of Form
+            it should have fields representative of the questions in the questiongroup
         '''
-        testquestionnaire = Questionnaire.objects.get(pk=1)      
-        testquestiongroup=QuestionGroup.objects.get(pk=1)
-        self.user_test = User.objects.create_user('user', 'email@email.com', 'password')          
-        self.answerset = AnswerSet.objects.create(user=self.user_test,questionnaire=testquestionnaire,questiongroup=testquestiongroup)
-        user = User.objects.get(pk=1)
+        #mock the _get_fields_for_group function to return a predefined list of tuples
+        with patch('questionnaire.forms._get_fields_for_group') as get_fields_mock:
+            mock1 = MagicMock(name='1')
+            mock2 = MagicMock(name='1')
+            get_fields_mock.return_value = [('1', mock1), ('2', mock2 )]
+            question_group = MagicMock('question_group')
+            
+            test_form = QuestionGroupForm(questiongroup=question_group,  initial=None, data=None)
         
-        self.question_answer_1 = QuestionAnswer.objects.create(question=Question.objects.get(pk=1),answer="charfield_answer",answer_set=AnswerSet.objects.get(pk=1))
-        self.question_answer_2 = QuestionAnswer.objects.create(question=Question.objects.get(pk=2),answer="textfield_answer",answer_set=AnswerSet.objects.get(pk=1))
-        self.question_answer_3 = QuestionAnswer.objects.create(question=Question.objects.get(pk=3),answer="True",answer_set=AnswerSet.objects.get(pk=1))  
+            self.assertEqual(test_form.fields['1'], mock1)#assert that the fields contain the fields expected based on the mocked return value
+            self.assertEqual(test_form.fields['2'], mock2)
+    def test_create_form_with_initial_data(self):
+        '''
+            If I do all of the above, but also pass a dictionary as the instance argument then my form
+            should have initial data for all of the fields that the question group and the answerset have in common
+        '''
+        with patch('questionnaire.forms._get_fields_for_group') as get_fields_mock:
+            mock1 = MagicMock(name='1')
+            mock2 = MagicMock(name='1')
+            get_fields_mock.return_value = [('1', mock1), ('2', mock2 )]
+            question_group = MagicMock('question_group')
+            
+            initial_data = {'1':'initial1', '2':'initial2', }
+            test_data = {'1':'data1', '2':'data2',}
+            test_form = QuestionGroupForm(questiongroup=question_group,initial=initial_data, data=test_data)
         
-        test_edit_form = create_question_answer_edit_form(user,testquestionnaire,testquestiongroup)
+            #sanity check should be the same as above
+            self.assertEqual(test_form.fields['1'], mock1)#assert that the fields contain the fields expected based on the mocked return value
+            self.assertEqual(test_form.fields['2'], mock2)
+            
+            #assert the intial data
+            self.assertEqual(test_form.initial['1'], 'initial1')
+            self.assertEqual(test_form.initial['2'], 'initial2')
+            
+            self.assertEqual(test_form.data['1'], 'data1')
+            self.assertEqual(test_form.data['2'], 'data2')
+    
+    @patch('questionnaire.forms._convert_answerset_to_intial_data')        
+    def test_create_form_with_initial_answer_set(self, conversion_fucntion_mock):
+        '''
+            If I do all of the above, but also pass an answer set as the instance argument then my form will call the 
+            _convert_answerset_to_intial_data with the answer set function, and use the returned dict as the initial data function
+        '''
+        conversion_fucntion_mock.return_value = {'1':'initial_answer_1', '2':'initial_answer_2' }
         
-        expected = [    ('question 1','charfield_answer'),
-                        ('question 2','textfield_answer'),
-                        ('question 3',True)]
+        with patch('questionnaire.forms._get_fields_for_group') as get_fields_mock:
+            mock1 = MagicMock(name='1')
+            mock2 = MagicMock(name='1')
+            get_fields_mock.return_value = [('1', mock1), ('2', mock2 )]
+            question_group = MagicMock('question_group')
+            
+            initial_data = AnswerSet()
+            test_data = {'1':'data1', '2':'data2',}
+            test_form = QuestionGroupForm(questiongroup=question_group,initial=initial_data, data=test_data)
         
-        self.assertTrue(issubclass(test_edit_form, BaseForm))
-        
-        
-        
-        for index in range(len(test_edit_form.base_fields)):
-
-            self.assertEqual(test_edit_form.base_fields.value_for_index(index).label, expected[index][0])
-            self.assertEqual(expected[index][1], test_edit_form.base_fields.value_for_index(index).initial) 
+            #sanity check should be the same as above
+            self.assertEqual(test_form.fields['1'], mock1)#assert that the fields contain the fields expected based on the mocked return value
+            self.assertEqual(test_form.fields['2'], mock2)
+            
+            #assert the intial data
+            self.assertEqual(test_form.initial['1'], 'initial_answer_1')
+            self.assertEqual(test_form.initial['2'], 'initial_answer_2')
+            
+            self.assertEqual(test_form.data['1'], 'data1')
+            self.assertEqual(test_form.data['2'], 'data2')
+            
+            conversion_fucntion_mock.assert_called_once_with(initial_data)
         

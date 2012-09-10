@@ -8,10 +8,12 @@ Created on Jun 26, 2012
 from django import forms
 from models import QuestionAnswer
 from django.forms.fields import CharField,BooleanField,ChoiceField,MultipleChoiceField
-from django.forms.widgets import RadioSelect 
+from django.forms.widgets import RadioSelect , HiddenInput
 from django.utils.datastructures import SortedDict
 from django.db.models import Q
 from django.db.models import Max
+from django.forms.forms import BaseForm
+from questionnaire.models import AnswerSet
 
   
 
@@ -22,6 +24,9 @@ def get_choices(question):
      TODO: What might this be used for (so the reviewer doesn't have to go searching)
     '''
     choices_list = question.selectoptions
+    
+    if choices_list == None:
+        return None
     choices= [(x,x) for x in choices_list]
     return choices
     
@@ -77,79 +82,60 @@ FIELD_TYPES={
             'multiplechoicefield':generate_multiplechoice_field,
             }
 
-def make_question_group_form(questiongroup,questionnaire_id):
+def _get_fields_for_group(questiongroup):
     '''
-     mapping questions fields  type  to form fields type 
-     @return: type form for specific questiongroup 
-    
+        This builds a sorted dict of fields that are created in the order defined in the 
+        questiongroup, and created based on the question label and the question type
     '''
-    fields = SortedDict([])#TODO: document why you are using a sortedict
-       
+    questions = questiongroup.get_ordered_questions()
+        
+    fields = []
     
-    orderedgroups = questiongroup.get_ordered_questions()
+    for question in questions:
+        
+        field = FIELD_TYPES[question.field_type]()
+        field.label = question.label
+        field.choices=get_choices(question)
+        fields.append((str(question.id),field))
+    return fields
+
+def _convert_answerset_to_intial_data(answer_set):
+    '''
+        This function takes an asnwer set and then returns the QuestionAnswers as a dictionary
+        suitable to be used as the intial data for a form
+    '''
+    if not isinstance(answer_set, AnswerSet):
+        raise AttributeError('This function only accepts an AnswerSet asn its argument')
+    initial_data = {}
+    for question_answer in answer_set.questionanswer_set.all():
+        initial_data[str(question_answer.id)] = question_answer.answer
+    return initial_data
     
-    
-    for question in orderedgroups:
+
+class QuestionGroupForm(forms.Form):
+    '''
+        This form will be used to render the form for each question group
+        by passing a questiongroup into the constructor it will dynamically generate
+        the form fields required to render and validate the questions in any question group
+    '''
+    def __init__(self, questiongroup, initial=None, data=None):
+        
+        #TODO test that if the initial is an answer set that the convert_answerset_to_initial_data is called
+        if isinstance(initial, AnswerSet):
+            initial = _convert_answerset_to_intial_data(initial)
+        
+        super(QuestionGroupForm, self).__init__(initial=initial, data = data)
+        
+        
+        
+        for field in _get_fields_for_group(questiongroup):
+            
+            self.fields[field[0]] = field[1]
+
+         
+            
+        
         
 
-        if question.field_type in ['select_dropdown_field','radioselectfield','multiplechoicefield']:
-            field=FIELD_TYPES[question.field_type]()
-            if get_choices(question):#TODO: do we really need to do this if this function returns None, then you might as well set field.choices=None as it will be None anyway?
-                field.choices=get_choices(question)
-            
-            field.label = question.label
-            fields[str(question.id)]= field
-        else:    
-            field = FIELD_TYPES[question.field_type]()
-            field.label = question.label
-            fields[str(question.id)]= field
 
-    #TODO: it might be worth explaining this a bit more as this is quite advanced python and might not be totally clear to the reviewer
-    return type('%sForm' % id (questionnaire_id),(forms.BaseForm,),{'base_fields':fields})
-
-
-
-def  create_question_answer_edit_form(user,this_questionnaire,this_questiongroup):
-    '''
-    create form for editing recent question answer for given user 
-    prepopulate fields with most recent answers for given user and questiongroup
-    field.initial store  most recent answers to prepopulate the form fields 
-    '''  
-    
-    #TODO: this block looks very similar to the one used in the view code - consider refactoring this to a function, perhaps located as a function of QuestionGroup i.e. get_questionsanswers_for_user or something like that?
-    q_list=QuestionAnswer.objects.values('question','answer_set').annotate(Max('id'))
-    answer_max_id_list=q_list.values_list('id__max',flat=True)
-    qs=QuestionAnswer.objects.filter(Q(answer_set__user_id=user,answer_set__questiongroup=this_questiongroup,answer_set__questionnaire=this_questionnaire)).filter(id__in=answer_max_id_list)  
-    questionanswer=[(x.question ,x.answer) for x in qs] 
-
-    fields = SortedDict([])
-    
-    #TODO:This block appears to be very similar to make_question_group_form consider refactoring the shaared code into a function that can be used by both form functions.
-    for (question,answer)in questionanswer:
-        
-        if  question.field_type in ['select_dropdown_field','radioselectfield','multiplechoicefield']:
-            field=FIELD_TYPES[question.field_type]()
-            field.label= question.label
-            field.choices=get_choices(question)
-            
-            if question.field_type == 'multiplechoicefield':
-                field.initial = [str(x) for x in answer.split(',')]
-            else:
-                field.initial=str(answer)
-                
-            fields[str(question.id)]= field
-        else:
-            field=FIELD_TYPES[question.field_type]()
-            field.label= question.label
-            
-            if not question.field_type =='booleanfield':
-                field.initial = answer
-                
-            fields[str(question.id)]= field
-             
-    return type('editForm',(forms.BaseForm,),{'base_fields':fields})
-        
-
-     
-   
         

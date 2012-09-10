@@ -8,6 +8,7 @@ from django.db import models
 
 from django.contrib.auth.models import User
 from django import forms
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class CustomListField(models.TextField):
@@ -173,6 +174,17 @@ class Questionnaire(models.Model):
         '''
         return QuestionGroup_order.objects.filter(questionnaire=self).order_by('order_info')
     
+    def get_group_for_index(self, index):
+        '''
+            Returns the question group that is at the position in the ordered sequence of groups
+            represented by the index argument
+            
+            If there is not a group at this index in the ordered_groups then an index error will be thrown.
+        '''
+        ordered_groups = [order_info.questiongroup for order_info in self.get_ordered_groups()]
+        return (ordered_groups[index], (len(ordered_groups) - index) -1)
+    
+    
     def __unicode__(self):
         return self.name
     
@@ -218,7 +230,14 @@ class AnswerSet(models.Model):
         
     def __unicode__(self):
         return 'user:%s questionnaire:%s  questiongroup:%s ' %(str(self.user), str(self.questionnaire),str(self.questiongroup)) 
-        
+    
+    def get_latest_question_answers(self):
+        '''
+            Convenience function that returns a list of the latest QuestionAnswer objects (bearing in mind that you could
+            have more than one QuestionAnswer for each question in a given answer set).
+        '''
+        return [record.question_answer for record in LatestQuestionAnswer.objects.filter(answer_set=self)]  
+     
 class QuestionAnswer(models.Model):    
     '''
     This model stores questions, answers and related answer_set 
@@ -229,8 +248,30 @@ class QuestionAnswer(models.Model):
     question = models.ForeignKey(Question)
     answer = models.CharField(max_length=255)
     answer_set = models.ForeignKey(AnswerSet)
+    created = models.DateTimeField(auto_now_add=True)
      
+    
+    def save(self, force_insert=False, force_update=False, using=None):
+        super(QuestionAnswer, self).save(force_insert=force_insert, force_update=force_update, using=using)
+        #now update the LatestQuestionAnswer table
+        
+        try:
+            record = LatestQuestionAnswer.objects.get(question=self.question, answer_set=self.answer_set)
+            
+            if record.question_answer == self:
+                return#nothing to do no point updating the record as it is already correct
+            
+        except ObjectDoesNotExist:
+            record = LatestQuestionAnswer(question=self.question, answer_set= self.answer_set)
+            
+        record.question_answer = self
+        record.save()
     
     def __unicode__(self):
         return 'question:%s answer:%s answer_set:%s' %(str(self.question), str(self.answer), str(self.answer_set))
 
+class LatestQuestionAnswer(models.Model):
+    question = models.ForeignKey(Question)
+    question_answer = models.ForeignKey(QuestionAnswer)
+    answer_set = models.ForeignKey(AnswerSet)
+    created = created = models.DateTimeField(auto_now_add=True)

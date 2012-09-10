@@ -12,10 +12,13 @@ urlpatterns = patterns('questionnaire.views',
                name='questionnaire_index'),
                 
                        
-          url(r'^qs/(?P<questionnaire_id>\d+)/(?P<order_info>\d+)/$', 
-          view = 'handle_next_questiongroup_form',
+          url(r'^qs/(?P<questionnaire_id>\d+)/(?P<order_index>\d+)/$', 
+          view = 'do_questionnaire',
           name = 'handle_next_questiongroup_form'),                      
     
+          url(r'^qs/(?P<questionnaire_id>\d+)/$', 
+          view = 'do_questionnaire',
+          name = 'handle_next_questiongroup_form'), 
                        
         url(r'^finish/$', 
             view = 'finish',
@@ -26,8 +29,8 @@ urlpatterns = patterns('questionnaire.views',
             view = 'display_question_answer',
             name = 'display_question_answer'),
                        
-        url(r'^edit/(?P<questionnaire_id>\d+)/(?P<questiongroup_id>\d+)/$', 
-            view = 'edit_question_answer',
+        url(r'^edit/(?P<questionnaire_id>\d+)/(?P<order_index>\d+)/$', 
+            view = 'do_questionnaire',
             name = 'edit_question_answer'),
          
         url(r'^trailquestionanswers/(?P<user_id>\d+)/(?P<questionnaire_id>\d+)/(?P<questiongroup_id>\d+)/$', 
