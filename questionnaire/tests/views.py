@@ -197,7 +197,7 @@ class QuestionnaireViewTests(TestCase):
         '''
         check if there are only 1 AnswerSet object created which means there is no extra AnswerSet object created
         '''               
-        self.assertEqual(AnswerSet.objects.get(pk=1).user, User.objects.get(pk=1))
+        self.assertEqual(AnswerSet.objects.get(pk=1).user, User.objects.get(username='user'))
         self.assertEqual(AnswerSet.objects.all().count(), 1 )
         
     def test_handle_next_questiongroup_form_post_failure(self):
@@ -428,18 +428,15 @@ class QuestionnaireViewTests(TestCase):
         self.question_answer_1 = QuestionAnswer.objects.create(question=Question.objects.get(pk=1),answer="charfield_answer",answer_set=AnswerSet.objects.get(pk=1))
         self.question_answer_2 = QuestionAnswer.objects.create(question=Question.objects.get(pk=2),answer="textfield_answer",answer_set=AnswerSet.objects.get(pk=1))
         self.question_answer_3 = QuestionAnswer.objects.create(question=Question.objects.get(pk=3),answer="True",answer_set=AnswerSet.objects.get(pk=1))
-        self.question_answer_4 = QuestionAnswer.objects.create(question=Question.objects.get(pk=1),answer="charfield_answer_edited",answer_set=AnswerSet.objects.get(pk=1))
-        self.question_answer_5 = QuestionAnswer.objects.create(question=Question.objects.get(pk=2),answer="textfield_answer_edited",answer_set=AnswerSet.objects.get(pk=1))
-        self.question_answer_6 = QuestionAnswer.objects.create(question=Question.objects.get(pk=3),answer="False",answer_set=AnswerSet.objects.get(pk=1))
-
+        
           
         
         self.client.login(username='user', password='password') 
-        url = reverse('all_question_answers_for_questiongroup', kwargs={'user_id':1,'questionnaire_id':1, 'questiongroup_id':1})   
+        url = reverse('all_question_answers_for_questiongroup', kwargs={'user_id':self.user_test.id,'questionnaire_id':1, 'questiongroup_id':1})   
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200, 'user authenticated and can access the page')
         self.assertTemplateUsed('all_questionanswers.html') 
-        self.assertGreater(len(resp.context['questionanswer_list']), 3)
+        self.assertEqual(len(resp.context['questionanswer_list']), 3)
         
         
     def test_questionnaire_detail_list(self):
@@ -454,7 +451,6 @@ class QuestionnaireViewTests(TestCase):
         self.question_answer_2 = QuestionAnswer.objects.create(question=Question.objects.get(pk=2),answer="textfield_answer",answer_set=AnswerSet.objects.get(pk=1))
         self.question_answer_3 = QuestionAnswer.objects.create(question=Question.objects.get(pk=3),answer="True",answer_set=AnswerSet.objects.get(pk=1))
 
-          
         
         self.client.login(username='user', password='password') 
         url = reverse('questionnaire_detail_list', kwargs={'questionnaire_id':1})   

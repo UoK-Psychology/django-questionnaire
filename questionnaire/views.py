@@ -147,6 +147,7 @@ def all_question_answers_for_questiongroup(request,user_id,questionnaire_id,ques
     user =get_object_or_404(User,pk=user_id)
     this_questionnaire=get_object_or_404(Questionnaire,pk=questionnaire_id)
     this_questiongroup=get_object_or_404(QuestionGroup,pk=questiongroup_id)
+    this_answer_set = get_object_or_404(AnswerSet, user=user, questionnaire=this_questionnaire, questiongroup=this_questiongroup)
         
         #TODO: use .get_ordered_groups() for this as it abstracts the need to know about the ordering implementation and you won't need the next line as it returns a list of questiongroups
 #        orderedgroups = QuestionGroup_order.objects.filter(questionnaire= this_questionnaire).order_by('order_info') 
@@ -154,12 +155,9 @@ def all_question_answers_for_questiongroup(request,user_id,questionnaire_id,ques
     groups_list=[(x.questiongroup) for x in orderedgroups]
         
         #TODO explain what this does
-    y=QuestionAnswer.objects.filter(Q(answer_set__user_id=user,answer_set__questiongroup=this_questiongroup,answer_set__questionnaire=this_questionnaire)) 
-    questionanswer=[(x.question.id,x.question.label ,x.answer) for x in y]
        
-       
-    qs= sorted(set(questionanswer),key=itemgetter(0))            
-    questionanswer_list = list(map(itemgetter(0), groupby(qs)))        
+          
+    questionanswer_list = this_answer_set.get_latest_question_answers()     
 #        context= questionanswer_list
 
         #
