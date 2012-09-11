@@ -125,7 +125,7 @@ class QuestionnaireViewTests(TestCase):
         
         self.client.login(username='test', password='testpass')
         url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id':1})
-        post_data =  {u'1': [u'a'], u'2': [u'a'], u'3': [u'True']}
+        post_data =  {u'1': [u'a'], u'2': [u'a'], u'3': 1}
         resp = self.client.post(url,post_data)        
         self.assertEqual(302, resp.status_code)      
         self.assertEqual(resp['Location'], 'http://testserver/questionnaire/qs/1/1/')
@@ -176,7 +176,7 @@ class QuestionnaireViewTests(TestCase):
         
         self.client.login(username='user', password='password')
         url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id': 1, 'order_index':0})
-        post_data =  {u'1': [u'b'], u'2': [u'b'], u'3': [u'True']}
+        post_data =  {u'1': [u'b'], u'2': [u'b'], u'3': 1}
         resp = self.client.post(url,post_data)
 
 
@@ -190,7 +190,7 @@ class QuestionnaireViewTests(TestCase):
         self.assertEqual(QuestionAnswer.objects.get(pk=1).answer, 'charfield')
         self.assertEqual(QuestionAnswer.objects.get(pk=4).answer, 'b')                
         self.assertNotEqual(QuestionAnswer.objects.get(pk=4).answer, QuestionAnswer.objects.get(pk=1).answer) 
-        self.assertEqual(QuestionAnswer.objects.all().count(), 5)
+        
         
         '''
         check if there are only 1 AnswerSet object created which means there is no extra AnswerSet object created
@@ -212,7 +212,8 @@ class QuestionnaireViewTests(TestCase):
         post_data =  {u'1': [u'c'], u'2': [u'b'], u'3': [u'xxx']}
         
         resp = self.client.post('/questionnaire/qs/1/',post_data)
-        self.assertNotEqual(200, resp.status_code)
+        self.assertEqual(200, resp.status_code)
+        self.assertTrue(len(resp.context['form'].errors) > 0)
         
     def test_finish_view(self):
         

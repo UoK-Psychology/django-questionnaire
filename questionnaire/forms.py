@@ -1,6 +1,7 @@
 from django import forms
-from django.forms.fields import CharField,BooleanField,ChoiceField,MultipleChoiceField
-from django.forms.widgets import RadioSelect
+from django.forms.fields import CharField,BooleanField,ChoiceField,MultipleChoiceField,\
+    TypedChoiceField
+from django.forms.widgets import RadioSelect, CheckboxInput
 from questionnaire.models import AnswerSet
 
   
@@ -36,8 +37,12 @@ def generate_boolean_field():
     '''
      @return Boolean field   
      initial value set to True and required =False to allow dynamic change of value to etheir False or True
-    '''    
-    return BooleanField(required=False ,initial=True)
+    '''   
+    return TypedChoiceField(
+                         choices=((1,'Yes'),(0,'No')), 
+                         widget=forms.RadioSelect, coerce=int
+                    ) 
+    
 
 def generate_select_dropdown_field():
     '''
@@ -83,7 +88,9 @@ def _get_fields_for_group(questiongroup):
         
         field = FIELD_TYPES[question.field_type]()
         field.label = question.label
-        field.choices=get_choices(question)
+        choices = get_choices(question)
+        if choices != None:
+            field.choices= choices
         fields.append((str(question.id),field))
     return fields
 
