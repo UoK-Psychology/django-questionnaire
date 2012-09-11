@@ -178,7 +178,23 @@ class Questionnaire(models.Model):
         ordered_groups = [order_info.questiongroup for order_info in self.get_ordered_groups()]
         return (ordered_groups[index], (len(ordered_groups) - index) -1)
     
-    
+    def add_question_group(self, questiongroup):
+        '''
+            This function properly adds the questiongroup to the ordered sequence of groups
+            the group you pass in will be added to the end of the list
+            
+        '''
+        if not isinstance(questiongroup, QuestionGroup):
+            raise AttributeError
+        
+        if len(self.get_ordered_groups()) > 0:
+            latest_group = QuestionGroup_order.objects.filter(questionnaire=self).latest('order_info')
+            next_group_info = latest_group.order_info +1
+        else:
+            next_group_info = 1
+            
+        QuestionGroup_order.objects.create(questionnaire=self, questiongroup=questiongroup, order_info= next_group_info)
+        
     def __unicode__(self):
         return self.name
     
