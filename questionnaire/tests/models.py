@@ -265,7 +265,40 @@ class QuestionnaireTestCase(TestCase):
         
         self.assertEqual(question_group, group)
         self.assertEqual(0, count)#there were two groups so after this index there should be 2 remaining    
+    
+    def test_add_question_group(self):
+        '''
+            first group, should be added with order_info of 1
+            non first group, should be added with the next order_info in the sequence, eg. if the most recent order_info is 3 then
+            this group should be added with order_info = 4
+            questiongroup, not a questiongroup - raise attributeerror
+        '''
         
+        test_questionnaire = Questionnaire.objects.create(name='test_questionnaire')
+        test_group = QuestionGroup.objects.create(name='test_question_group')
+        another_test_group = QuestionGroup.objects.create(name='test_question_group2')
+        
+        groups_in_order = QuestionGroup_order.objects.filter(questionnaire=test_questionnaire).order_by('order_info')
+        
+        self.assertEqual(0, len(groups_in_order))
+        
+        test_questionnaire.add_question_group(test_group)
+        
+        groups_in_order = QuestionGroup_order.objects.filter(questionnaire=test_questionnaire).order_by('order_info')
+        
+        self.assertEqual(1, len(groups_in_order))
+        self.assertEqual(QuestionGroup_order.objects.get(questiongroup=test_group, questionnaire=test_questionnaire).order_info, 1)
+        
+        #add another group
+        test_questionnaire.add_question_group(another_test_group)
+        groups_in_order = QuestionGroup_order.objects.filter(questionnaire=test_questionnaire).order_by('order_info')
+        
+        self.assertEqual(2, len(groups_in_order))
+        self.assertEqual(QuestionGroup_order.objects.get(questiongroup=another_test_group, questionnaire=test_questionnaire).order_info, 2)
+        
+        #try adding an invalid group
+        self.assertRaises(AttributeError, test_questionnaire.add_question_group, 'not a QuestionGroup')
+
         
 class Questiongroup_OrderTestCase(TestCase):
     fixtures = ['test_questionnaire_fixtures_formodels.json']
