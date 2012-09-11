@@ -3,7 +3,7 @@ from questionnaire.forms import get_choices, generate_charfield, generate_textfi
     QuestionGroupForm, _get_fields_for_group, _convert_answerset_to_intial_data
 from questionnaire.models import Question, Questionnaire, QuestionGroup, AnswerSet, QuestionAnswer
 from django.forms import Textarea, TextInput, BooleanField, ChoiceField, RadioSelect,CheckboxSelectMultiple, CharField
-from django.forms.fields import  MultipleChoiceField
+from django.forms.fields import  MultipleChoiceField, TypedChoiceField
 from mock import MagicMock, patch, call
 from django.contrib.auth.models import User
 
@@ -64,10 +64,10 @@ class FormsTestCase(TestCase):
         
     def test_generate_boolean_field(self):
         '''
-            This should return a BooleanField object defaulting to false
+            This should return a TypedChoiceField object with yes and no as options
         '''
-        self.assertIsInstance(generate_boolean_field(), BooleanField, 'The return class should be boolean field')
-        self.assertEqual(generate_boolean_field().initial, True, 'Default value for booleanField is True')
+        self.assertIsInstance(generate_boolean_field(), TypedChoiceField, 'The return class should be boolean field')
+        self.assertEqual(generate_boolean_field().choices, [(1,'Yes'),( 0,'No')])
         
         
     def test_generate_select_dropdown_field(self):
