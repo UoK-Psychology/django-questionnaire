@@ -113,7 +113,7 @@ class QuestionGroupForm(forms.Form):
         by passing a questiongroup into the constructor it will dynamically generate
         the form fields required to render and validate the questions in any question group
     '''
-    def __init__(self, questiongroup, initial=None, data=None):
+    def __init__(self, questiongroup, initial=None, data=None, success_info=None):
         if isinstance(initial, AnswerSet):
             initial = _convert_answerset_to_intial_data(initial)
         
@@ -126,7 +126,9 @@ class QuestionGroupForm(forms.Form):
             self.fields[field[0]] = field[1]
 
          
-            
+        if success_info != None:
+            self.fields[success_info[0]] = forms.CharField(widget=forms.HiddenInput())
+            self.initial[success_info[0]]  = success_info[1] 
         
         
 

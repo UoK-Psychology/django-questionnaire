@@ -9,20 +9,10 @@ from django.core.urlresolvers import reverse
 
         
         
-class QuestionnaireViewTests(TestCase):
+class DoQuestionnaireTests(TestCase):
     fixtures = ['test_questionnaire_fixtures.json']
     '''
-        This class will house unit test for the questionnaire package
-        
-        The views under test are:
-        
-        handle_next_questiongroup_form
-        finish
-        display_question_answer
-        
-        
-        
-        @author: jjm20
+        This class will house unit test for the do_questionnaire view function in the views module of the questionnaire package
     '''
     def setUp(self):
         
@@ -37,14 +27,9 @@ class QuestionnaireViewTests(TestCase):
         self.user_test = User.objects.create_user('user', 'email@email.com', 'password')          
         self.answerset = AnswerSet.objects.create(user=self.user_test,questionnaire=testquestionnaire,questiongroup=testquestiongroup)
 
-        
-        super(QuestionnaireViewTests,self).setUp()
-          
-        
-
-        
+   
   
-    def test_handle_next_questiongroup_form_no_user(self):
+    def test_no_user(self):
         """
             A get request to this view without a logged in user should redirect to the default login url
         """
@@ -54,7 +39,7 @@ class QuestionnaireViewTests(TestCase):
         self.assertEquals (302, response.status_code )
         self.assertEquals (response['Location'], 'http://testserver/accounts/login/?next=%s' % url )
         
-    def test_handle_next_questiongroup_form_get_valid_questionnaire_firsttime(self):
+    def test_get_valid_questionnaire_firsttime(self):
         """
             A GET request to the ''handle_next_questiongroup_form'' view specifying a valid questionnaire id,
             which the user hasn't participated in yet should:
@@ -88,7 +73,7 @@ class QuestionnaireViewTests(TestCase):
             
         
         
-    def test_handle_next_questiongroup_form_get_invalid_questionnaire(self):
+    def test_get_invalid_questionnaire(self):
         """
             A GET request to the ''handle_next_questiongroup_form'' view specifying a invalid questionnaire id
             should yield a http 404 response as this questionnaire does not exist
@@ -99,7 +84,7 @@ class QuestionnaireViewTests(TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404, 'There are no questionnaire with id 2!')
         
-    def test_handle_next_questiongroup_form_get_invalid_order_info(self):
+    def test_get_invalid_order_info(self):
         """
             A GET request to the ''handle_next_questiongroup_form'' view specifying a invalid questionnaire id
             should yield a http 404 response as this questionnaire does not exist
@@ -111,7 +96,7 @@ class QuestionnaireViewTests(TestCase):
         self.assertEqual(resp.status_code, 404, 'There are no questionnaire with id 2!')
         
         
-    def test_handle_next_questiongroup_form_post_success_firsttime(self):
+    def test_post_success_firsttime(self):
         """
             A POST request to the ''handle_next_questiongroup_form'' view specifying a valid questionnaire id and no
             question group id, where this is the first time a user has attempted the questionnaire should:
@@ -121,9 +106,9 @@ class QuestionnaireViewTests(TestCase):
             id of the next question group for the questionniare (in this case there is one as that is how we setup the fixture)
         """
         #create a new user so that we know that this is the firsttime that the user has answered the questionniare
-        test_user = User.objects.create_user('test', 'test@home.com', 'testpass')
+
         
-        self.client.login(username='test', password='testpass')
+        self.client.login(username='user', password='password')
         url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id':1})
         post_data =  {u'1': [u'a'], u'2': [u'a'], u'3': 1}
         resp = self.client.post(url,post_data)        
@@ -134,14 +119,14 @@ class QuestionnaireViewTests(TestCase):
         test_question = Question.objects.get(pk=1)
         test_questionnaire = Questionnaire.objects.get(pk=1)
         test_question_group = test_questionnaire.get_group_for_index(0)[0]
-        test_answer_Set = AnswerSet.objects.get(user=test_user, 
+        test_answer_Set = AnswerSet.objects.get(user=self.user_test, 
                                                 questionnaire=test_questionnaire,
                                                 questiongroup=test_question_group )
-        self.assertEqual(test_answer_Set.user, test_user)
+        self.assertEqual(test_answer_Set.user, self.user_test)
         self.assertEqual(QuestionAnswer.objects.get(question=test_question, answer_set=test_answer_Set).answer, 'a')
 
         
-    def test_handle_next_questiongroup_form_post_success_lastgroup(self):
+    def test_post_success_lastgroup(self):
         """
             A POST request to the ''handle_next_questiongroup_form'' view specifying a valid questionnaire id and the id
             of the last QuestionGroup id, where the user has already answered at least one other QuestionGroups should
@@ -156,7 +141,7 @@ class QuestionnaireViewTests(TestCase):
         self.assertEqual(resp.status_code, 302)     
         self.assertEqual(resp['Location'], 'http://testserver/questionnaire/finish/')
         
-    def test_handle_next_questiongroup_form_post_success_retry(self):
+    def test_post_success_retry(self):
         """
             In this scenario the user has already completed the first group in the questionnaire, but is retrying/editing their response
             A valid post request will:
@@ -198,10 +183,10 @@ class QuestionnaireViewTests(TestCase):
         self.assertEqual(AnswerSet.objects.get(pk=1).user, User.objects.get(username='user'))
         self.assertEqual(AnswerSet.objects.all().count(), 1 )
         
-    def test_handle_next_questiongroup_form_post_failure(self):
+    def test_post_failure(self):
         
         """
-            An invalid POST request to ''handle_next_questiongroup_form'' view specifying a valid questionnaire id 
+            An invalid POST request to the ''do_questionnaire'' view specifying a valid questionnaire id 
             where this is the first request made on a quesstionnaire that the user has not previously attempted should:
             1. Not create an Answerset, or any QuestionAnswer objects
             2. Should redisplay the original form, with appropriate error messages
@@ -215,6 +200,116 @@ class QuestionnaireViewTests(TestCase):
         self.assertEqual(200, resp.status_code)
         self.assertTrue(len(resp.context['form'].errors) > 0)
         
+    def test_get_success_name_provided_and_in_request(self):
+        '''
+            If the success name argument is passed to the view, and there is data for it in the get request
+            then when the form is rendered there should be a hidden input with id the same as the success name,
+            and the value being equal to the data passed into the request
+        '''
+        self.client.login(username='user', password='password')
+        url = reverse('do_questionnaire_with_success', kwargs={'questionnaire_id': 1})
+        resp = self.client.get(url, data={'on_success':reverse('questionnaire_finish')})
+        
+        self.assertTrue('on_success' in resp.context['form'].fields)
+        self.assertEqual(resp.context['form'].initial['on_success'], reverse('questionnaire_finish'))
+    
+    def test_get_success_name_provided_and_not_in_request(self): 
+        '''
+            If the success name argument is passed to the view, and there is NOT data for it in the get request
+            then there shouldn't be any hidden fields in the form
+        '''
+        self.client.login(username='user', password='password')
+        url = reverse('do_questionnaire_with_success', kwargs={'questionnaire_id': 1})
+        resp = self.client.get(url)
+        
+        self.assertFalse('on_success' in resp.context['form'].fields)
+        self.assertFalse('on_success' in resp.context['form'].initial)
+    
+    def test_post_success_name_provided_and_in_post_firstgroup(self):
+        '''
+            If there is a valid post that is passed in a request to the view that defines a
+            success name parameter (defined in the url config), and in this post there is data for this success name,
+            AND there are more groups to be completed in the questionnaire, then:
+            1. Nothing should be saved for this extra post parameter (its not a question!!!)
+            2. The redirect url should be a get request that contains the success_name data
+        ''' 
+        
+        self.client.login(username='user', password='password')
+        url = reverse('do_questionnaire_with_success', kwargs={'questionnaire_id':1})
+        post_data =  {u'1': [u'a'], u'2': [u'a'], u'3': 1, 'on_success':reverse('questionnaire_finish')}
+        resp = self.client.post(url,post_data)        
+        
+        test_questionnaire = Questionnaire.objects.get(pk=1)
+        test_question_group = test_questionnaire.get_group_for_index(0)[0]
+        test_answer_set = AnswerSet.objects.get(user=self.user_test, 
+                                                questionnaire=test_questionnaire,
+                                                questiongroup=test_question_group )
+        
+        self.assertEqual(len(test_answer_set.questionanswer_set.all()), 3)
+        
+        self.assertEqual(302, resp.status_code)      
+        redirect_url = reverse('do_questionnaire_with_success', kwargs={'questionnaire_id':1 , 'order_index':1})
+        self.assertEqual(resp['Location'], 'http://testserver%s?on_success=%s' % (redirect_url, reverse('questionnaire_finish')))
+    
+        
+    def test_post_success_name_provided_and_in_post_lastgroup(self):
+        '''
+            If there is a valid post that is passed in a request to the view that defines a
+            success name parameter(defined in the url config), and in this post there is data for this success name,
+            AND there are NO more groups to be completed in the questionnaire, then:
+            1. Nothing should be saved for this extra post parameter (its not a question!!!)
+            2. The redirect url should be a get request to the url specified in this success_name data
+        ''' 
+        self.client.login(username='user', password='password')
+        url = reverse('do_questionnaire_with_success', kwargs={'questionnaire_id':1, 'order_index':1})
+        post_data =  {u'4': [u'Dropdown 1'], u'5': [u'Radio 1'], u'6': [u'MultipleChoice 1'], 'on_success':reverse('questionnaire_finish')}
+        resp = self.client.post(url,post_data)        
+        
+        
+        test_questionnaire = Questionnaire.objects.get(pk=1)
+        test_question_group = test_questionnaire.get_group_for_index(1)[0]
+        test_answer_set = AnswerSet.objects.get(user=self.user_test, 
+                                                questionnaire=test_questionnaire,
+                                                questiongroup=test_question_group )
+        
+        self.assertEqual(len(test_answer_set.questionanswer_set.all()), 3)
+        self.assertRedirects(resp, reverse('questionnaire_finish'))
+        
+        
+        
+        
+        
+class QuestionnaireViewTests(TestCase):
+    fixtures = ['test_questionnaire_fixtures.json']
+    '''
+        This class will house unit test for the questionnaire package
+        
+        The views under test are:
+        
+        handle_next_questiongroup_form
+        finish
+        display_question_answer
+        
+        
+        
+        @author: jjm20
+    '''
+    def setUp(self):
+        
+        """
+            We need to have some intitial data
+            1. A User we can login with
+            2. A Questionnaire defined, which has 2 QuestionGroup defined, each with 1 question of each question type
+        """
+        testquestionnaire = Questionnaire.objects.get(pk=1)      
+        testquestiongroup=QuestionGroup.objects.get(pk=1)
+        self.client = Client()
+        self.user_test = User.objects.create_user('user', 'email@email.com', 'password')          
+        self.answerset = AnswerSet.objects.create(user=self.user_test,questionnaire=testquestionnaire,questiongroup=testquestiongroup)
+
+        
+        super(QuestionnaireViewTests,self).setUp()
+                 
     def test_finish_view(self):
         
         """

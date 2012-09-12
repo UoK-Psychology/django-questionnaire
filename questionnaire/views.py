@@ -22,7 +22,7 @@ def questionnaire_index (request, template_name):
 
 
 @login_required
-def do_questionnaire(request,questionnaire_id,template_name,next_form_name, finished_url,order_index=None):
+def do_questionnaire(request,questionnaire_id,template_name,next_form_name, finished_url, success_name=None,order_index=None):
     
     '''
         This view handles the presentation and submission of questiongroups. You must always specify a 
@@ -50,9 +50,15 @@ def do_questionnaire(request,questionnaire_id,template_name,next_form_name, fini
                                                                        questionnaire=this_questionnaire,
                                                                        questiongroup=questiongroup)[0]#we don't care if it had been created so we only need to first index of the tuple
     
-    form=QuestionGroupForm(questiongroup=questiongroup,initial=this_answer_set, data=request.POST or None)
-    
     if request.method =='POST':
+        
+        if success_name != None and  request.POST.get(success_name, None) != None:
+            success_info = (success_name, request.POST.get(success_name))
+        else:
+            success_info = None
+        
+        form=QuestionGroupForm(questiongroup=questiongroup,initial=this_answer_set, data=request.POST or None, success_info = success_info)
+        
         if form.is_valid():
             
             for question, answer in form.cleaned_data.items():
@@ -64,15 +70,40 @@ def do_questionnaire(request,questionnaire_id,template_name,next_form_name, fini
                                                 answer=str(answer),
                                                 answer_set=this_answer_set)
                         
-                
+            if success_name != None and success_name in form.cleaned_data:
+                redirect_url = form.cleaned_data[success_name]
+            else:
+                redirect_url = None
+                    
                 
             if count == 0:#this is the last group in the questionnaire
+                
+                if redirect_url != None:
+                    finished_url = redirect_url #redirect url trumps the finished_url argument
                 return HttpResponseRedirect(finished_url)
             
             else: 
                 order_info = order_index + 1
-                return HttpResponseRedirect(reverse(next_form_name, kwargs = {'questionnaire_id': questionnaire_id, 'order_index' : order_info}))
-            
+                
+                base_url = reverse(next_form_name, kwargs = {'questionnaire_id': questionnaire_id, 'order_index' : order_info})
+                
+                if redirect_url != None:
+                    url = '%s?%s=%s' % (base_url,success_name,redirect_url)
+                else:
+                    url= base_url
+                return HttpResponseRedirect(url)
+    
+    else:
+        if success_name != None and  request.GET.get(success_name, None) != None:
+            success_info = (success_name, request.GET.get(success_name))
+        else:
+            success_info = None
+
+        form=QuestionGroupForm(questiongroup=questiongroup,initial=this_answer_set, data=request.POST or None, success_info = success_info)
+
+   
+        
+    #GET requests or failed POSTS    
     return render_to_response(template_name, 
     {'form': form ,'questionnaire':this_questionnaire,'questiongroup':questiongroup,},context_instance=RequestContext(request))
     
