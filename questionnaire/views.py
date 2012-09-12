@@ -22,7 +22,7 @@ def questionnaire_index (request, template_name):
 
 
 @login_required
-def do_questionnaire(request,questionnaire_id,template_name,next_form_name, finished_url,order_index=None):
+def do_questionnaire(request,questionnaire_id,template_name,next_form_name, finished_url, success_name=None,order_index=None):
     
     '''
         This view handles the presentation and submission of questiongroups. You must always specify a 
@@ -50,9 +50,9 @@ def do_questionnaire(request,questionnaire_id,template_name,next_form_name, fini
                                                                        questionnaire=this_questionnaire,
                                                                        questiongroup=questiongroup)[0]#we don't care if it had been created so we only need to first index of the tuple
     
-    form=QuestionGroupForm(questiongroup=questiongroup,initial=this_answer_set, data=request.POST or None)
     
     if request.method =='POST':
+        form=QuestionGroupForm(questiongroup=questiongroup,initial=this_answer_set, data=request.POST)
         if form.is_valid():
             
             for question, answer in form.cleaned_data.items():
@@ -72,7 +72,21 @@ def do_questionnaire(request,questionnaire_id,template_name,next_form_name, fini
             else: 
                 order_info = order_index + 1
                 return HttpResponseRedirect(reverse(next_form_name, kwargs = {'questionnaire_id': questionnaire_id, 'order_index' : order_info}))
+    
+    
+    else: #it is a GET
+        #if there is a success name argument, and we can find this data in the get request we should pass it to the form to deal with
+        success_info = None
+        if success_name != None:
+            success_data = request.GET.get(success_name, None)
             
+            if success_data != None:
+                success_info = (success_name, success_data)
+
+            
+        form=QuestionGroupForm(questiongroup=questiongroup,initial=this_answer_set, success_info=success_info) 
+        
+    #GET requests or failed POSTS    
     return render_to_response(template_name, 
     {'form': form ,'questionnaire':this_questionnaire,'questiongroup':questiongroup,},context_instance=RequestContext(request))
     

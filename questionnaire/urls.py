@@ -19,7 +19,15 @@ urlpatterns = patterns('questionnaire.views',
           kwargs={'template_name':'questionnaire/questionform.html',
                   'next_form_name':'handle_next_questiongroup_form',
                     'finished_url':'/questionnaire/finish/'},),
-        
+          
+          url(r'^qss/(?P<questionnaire_id>\d+)/$', 
+          view = 'do_questionnaire',
+          name = 'do_questionnaire_with_success',
+          kwargs={'template_name':'questionnaire/questionform.html',
+                  'next_form_name':'handle_next_questiongroup_form',
+                    'finished_url':'/questionnaire/finish/',
+                    'success_name':'on_success'},
+              ),
     
           url(r'^qs/(?P<questionnaire_id>\d+)/$', 
           view = 'do_questionnaire',

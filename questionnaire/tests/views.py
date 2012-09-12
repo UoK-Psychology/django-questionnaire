@@ -186,7 +186,7 @@ class DoQuestionnaireTests(TestCase):
     def test_post_failure(self):
         
         """
-            An invalid POST request to ''handle_next_questiongroup_form'' view specifying a valid questionnaire id 
+            An invalid POST request to the ''do_questionnaire'' view specifying a valid questionnaire id 
             where this is the first request made on a quesstionnaire that the user has not previously attempted should:
             1. Not create an Answerset, or any QuestionAnswer objects
             2. Should redisplay the original form, with appropriate error messages
@@ -199,6 +199,32 @@ class DoQuestionnaireTests(TestCase):
         resp = self.client.post('/questionnaire/qs/1/',post_data)
         self.assertEqual(200, resp.status_code)
         self.assertTrue(len(resp.context['form'].errors) > 0)
+        
+    def test_get_success_name_provided_and_in_request(self):
+        '''
+            If the success name argument is passed to the view, and there is data for it in the get request
+            then when the form is rendered there should be a hidden input with id the same as the success name,
+            and the value being equal to the data passed into the request
+        '''
+        self.client.login(username='user', password='password')
+        url = reverse('do_questionnaire_with_success', kwargs={'questionnaire_id': 1})
+        resp = self.client.get(url, data={'on_success':reverse('questionnaire_finish')})
+        
+        self.assertTrue('on_success' in resp.context['form'].fields)
+        self.assertEqual(resp.context['form'].initial['on_success'], reverse('questionnaire_finish'))
+    
+    def test_get_success_name_provided_and_not_in_request(self): 
+        '''
+            If the success name argument is passed to the view, and there is NOT data for it in the get request
+            then there shouldn't be any hidden fields in the form
+        '''
+        self.client.login(username='user', password='password')
+        url = reverse('do_questionnaire_with_success', kwargs={'questionnaire_id': 1})
+        resp = self.client.get(url)
+        
+        self.assertFalse('on_success' in resp.context['form'].fields)
+        self.assertFalse('on_success' in resp.context['form'].initial)
+    
 
 class QuestionnaireViewTests(TestCase):
     fixtures = ['test_questionnaire_fixtures.json']
