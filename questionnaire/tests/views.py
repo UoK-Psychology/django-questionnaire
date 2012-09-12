@@ -106,9 +106,9 @@ class DoQuestionnaireTests(TestCase):
             id of the next question group for the questionniare (in this case there is one as that is how we setup the fixture)
         """
         #create a new user so that we know that this is the firsttime that the user has answered the questionniare
-        test_user = User.objects.create_user('test', 'test@home.com', 'testpass')
+
         
-        self.client.login(username='test', password='testpass')
+        self.client.login(username='user', password='password')
         url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id':1})
         post_data =  {u'1': [u'a'], u'2': [u'a'], u'3': 1}
         resp = self.client.post(url,post_data)        
@@ -119,10 +119,10 @@ class DoQuestionnaireTests(TestCase):
         test_question = Question.objects.get(pk=1)
         test_questionnaire = Questionnaire.objects.get(pk=1)
         test_question_group = test_questionnaire.get_group_for_index(0)[0]
-        test_answer_Set = AnswerSet.objects.get(user=test_user, 
+        test_answer_Set = AnswerSet.objects.get(user=self.user_test, 
                                                 questionnaire=test_questionnaire,
                                                 questiongroup=test_question_group )
-        self.assertEqual(test_answer_Set.user, test_user)
+        self.assertEqual(test_answer_Set.user, self.user_test)
         self.assertEqual(QuestionAnswer.objects.get(question=test_question, answer_set=test_answer_Set).answer, 'a')
 
         
@@ -225,7 +225,60 @@ class DoQuestionnaireTests(TestCase):
         self.assertFalse('on_success' in resp.context['form'].fields)
         self.assertFalse('on_success' in resp.context['form'].initial)
     
-
+    def test_post_success_name_provided_and_in_post_firstgroup(self):
+        '''
+            If there is a valid post that is passed in a request to the view that defines a
+            success name parameter (defined in the url config), and in this post there is data for this success name,
+            AND there are more groups to be completed in the questionnaire, then:
+            1. Nothing should be saved for this extra post parameter (its not a question!!!)
+            2. The redirect url should be a get request that contains the success_name data
+        ''' 
+        
+        self.client.login(username='user', password='password')
+        url = reverse('do_questionnaire_with_success', kwargs={'questionnaire_id':1})
+        post_data =  {u'1': [u'a'], u'2': [u'a'], u'3': 1, 'on_success':reverse('questionnaire_finish')}
+        resp = self.client.post(url,post_data)        
+        
+        test_questionnaire = Questionnaire.objects.get(pk=1)
+        test_question_group = test_questionnaire.get_group_for_index(0)[0]
+        test_answer_set = AnswerSet.objects.get(user=self.user_test, 
+                                                questionnaire=test_questionnaire,
+                                                questiongroup=test_question_group )
+        
+        self.assertEqual(len(test_answer_set.questionanswer_set.all()), 3)
+        
+        self.assertEqual(302, resp.status_code)      
+        redirect_url = reverse('do_questionnaire_with_success', kwargs={'questionnaire_id':1 , 'order_index':1})
+        self.assertEqual(resp['Location'], 'http://testserver%s?on_success=%s' % (redirect_url, reverse('questionnaire_finish')))
+    
+        
+    def test_post_success_name_provided_and_in_post_lastgroup(self):
+        '''
+            If there is a valid post that is passed in a request to the view that defines a
+            success name parameter(defined in the url config), and in this post there is data for this success name,
+            AND there are NO more groups to be completed in the questionnaire, then:
+            1. Nothing should be saved for this extra post parameter (its not a question!!!)
+            2. The redirect url should be a get request to the url specified in this success_name data
+        ''' 
+        self.client.login(username='user', password='password')
+        url = reverse('do_questionnaire_with_success', kwargs={'questionnaire_id':1, 'order_index':1})
+        post_data =  {u'4': [u'Dropdown 1'], u'5': [u'Radio 1'], u'6': [u'MultipleChoice 1'], 'on_success':reverse('questionnaire_finish')}
+        resp = self.client.post(url,post_data)        
+        
+        
+        test_questionnaire = Questionnaire.objects.get(pk=1)
+        test_question_group = test_questionnaire.get_group_for_index(1)[0]
+        test_answer_set = AnswerSet.objects.get(user=self.user_test, 
+                                                questionnaire=test_questionnaire,
+                                                questiongroup=test_question_group )
+        
+        self.assertEqual(len(test_answer_set.questionanswer_set.all()), 3)
+        self.assertRedirects(resp, reverse('questionnaire_finish'))
+        
+        
+        
+        
+        
 class QuestionnaireViewTests(TestCase):
     fixtures = ['test_questionnaire_fixtures.json']
     '''
