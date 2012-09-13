@@ -166,7 +166,7 @@ class Questionnaire(models.Model):
         @return: the questiongroups in a questionnaire order by the order_info
             
         '''
-        return QuestionGroup_order.objects.filter(questionnaire=self).order_by('order_info')
+        return [order.questiongroup for order in QuestionGroup_order.objects.filter(questionnaire=self).order_by('order_info')]
     
     def get_group_for_index(self, index):
         '''
@@ -175,8 +175,8 @@ class Questionnaire(models.Model):
             
             If there is not a group at this index in the ordered_groups then an index error will be thrown.
         '''
-        ordered_groups = [order_info.questiongroup for order_info in self.get_ordered_groups()]
-        return (ordered_groups[index], (len(ordered_groups) - index) -1)
+        ordered_groups = self.get_ordered_groups()
+        return (self.get_ordered_groups()[index], (len(ordered_groups) - index) -1)
     
     def add_question_group(self, questiongroup):
         '''
