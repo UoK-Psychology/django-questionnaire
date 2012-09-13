@@ -227,10 +227,10 @@ class QuestionnaireTestCase(TestCase):
         '''
         questionnaire_test = Questionnaire.objects.get(pk=1)
         question_group = questionnaire_test.get_ordered_groups()
-        question_group1 = QuestionGroup_order.objects.get(pk=1)
-        question_group2 = QuestionGroup_order.objects.get(pk=2) 
-        self.assertEqual(question_group[0].questiongroup.name, question_group1.questiongroup.name)
-        self.assertEqual(question_group[1].questiongroup.name, question_group2.questiongroup.name)
+        question_group1 = QuestionGroup.objects.get(pk=1)
+        question_group2 = QuestionGroup.objects.get(pk=2) 
+        self.assertEqual(question_group[0], question_group1)
+        self.assertEqual(question_group[1], question_group2)
         
     def test_get_group_for_index_invalid_index(self):
         '''

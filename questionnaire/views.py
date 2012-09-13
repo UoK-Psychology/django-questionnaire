@@ -137,10 +137,9 @@ def display_question_answer(request,questionnaire_id,questiongroup_id,template_n
         
     #TODO: Why do you need to get the ordered list of groups? you have specified a specific question group_id as an argument for the function?
 #   orderedgroups = QuestionGroup_order.objects.filter(questionnaire= this_questionnaire).order_by('order_info')#TODO: use .get_ordered_groups() for this as it abstracts the need to know about the ordering implementation and you won't need the next line as it returns a list of questiongroups
-    orderedgroups=this_questionnaire.get_ordered_groups()
     
 ##EXPLAINATION  group list is passed to the template to display links to  other question groups in the  given questionnaire so it make easier for user to navigate to other questionanswer display in the questionnaire
-    groups_list=[(x.questiongroup) for x in orderedgroups]
+    groups_list=this_questionnaire.get_ordered_groups()
         
     #TODO: this seems a quite complex, and is difficult to follow, either add a comment to explain what you are doing, or consider refactoring to make it simpler?
     ##EXPLAINATION  using django Complex lookups with Q objects use for join query , it retrieve all the questionanswer related objects where the user is this user for this question group and this questionnaire
@@ -182,8 +181,8 @@ def all_question_answers_for_questiongroup(request,user_id,questionnaire_id,ques
         
         #TODO: use .get_ordered_groups() for this as it abstracts the need to know about the ordering implementation and you won't need the next line as it returns a list of questiongroups
 #        orderedgroups = QuestionGroup_order.objects.filter(questionnaire= this_questionnaire).order_by('order_info') 
-    orderedgroups=this_questionnaire.get_ordered_groups()   
-    groups_list=[(x.questiongroup) for x in orderedgroups]
+      
+    groups_list=this_questionnaire.get_ordered_groups()
         
         #TODO explain what this does
        
