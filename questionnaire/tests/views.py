@@ -283,8 +283,21 @@ class DoQuestionnaireTests(TestCase):
             questiongroup after the group being requested, then a valid post will cause a redirect to the 
             finish_url, and not to the next questiongroup as would be the case for a limit of 0 or more than 1
         '''
+        test_questionnaire = Questionnaire.objects.create(name='test_questionnaire')
+        test_group = QuestionGroup.objects.get(pk=1) #we know that this is in the db from the fixture
         
-        self.assertTrue(False)
+        for index in range(3): #add the same group thrice
+            test_questionnaire.add_question_group(test_group)
+            
+        self.client.login(username='user', password='password')
+        
+        url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id': 1, 'order_index':0, 'group_limit':1})
+        post_data =  {u'1': [u'b'], u'2': [u'b'], u'3': 1} #a valid post for this questiongroup
+        resp = self.client.post(url,post_data)
+
+        self.assertEqual(resp.status_code, 302)     
+        self.assertEqual(resp['Location'], 'http://testserver/questionnaire/finish/')#this is what is configured as the finish url in the url conf
+
         
     def test_valid_post_with_limit_of_greater_than_one_groups_avaialble(self):
         '''
