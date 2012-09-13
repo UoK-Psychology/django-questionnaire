@@ -275,7 +275,41 @@ class DoQuestionnaireTests(TestCase):
         self.assertEqual(len(test_answer_set.questionanswer_set.all()), 3)
         self.assertRedirects(resp, reverse('questionnaire_finish'))
         
+    def test_valid_post_with_limit_of_one(self): 
+        '''
+            A group limit of 1 means that you only want to do one group: the group that you are requesting in the
+            order_index.
+            If a group limit of one is passed in, and the questionnaire contains more than one
+            questiongroup after the group being requested, then a valid post will cause a redirect to the 
+            finish_url, and not to the next questiongroup as would be the case for a limit of 0 or more than 1
+        '''
         
+        self.assertTrue(False)
+        
+    def test_valid_post_with_limit_of_greater_than_one_groups_avaialble(self):
+        '''
+            A group limit of more than one means that you want to do the current group (defined by order_index)
+            and then (group_index -1) more groups (if there are that many in the sequence).
+            
+            In this case there are groups available to fulfill this request. for example there are three
+            groups, and we are requesting the first group with a group_limit of 2, in this case
+            a valid post to the url will decrement the current group_limit when it redirects to the url
+            for the next group (Eventually it will hit 1 and then that will be the last group carried out)
+        '''
+        
+        self.assertTrue(False)
+        
+    def test_valid_post_with_limit_of_greater_than_one_groups_not_avaialble(self):
+        '''
+            A group limit of more than one means that you want to do the current group (defined by order_index)
+            and then (group_index -1) more groups (if there are that many in the sequence).
+            
+            In this case there are not enough groups to fulfill this request for example there
+            are 3 groups and we are requesting group 2 with a group limit of 3. IN this case the questionnaire
+            will simply terminate as usual after the last group.
+        '''
+        
+        self.assertTrue(False)
         
         
         
