@@ -22,7 +22,7 @@ def questionnaire_index (request, template_name):
 
 
 @login_required
-def do_questionnaire(request,questionnaire_id,template_name,next_form_name, finished_url, success_name=None,order_index=None):
+def do_questionnaire(request,questionnaire_id,template_name,next_form_name, finished_url, success_name=None,order_index=None, group_limit=0):
     
     '''
         This view handles the presentation and submission of questiongroups. You must always specify a 
