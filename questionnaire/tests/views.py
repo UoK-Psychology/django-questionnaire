@@ -310,7 +310,24 @@ class DoQuestionnaireTests(TestCase):
             for the next group (Eventually it will hit 1 and then that will be the last group carried out)
         '''
         
-        self.assertTrue(False)
+        test_questionnaire = Questionnaire.objects.create(name='test_questionnaire')
+        test_group = QuestionGroup.objects.get(pk=1) #we know that this is in the db from the fixture
+        
+        for index in range(3): #add the same group thrice
+            test_questionnaire.add_question_group(test_group)
+            
+        self.client.login(username='user', password='password')
+        
+        url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id': 1, 'order_index':0, 'group_limit':2})
+        post_data =  {u'1': [u'b'], u'2': [u'b'], u'3': 1} #a valid post for this questiongroup
+        resp = self.client.post(url,post_data)
+
+        self.assertEqual(resp.status_code, 302)   
+        redirect_url = reverse('handle_next_questiongroup_form', kwargs={'questionnaire_id': 1, 'order_index':1,#order incremented by 1
+                                                                                     'group_limit':1}) #limit reduced by 1 
+        
+        self.assertEqual(resp['Location'], redirect_url)#this is what is configured as the finish url in the url conf
+
         
     def test_valid_post_with_limit_of_greater_than_one_groups_not_avaialble(self):
         '''
