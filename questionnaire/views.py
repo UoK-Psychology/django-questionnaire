@@ -33,6 +33,7 @@ def do_questionnaire(request,questionnaire_id,template_name,next_form_name, fini
         display, and allow them to edit their previous answers.
     '''
     questionnaire_id = int(questionnaire_id)
+    group_limit = int(group_limit)
     
     if order_index==None:
         order_index = 0# zero based index 
@@ -76,7 +77,7 @@ def do_questionnaire(request,questionnaire_id,template_name,next_form_name, fini
                 redirect_url = None
                     
                 
-            if count == 0:#this is the last group in the questionnaire
+            if group_limit == 1 or count == 0:#the group limit is 1 (ie only do this group) or this is the last group in the questionnaire 
                 
                 if redirect_url != None:
                     finished_url = redirect_url #redirect url trumps the finished_url argument
@@ -85,7 +86,11 @@ def do_questionnaire(request,questionnaire_id,template_name,next_form_name, fini
             else: 
                 order_info = order_index + 1
                 
-                base_url = reverse(next_form_name, kwargs = {'questionnaire_id': questionnaire_id, 'order_index' : order_info})
+                redirect_arguments = {'questionnaire_id': questionnaire_id, 'order_index' : order_info}
+                
+                if group_limit >1 :# if a group limit has been specified then decrement it by one and pass in to the redirect.
+                    redirect_arguments['group_limit'] = (group_limit -1)
+                base_url = reverse(next_form_name, kwargs = redirect_arguments )
                 
                 if redirect_url != None:
                     url = '%s?%s=%s' % (base_url,success_name,redirect_url)
