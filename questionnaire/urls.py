@@ -12,7 +12,13 @@ urlpatterns = patterns('questionnaire.views',
                name='questionnaire_index',
                kwargs={'template_name':'questionnaire/questionnaire_index.html'}),
                 
-                       
+          url(r'^qs/(?P<questionnaire_id>\d+)/(?P<order_index>\d+)/(?P<group_limit>\d+)/$', 
+          view = 'do_questionnaire',
+          name = 'handle_next_questiongroup_form',
+          kwargs={'template_name':'questionnaire/questionform.html',
+                  'next_form_name':'handle_next_questiongroup_form',
+                    'finished_url':'/questionnaire/finish/'},),
+                                   
           url(r'^qs/(?P<questionnaire_id>\d+)/(?P<order_index>\d+)/$', 
           view = 'do_questionnaire',
           name = 'handle_next_questiongroup_form',
