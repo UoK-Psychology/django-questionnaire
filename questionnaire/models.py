@@ -281,7 +281,20 @@ class AnswerSet(models.Model):
             questions defined in the questiongroup. Otherwise it will return False
         ''' 
         
-        return False
+        answers = self.get_latest_question_answers()
+        questions = self.questiongroup.get_ordered_questions()
+        
+        #get a list of the answered questions
+        answered_questions = []
+        for answer in answers:
+            answered_questions.append(answer.question)
+        
+        for question in questions:
+            if question not in answered_questions:
+                return False
+        
+        return True
+    
 class QuestionAnswer(models.Model):    
     '''
     This model stores questions, answers and related answer_set 
