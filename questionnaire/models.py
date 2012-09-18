@@ -141,8 +141,9 @@ class QuestionGroup(models.Model):
     name = models.CharField('questiongroupname',max_length=255,unique=True)
     questions = models.ManyToManyField(Question, through = 'Question_order')
     
-    #non-fields
+    #context fields
     _questionnaire_context = None
+    _user_context = None
     
     def get_ordered_questions(self):
         '''
@@ -151,26 +152,29 @@ class QuestionGroup(models.Model):
         return [order.question for order in Question_order.objects.filter(questiongroup=self).order_by('order_info')]
     
     
-    def set_questionnaire_context(self, questionnaire):
+    def set_context(self, questionnaire, user):
         '''
-           As a Questiongroup can be associated with many Questionnaires, and therefore can have many Answersets
-           associated with it, this allows you to put this questiongroup into context to a single questionnaire.
+           As a Questiongroup can be associated with many Questionnaires and every combo can be associated with
+           many users, there will be many AnswerSets for each questiongroup.
+           This function allows you to put this questiongroup into context to a single questionnaire and user combination.
            This allows you to use the utilty functions, for example those that report on the completion
            of this group. 
            This is not saved into the database or persisted in any other way, it is on an instance basis
         '''
         
-        if not isinstance(questionnaire, Questionnaire):
+        if not isinstance(questionnaire, Questionnaire) or not isinstance(user, User):
             raise AttributeError
     
         self._questionnaire_context = questionnaire
-    def clear_questionnaire_context(self):
+        self._user_context = user
+    def clear_context(self):
         '''
-            This allows you to clear the Questionnaire context for this instance.
+            This allows you to clears the context fields for this instance.
         '''
         self._questionnaire_context = None
+        self._user_context = None
         
-    def is_complete(self, questionnaire_context=None):
+    def is_complete(self, questionnaire_context=None, user=None):
         '''
             Returns a boolean representing if this question group has been completed. This function relies on
             being in the context of a particular questionniare, you can either pass one in as an argument, or

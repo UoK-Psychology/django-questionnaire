@@ -196,34 +196,45 @@ class QuestionGroupTestCase(TestCase):
         self.assertEqual(questions[1].label, question_order2.question.label)
         self.assertEqual(questions[2].label, question_order3.question.label)
         
-    def test_set_questionnaire_context(self):
+    def test_set_context(self):
         '''
-            If you pass in a questionnaire object, this function will set _questionnaire_context
-            with that value. If you pass in anything else then an AttributeError will be thrown
+            If you pass in questionnaire and user objects, this function will set  and
+            _user_context respectively with these values. If you pass in anything else 
+            then an AttributeError will be thrown
         '''
-        
+        test_user = User.objects.create_user('test', 'test@test.com', 'password')
         test_group = QuestionGroup.objects.get(pk=1)
         test_questionnaire = Questionnaire.objects.get(id=1)
         self.assertIsNone(test_group._questionnaire_context)#should start out empty
-        self.assertRaises(AttributeError, test_group.set_questionnaire_context, 'not a questionnaire')
+        self.assertIsNone(test_group._user_context)#should start out empty
         
-        test_group.set_questionnaire_context(test_questionnaire)
+        self.assertRaises(AttributeError, test_group.set_context, 'not a questionnaire', test_user)
+        self.assertRaises(AttributeError, test_group.set_context, test_questionnaire, 'not a user')
+        
+        test_group.set_context(test_questionnaire, test_user)
         self.assertEqual(test_group._questionnaire_context, test_questionnaire)
+        self.assertEqual(test_group._user_context, test_user)
         
     def test_clear_questionnaire_context(self):
         '''
             This will set _questionnaire_context to None
         '''
+        test_user = User.objects.create_user('test', 'test@test.com', 'password')
         test_group = QuestionGroup.objects.get(pk=1)
         test_questionnaire = Questionnaire.objects.get(id=1)
-        self.assertIsNone(test_group._questionnaire_context)#should start out empty
         
-        test_group.clear_questionnaire_context()
+        self.assertIsNone(test_group._questionnaire_context)#should start out empty
+        self.assertIsNone(test_group._user_context)#should start out empty
+        
+        test_group.clear_context()
         self.assertIsNone(test_group._questionnaire_context)
+        self.assertIsNone(test_group._user_context)
         
         test_group._questionnaire_context = test_questionnaire
-        test_group.clear_questionnaire_context()
+        test_group._user_context = test_user
+        test_group.clear_context()
         self.assertIsNone(test_group._questionnaire_context)
+        self.assertIsNone(test_group._user_context)
 
         
     def test_is_complete_with_argument(self):
@@ -232,7 +243,7 @@ class QuestionGroupTestCase(TestCase):
             will get the answer set that links itself with this questionnaire. If this
             answerset is complete then it will return True otherwise it will return False
         '''
-        
+
         self.assertTrue(False)
         
     def test_is_complete_with_invalide_argument(self):
