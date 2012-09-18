@@ -202,14 +202,29 @@ class QuestionGroupTestCase(TestCase):
             with that value. If you pass in anything else then an AttributeError will be thrown
         '''
         
-        self.assertTrue(False)
+        test_group = QuestionGroup.objects.get(pk=1)
+        test_questionnaire = Questionnaire.objects.get(id=1)
+        self.assertIsNone(test_group._questionnaire_context)#should start out empty
+        self.assertRaises(AttributeError, test_group.set_questionnaire_context, 'not a questionnaire')
+        
+        test_group.set_questionnaire_context(test_questionnaire)
+        self.assertEqual(test_group._questionnaire_context, test_questionnaire)
         
     def test_clear_questionnaire_context(self):
         '''
             This will set _questionnaire_context to None
         '''
+        test_group = QuestionGroup.objects.get(pk=1)
+        test_questionnaire = Questionnaire.objects.get(id=1)
+        self.assertIsNone(test_group._questionnaire_context)#should start out empty
         
-        self.assertTrue(False)
+        test_group.clear_questionnaire_context()
+        self.assertIsNone(test_group._questionnaire_context)
+        
+        test_group._questionnaire_context = test_questionnaire
+        test_group.clear_questionnaire_context()
+        self.assertIsNone(test_group._questionnaire_context)
+
         
     def test_is_complete_with_argument(self):
         '''

@@ -159,10 +159,16 @@ class QuestionGroup(models.Model):
            of this group. 
            This is not saved into the database or persisted in any other way, it is on an instance basis
         '''
+        
+        if not isinstance(questionnaire, Questionnaire):
+            raise AttributeError
+    
+        self._questionnaire_context = questionnaire
     def clear_questionnaire_context(self):
         '''
             This allows you to clear the Questionnaire context for this instance.
         '''
+        self._questionnaire_context = None
         
     def is_complete(self, questionnaire_context=None):
         '''
