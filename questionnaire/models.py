@@ -141,11 +141,38 @@ class QuestionGroup(models.Model):
     name = models.CharField('questiongroupname',max_length=255,unique=True)
     questions = models.ManyToManyField(Question, through = 'Question_order')
     
+    #context fields
+    _context = None
+    
     def get_ordered_questions(self):
         '''
         @return: questions in  question group ordered by order_info
         '''
         return [order.question for order in Question_order.objects.filter(questiongroup=self).order_by('order_info')]
+    
+    
+    def set_context(self, answer_set):
+        '''
+           A Question group can be assigned to many Questionnaires. And this questionnaire can be taken by many
+           Users. Therefore there will be many different combinations of questionnaire, user and answerset 
+           associated with any question group.
+           Sometimes you will want to see the group in a specific context, and the best way to do this
+           is to associate an instance to a singel answer set this will give you access the contextualised
+           questionnaier, its user and the answers to its questions
+           This is not saved into the database or persisted in any other way, it is on an instance basis
+        '''
+        
+        if not isinstance(answer_set, AnswerSet) :
+            raise AttributeError
+    
+        self._context = answer_set
+        
+    def clear_context(self):
+        '''
+            This allows you to clears the context fields for this instance.
+        '''
+        self._context = None
+        
     
     def __unicode__(self):
         return self.name
@@ -247,7 +274,27 @@ class AnswerSet(models.Model):
             have more than one QuestionAnswer for each question in a given answer set).
         '''
         return [record.question_answer for record in LatestQuestionAnswer.objects.filter(answer_set=self)]  
-     
+    
+    def is_complete(self):
+        '''
+            This function will return True is there is an answer for each of the 
+            questions defined in the questiongroup. Otherwise it will return False
+        ''' 
+        
+        answers = self.get_latest_question_answers()
+        questions = self.questiongroup.get_ordered_questions()
+        
+        #get a list of the answered questions
+        answered_questions = []
+        for answer in answers:
+            answered_questions.append(answer.question)
+        
+        for question in questions:
+            if question not in answered_questions:
+                return False
+        
+        return True
+    
 class QuestionAnswer(models.Model):    
     '''
     This model stores questions, answers and related answer_set 
