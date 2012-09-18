@@ -5,7 +5,7 @@ from questionnaire.models import QuestionAnswer, AnswerSet, Question, QuestionGr
 from django.db.models.fields import CharField
 from django.db import IntegrityError
 import mock
-from mock import MagicMock
+from mock import MagicMock, patch
 from django.contrib.auth.models import User
 
 
@@ -205,15 +205,16 @@ class QuestionGroupTestCase(TestCase):
         test_user = User.objects.create_user('test', 'test@test.com', 'password')
         test_group = QuestionGroup.objects.get(pk=1)
         test_questionnaire = Questionnaire.objects.get(id=1)
-        self.assertIsNone(test_group._questionnaire_context)#should start out empty
-        self.assertIsNone(test_group._user_context)#should start out empty
+        test_answer_set = AnswerSet.objects.create(user=test_user,
+                                                   questionniare=test_questionnaire,
+                                                   questiongroup=test_group)
         
-        self.assertRaises(AttributeError, test_group.set_context, 'not a questionnaire', test_user)
-        self.assertRaises(AttributeError, test_group.set_context, test_questionnaire, 'not a user')
+        self.assertIsNone(test_group._context)#should start out empty
         
-        test_group.set_context(test_questionnaire, test_user)
-        self.assertEqual(test_group._questionnaire_context, test_questionnaire)
-        self.assertEqual(test_group._user_context, test_user)
+        self.assertRaises(AttributeError, test_group.set_context, 'not an answerset')
+        
+        test_group.set_context(test_answer_set)
+        self.assertEqual(test_group._context, test_answer_set)
         
     def test_clear_questionnaire_context(self):
         '''
@@ -222,29 +223,52 @@ class QuestionGroupTestCase(TestCase):
         test_user = User.objects.create_user('test', 'test@test.com', 'password')
         test_group = QuestionGroup.objects.get(pk=1)
         test_questionnaire = Questionnaire.objects.get(id=1)
+        test_answer_set = AnswerSet.objects.create(user=test_user,
+                                                   questionniare=test_questionnaire,
+                                                   questiongroup=test_group)
         
-        self.assertIsNone(test_group._questionnaire_context)#should start out empty
-        self.assertIsNone(test_group._user_context)#should start out empty
+        self.assertIsNone(test_group._context)#should start out empty
         
         test_group.clear_context()
-        self.assertIsNone(test_group._questionnaire_context)
-        self.assertIsNone(test_group._user_context)
+        self.assertIsNone(test_group._context)
         
-        test_group._questionnaire_context = test_questionnaire
-        test_group._user_context = test_user
+        test_group._context = test_answer_set
         test_group.clear_context()
-        self.assertIsNone(test_group._questionnaire_context)
-        self.assertIsNone(test_group._user_context)
+        self.assertIsNone(test_group._context)
 
-        
+    def fabricate_question_answer(self, question_id, answer_set, response):
+        question = Question.objects.get(id = question_id)
+        return AnswerSet(question=question,
+                         answer_set=answer_set,
+                         answer = response)   
     def test_is_complete_with_argument(self):
         '''
             If you pass in a questionnaire as the questionnaire_context argument, this function should
             will get the answer set that links itself with this questionnaire. If this
             answerset is complete then it will return True otherwise it will return False
         '''
-
-        self.assertTrue(False)
+        test_user = User.objects.create_user('test', 'test@test.com', 'password')
+        test_group = QuestionGroup.objects.get(pk=1)
+        test_questionnaire = Questionnaire.objects.get(id=1)
+        test_answer_set = AnswerSet.objects.create(user=test_user,
+                                                   questionniare=test_questionnaire,
+                                                   questiongroup=test_group)
+        
+        with patch('questionnaire.models.AnswerSet.get_latest_question_answers') as latest_answers_mock:
+            
+            #this should return true as we are fabricating a question answer for each question in the group
+            latest_answers_mock.return_value = [self.fabricate_question_answer(1, test_answer_set, 'response'),
+                                                self.fabricate_question_answer(2, test_answer_set, 'response'),
+                                                self.fabricate_question_answer(3, test_answer_set, 'response'),
+                                               ]
+            self.assertTrue(test_group.is_complete(questionnaire= test_questionnaire, user=test_user))
+            
+            #this should return false as there are no question answere
+            test_answer_set = AnswerSet.objects.create(user=test_user,
+                                                   questionniare=test_questionnaire,
+                                                   questiongroup=test_group)
+            #to be safe this should also return false as there is only 2 answers, and there are three in the group
+            
         
     def test_is_complete_with_invalide_argument(self):
         '''
