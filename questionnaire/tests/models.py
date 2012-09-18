@@ -195,6 +195,57 @@ class QuestionGroupTestCase(TestCase):
         self.assertEqual(questions[0].label, question_order1.question.label)
         self.assertEqual(questions[1].label, question_order2.question.label)
         self.assertEqual(questions[2].label, question_order3.question.label)
+        
+    def test_set_questionnaire_context(self):
+        '''
+            If you pass in a questionnaire object, this function will set _questionnaire_context
+            with that value. If you pass in anything else then an AttributeError will be thrown
+        '''
+        
+        self.assertTrue(False)
+        
+    def test_clear_questionnaire_context(self):
+        '''
+            This will set _questionnaire_context to None
+        '''
+        
+        self.assertTrue(False)
+        
+    def test_is_complete_with_argument(self):
+        '''
+            If you pass in a questionnaire as the questionnaire_context argument, this function should
+            will get the answer set that links itself with this questionnaire. If this
+            answerset is complete then it will return True otherwise it will return False
+        '''
+        
+        self.assertTrue(False)
+        
+    def test_is_complete_with_invalide_argument(self):
+        '''
+            If you pass in anyhting other than a questionnaire as questionnaire_context
+            argument you will get a AttributrError.
+        '''
+        
+        self.assertTrue(False)
+        
+    def test_is_complete_without_argument_context_set(self):
+        '''
+            If you don't pass in a questionnaire_context then the function will fall
+            back to using the _questionnaire_context field, if this is not None then
+            it will perform the same function as if you had passed this into the
+            function (the tests should be identical)
+        '''
+        
+        self.assertTrue(False)
+        
+    def test_is_complete_without_argument_context_not_set(self):
+        '''
+            If you don't pass in a questionnaire_context argument , and no
+            _questionnaire_context is set, then this will return False.
+        
+        '''
+        
+        self.assertTrue(False)
        
 class QuestionnaireTestCase(TestCase):
     fixtures = ['test_questionnaire_fixtures_formodels.json']
