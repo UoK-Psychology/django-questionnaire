@@ -274,7 +274,14 @@ class AnswerSet(models.Model):
             have more than one QuestionAnswer for each question in a given answer set).
         '''
         return [record.question_answer for record in LatestQuestionAnswer.objects.filter(answer_set=self)]  
-     
+    
+    def is_complete(self):
+        '''
+            This function will return True is there is an answer for each of the 
+            questions defined in the questiongroup. Otherwise it will return False
+        ''' 
+        
+        return False
 class QuestionAnswer(models.Model):    
     '''
     This model stores questions, answers and related answer_set 
