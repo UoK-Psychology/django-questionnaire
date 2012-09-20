@@ -384,6 +384,13 @@ class AnswerSetTestCase(TestCase):
         
             objects_patch.filter.assert_called_once_with(answer_set=test_answer_set)
             self.assertEqual(answers, ['questionAnswer1','questionAnswer2'])
+            
+    def test_get_latest_question_answer_in_order(self):
+        '''
+            This function will return the latest question answers for this answerset,
+            in the correct order as defined in the question ordering in the group.
+        '''
+        self.assertTrue(False)
     
 class QuestionAnswerTestCase(TestCase):
     fixtures = ['test_questionnaire_fixtures_formodels.json']
