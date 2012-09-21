@@ -20,6 +20,27 @@
     "model" : "questionnaire.question",
     "pk" : 3
   },
+   { "fields" : { "field_type" : "booleanfield",
+        "label" : "question_test_booleanfield",
+        "selectoptions" : null
+      },
+    "model" : "questionnaire.question",
+    "pk" : 4
+  },
+   { "fields" : { "field_type" : "booleanfield",
+        "label" : "question_test_booleanfield",
+        "selectoptions" : null
+      },
+    "model" : "questionnaire.question",
+    "pk" : 5
+  },
+   { "fields" : { "field_type" : "booleanfield",
+        "label" : "question_test_booleanfield",
+        "selectoptions" : null
+      },
+    "model" : "questionnaire.question",
+    "pk" : 6
+  },
   { "fields" : { "field_type" : "radioselectfield",
         "label" : "question_test_radioselectfield",
         "selectoptions" : "Radio 1, Radio 2, Radio 3"

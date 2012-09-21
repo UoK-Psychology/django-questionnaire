@@ -274,7 +274,24 @@ class AnswerSet(models.Model):
             have more than one QuestionAnswer for each question in a given answer set).
         '''
         return [record.question_answer for record in LatestQuestionAnswer.objects.filter(answer_set=self)]  
-    
+
+    def get_latest_question_answer_in_order(self):
+        '''
+            This function will return a list of QuestionAnswer objects in th same order that the questions are defined in
+            the group. Where an answer is not present for a question it will simply be missing from the list
+            and the sequence will move up
+        '''
+        
+        answer_dict = {record.question:record for record in self.get_latest_question_answers()}
+        
+        ordered_answers = []
+        
+        for question in self.questiongroup.get_ordered_questions():
+            if question in answer_dict:
+                ordered_answers.append(answer_dict[question])
+                
+        return ordered_answers
+
     def is_complete(self):
         '''
             This function will return True is there is an answer for each of the 
@@ -295,6 +312,7 @@ class AnswerSet(models.Model):
         
         return True
     
+
 class QuestionAnswer(models.Model):    
     '''
     This model stores questions, answers and related answer_set 
