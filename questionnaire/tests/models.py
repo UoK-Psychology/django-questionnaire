@@ -195,7 +195,48 @@ class QuestionGroupTestCase(TestCase):
         self.assertEqual(questions[0].label, question_order1.question.label)
         self.assertEqual(questions[1].label, question_order2.question.label)
         self.assertEqual(questions[2].label, question_order3.question.label)
-       
+        
+    def test_set_context(self):
+        '''
+            If you pass in questionnaire and user objects, this function will set  and
+            _user_context respectively with these values. If you pass in anything else 
+            then an AttributeError will be thrown
+        '''
+        test_user = User.objects.create_user('test', 'test@test.com', 'password')
+        test_group = QuestionGroup.objects.get(pk=1)
+        test_questionnaire = Questionnaire.objects.get(id=1)
+        test_answer_set = AnswerSet.objects.create(user=test_user,
+                                                   questionnaire=test_questionnaire,
+                                                   questiongroup=test_group)
+        
+        self.assertIsNone(test_group._context)#should start out empty
+        
+        self.assertRaises(AttributeError, test_group.set_context, 'not an answerset')
+        
+        test_group.set_context(test_answer_set)
+        self.assertEqual(test_group._context, test_answer_set)
+        
+    def test_clear_questionnaire_context(self):
+        '''
+            This will set _questionnaire_context to None
+        '''
+        test_user = User.objects.create_user('test', 'test@test.com', 'password')
+        test_group = QuestionGroup.objects.get(pk=1)
+        test_questionnaire = Questionnaire.objects.get(id=1)
+        test_answer_set = AnswerSet.objects.create(user=test_user,
+                                                   questionnaire=test_questionnaire,
+                                                   questiongroup=test_group)
+        
+        self.assertIsNone(test_group._context)#should start out empty
+        
+        test_group.clear_context()
+        self.assertIsNone(test_group._context)
+        
+        test_group._context = test_answer_set
+        test_group.clear_context()
+        self.assertIsNone(test_group._context)
+
+    
 class QuestionnaireTestCase(TestCase):
     fixtures = ['test_questionnaire_fixtures_formodels.json']
     
@@ -227,10 +268,10 @@ class QuestionnaireTestCase(TestCase):
         '''
         questionnaire_test = Questionnaire.objects.get(pk=1)
         question_group = questionnaire_test.get_ordered_groups()
-        question_group1 = QuestionGroup_order.objects.get(pk=1)
-        question_group2 = QuestionGroup_order.objects.get(pk=2) 
-        self.assertEqual(question_group[0].questiongroup.name, question_group1.questiongroup.name)
-        self.assertEqual(question_group[1].questiongroup.name, question_group2.questiongroup.name)
+        question_group1 = QuestionGroup.objects.get(pk=1)
+        question_group2 = QuestionGroup.objects.get(pk=2) 
+        self.assertEqual(question_group[0], question_group1)
+        self.assertEqual(question_group[1], question_group2)
         
     def test_get_group_for_index_invalid_index(self):
         '''
@@ -348,6 +389,14 @@ class Question_OrderTestCase(TestCase):
 class AnswerSetTestCase(TestCase):  
     fixtures = ['test_questionnaire_fixtures_formodels.json']
     
+    def setUp(self):
+        
+        self.test_questionnaire = Questionnaire.objects.get(id=1)
+        self.test_group = QuestionGroup.objects.get(id=1)
+        self.test_user = User.objects.create_user('test', 'test@test.com', 'password')
+        self.test_answer_set = AnswerSet.objects.create(user=self.test_user,
+                                                        questionnaire = self.test_questionnaire,
+                                                        questiongroup = self.test_group)
     def test_fields(self):
         '''
             An AnswerSet should have the following required fields:
@@ -373,7 +422,7 @@ class AnswerSetTestCase(TestCase):
         ''' 
         #generate an AnswerSet
         
-        test_answer_set = AnswerSet(user=User.objects.create_user('test', 'test@test.com', 'test'), 
+        test_answer_set = AnswerSet(user=User.objects.create_user('test_user', 'test@test.com', 'test'), 
                                     questionnaire=Questionnaire.objects.get(pk=1),
                                     questiongroup=QuestionGroup.objects.get(pk=1))
         #patch the LatestQuestionAnswer objects function
@@ -431,6 +480,42 @@ class AnswerSetTestCase(TestCase):
             
             self.assertEqual(test_answer_set.get_latest_question_answer_in_order(),[qa4,qa2,qa1])
             mocked_function.assert_called_once_with()
+    
+    
+    def fabricate_question_answer(self, question_id, answer_set, response):
+        '''
+            Fabricates QuestionAnswers and put them into the database
+        '''
+        question = Question.objects.get(id = question_id)
+        return QuestionAnswer.objects.create(question=question,
+                         answer_set=answer_set,
+                         answer = response) 
+                 
+    def test_is_complete_no_answers(self):
+        '''
+            If there are no answers associated with this AnswerSet then this function should return False
+        '''
+        self.assertFalse(self.test_answer_set.is_complete())#we haven't added any questionAnswers yet!
+        
+    def test_is_complete_incomplete_answers(self):
+        '''
+            If there are some answers, but not at least one answer for each question in the group then this
+            function should return False
+        '''
+        #add a questionAnswers for the first 2 but the not the last question
+        for index in range(1,3):
+            self.fabricate_question_answer(index, self.test_answer_set, 'response')
+        
+        self.assertFalse(self.test_answer_set.is_complete())
+        
+    def test_is_complete_all_answers(self):
+        '''
+            If there is at least one (remember we can have more than one answer for a question) questionAnswer for each 
+            question then this should return True
+        '''
+        for index in range(1,4):
+            self.fabricate_question_answer(index, self.test_answer_set, 'response')
+        self.assertTrue(self.test_answer_set.is_complete())
     
 class QuestionAnswerTestCase(TestCase):
     fixtures = ['test_questionnaire_fixtures_formodels.json']

@@ -22,7 +22,7 @@ def questionnaire_index (request, template_name):
 
 
 @login_required
-def do_questionnaire(request,questionnaire_id,template_name,next_form_name, finished_url, success_name=None,order_index=None):
+def do_questionnaire(request,questionnaire_id,template_name,next_form_name, finished_url, success_name=None,order_index=None, group_limit=0):
     
     '''
         This view handles the presentation and submission of questiongroups. You must always specify a 
@@ -33,6 +33,7 @@ def do_questionnaire(request,questionnaire_id,template_name,next_form_name, fini
         display, and allow them to edit their previous answers.
     '''
     questionnaire_id = int(questionnaire_id)
+    group_limit = int(group_limit)
     
     if order_index==None:
         order_index = 0# zero based index 
@@ -76,7 +77,7 @@ def do_questionnaire(request,questionnaire_id,template_name,next_form_name, fini
                 redirect_url = None
                     
                 
-            if count == 0:#this is the last group in the questionnaire
+            if group_limit == 1 or count == 0:#the group limit is 1 (ie only do this group) or this is the last group in the questionnaire 
                 
                 if redirect_url != None:
                     finished_url = redirect_url #redirect url trumps the finished_url argument
@@ -85,7 +86,11 @@ def do_questionnaire(request,questionnaire_id,template_name,next_form_name, fini
             else: 
                 order_info = order_index + 1
                 
-                base_url = reverse(next_form_name, kwargs = {'questionnaire_id': questionnaire_id, 'order_index' : order_info})
+                redirect_arguments = {'questionnaire_id': questionnaire_id, 'order_index' : order_info}
+                
+                if group_limit >1 :# if a group limit has been specified then decrement it by one and pass in to the redirect.
+                    redirect_arguments['group_limit'] = (group_limit -1)
+                base_url = reverse(next_form_name, kwargs = redirect_arguments )
                 
                 if redirect_url != None:
                     url = '%s?%s=%s' % (base_url,success_name,redirect_url)
@@ -137,10 +142,9 @@ def display_question_answer(request,questionnaire_id,questiongroup_id,template_n
         
     #TODO: Why do you need to get the ordered list of groups? you have specified a specific question group_id as an argument for the function?
 #   orderedgroups = QuestionGroup_order.objects.filter(questionnaire= this_questionnaire).order_by('order_info')#TODO: use .get_ordered_groups() for this as it abstracts the need to know about the ordering implementation and you won't need the next line as it returns a list of questiongroups
-    orderedgroups=this_questionnaire.get_ordered_groups()
     
 ##EXPLAINATION  group list is passed to the template to display links to  other question groups in the  given questionnaire so it make easier for user to navigate to other questionanswer display in the questionnaire
-    groups_list=[(x.questiongroup) for x in orderedgroups]
+    groups_list=this_questionnaire.get_ordered_groups()
         
     #TODO: this seems a quite complex, and is difficult to follow, either add a comment to explain what you are doing, or consider refactoring to make it simpler?
     ##EXPLAINATION  using django Complex lookups with Q objects use for join query , it retrieve all the questionanswer related objects where the user is this user for this question group and this questionnaire
@@ -182,8 +186,8 @@ def all_question_answers_for_questiongroup(request,user_id,questionnaire_id,ques
         
         #TODO: use .get_ordered_groups() for this as it abstracts the need to know about the ordering implementation and you won't need the next line as it returns a list of questiongroups
 #        orderedgroups = QuestionGroup_order.objects.filter(questionnaire= this_questionnaire).order_by('order_info') 
-    orderedgroups=this_questionnaire.get_ordered_groups()   
-    groups_list=[(x.questiongroup) for x in orderedgroups]
+      
+    groups_list=this_questionnaire.get_ordered_groups()
         
         #TODO explain what this does
        
