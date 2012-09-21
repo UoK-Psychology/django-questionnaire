@@ -5,7 +5,7 @@ from questionnaire.models import QuestionAnswer, AnswerSet, Question, QuestionGr
 from django.db.models.fields import CharField
 from django.db import IntegrityError
 import mock
-from mock import MagicMock
+from mock import MagicMock, patch
 from django.contrib.auth.models import User
 
 
@@ -389,8 +389,48 @@ class AnswerSetTestCase(TestCase):
         '''
             This function will return the latest question answers for this answerset,
             in the correct order as defined in the question ordering in the group.
+            
+            If a questiongroup has questions 1-6 ordered the same as their primary key and 
+            the get_latest_question_answer function returns the questionAnsers in
+            order 4,8,1 then we should expect this function to return 1,4,8.
+            However we want to make sure that this function orders the groups by the order_info
+            and not by the primary key of the questions. So we will define a new question group that has 4
+            questions:
+            1 : id:4
+            2 : id:2
+            3 : id:6
+            4 : id:1
+            
+            and we will mock the get_latest_question_answer function to return ids 1,2,4 and we should expect
+            4,2,1 to be returned.
         '''
-        self.assertTrue(False)
+        my_question_group = QuestionGroup.objects.create(name='test_qg')
+        my_questionnaire = Questionnaire.objects.create(name='test_Q')
+        my_questionnaire.add_question_group(my_question_group)
+        user = User.objects.create_user('username', 'email@me.com', 'password')
+        q4 = Question.objects.get(id=4)
+        q2 = Question.objects.get(id=2)
+        q6 = Question.objects.get(id=6)
+        q1 = Question.objects.get(id=1)
+        
+        Question_order.objects.create(questiongroup=my_question_group, question=q4, order_info=1)
+        Question_order.objects.create(questiongroup=my_question_group, question=q2, order_info=2)
+        Question_order.objects.create(questiongroup=my_question_group, question=q6, order_info=3)
+        Question_order.objects.create(questiongroup=my_question_group, question=q1, order_info=4)
+        
+        test_answer_set = AnswerSet.objects.create(questionnaire=my_questionnaire, 
+                                                   questiongroup=my_question_group,
+                                                   user = user) 
+        qa4 = QuestionAnswer.objects.create(question = q4, answer='yes', answer_set=test_answer_set)
+        qa2 = QuestionAnswer.objects.create(question = q2, answer='yes', answer_set=test_answer_set)
+        qa1 = QuestionAnswer.objects.create(question = q1, answer='yes', answer_set=test_answer_set)
+        
+        
+        with patch('questionnaire.models.AnswerSet.get_latest_question_answers') as mocked_function:
+            mocked_function.return_value = [qa1,qa2,qa4]
+            
+            self.assertEqual(test_answer_set.get_latest_question_answer_in_order(),[qa4,qa2,qa1])
+            mocked_function.assert_called_once_with()
     
 class QuestionAnswerTestCase(TestCase):
     fixtures = ['test_questionnaire_fixtures_formodels.json']

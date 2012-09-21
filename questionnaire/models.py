@@ -254,6 +254,16 @@ class AnswerSet(models.Model):
             the group. Where an answer is not present for a question it will simply be missing from the list
             and the sequence will move up
         '''
+        
+        answer_dict = {record.question:record for record in self.get_latest_question_answers()}
+        
+        ordered_answers = []
+        
+        for question in self.questiongroup.get_ordered_questions():
+            if question in answer_dict:
+                ordered_answers.append(answer_dict[question])
+                
+        return ordered_answers
      
 class QuestionAnswer(models.Model):    
     '''
